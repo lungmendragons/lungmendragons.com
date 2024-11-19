@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Component, CSSProperties } from "vue";
 import { useDark } from "@vueuse/core";
-import LogoColorIcon from "~/components/svg/LogoColorIcon.vue";
-import LogoBlackIcon from "~/components/svg/LogoBlackIcon.vue";
+import LogoColorIcon from "~/components/SVG/LogoColorIcon_.vue";
+import LogoBlackIcon from "~/components/SVG/LogoBlackIcon_.vue";
 
 const { style } = defineProps<{ style?: CSSProperties }>();
 const isDark = useDark();
