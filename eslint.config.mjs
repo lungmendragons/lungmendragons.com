@@ -10,7 +10,7 @@ export default withNuxt(
       "node_modules/**",
       "**/*.md",
       "app/app.vue",
-      "app/components/svg/**",
+      "app/components/SVG/**",
     ],
   }, {
     // https://github.com/antfu/eslint-config?tab=readme-ov-file#plugins-renaming
