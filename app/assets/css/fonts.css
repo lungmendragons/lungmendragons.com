@@ -1,0 +1,122 @@
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 100;
+  src: url("~/assets/fonts/inter/Inter_18pt-Thin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 100;
+  src: url("~/assets/fonts/inter/Inter_18pt-ThinItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 200;
+  src: url("~/assets/fonts/inter/Inter_18pt-ExtraLight.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 200;
+  src: url("~/assets/fonts/inter/Inter_18pt-ExtraLightItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 300;
+  src: url("~/assets/fonts/inter/Inter_18pt-Light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 300;
+  src: url("~/assets/fonts/inter/Inter_18pt-LightItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 400;
+  src: url("~/assets/fonts/inter/Inter_18pt-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 400;
+  src: url("~/assets/fonts/inter/Inter_18pt-Italic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 500;
+  src: url("~/assets/fonts/inter/Inter_18pt-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 500;
+  src: url("~/assets/fonts/inter/Inter_18pt-MediumItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 600;
+  src: url("~/assets/fonts/inter/Inter_18pt-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 600;
+  src: url("~/assets/fonts/inter/Inter_18pt-SemiBoldItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 700;
+  src: url("~/assets/fonts/inter/Inter_18pt-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 700;
+  src: url("~/assets/fonts/inter/Inter_18pt-BoldItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 800;
+  src: url("~/assets/fonts/inter/Inter_18pt-ExtraBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 800;
+  src: url("~/assets/fonts/inter/Inter_18pt-ExtraBoldItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 900;
+  src: url("~/assets/fonts/inter/Inter_18pt-Black.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter18pt";
+  font-weight: 900;
+  src: url("~/assets/fonts/inter/Inter_18pt-BlackItalic.woff2") format("woff2");
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "NewTegomin";
+  font-weight: 400;
+  src: url("~/assets/fonts/NewTegomin-Regular.woff2") format("woff2");
+}
