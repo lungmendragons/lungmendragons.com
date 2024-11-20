@@ -40,7 +40,7 @@ onMounted(() => isLoaded.value = true);
     <NMessageProvider>
     <NNotificationProvider>
 
-    <main />
+    <main data-allow-mismatch="children" />
 
     <!--
       Deferring content with a loading screen until app mounted avoids annoying FOUC problems
