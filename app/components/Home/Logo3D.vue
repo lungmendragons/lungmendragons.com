@@ -55,10 +55,10 @@ directionalLight2.castShadow = true;
 directionalLight2.shadow.bias = -0.00001;
 scene.add(directionalLight2);
 
-camera.position.z = 100;
+camera.position.z = 15;
 
-const loader = new GLTFLoader().setPath("/gltf/");
-loader.load("LD3D.gltf", (gltf) => {
+const loader = new GLTFLoader().setPath("/3d/");
+loader.load("ld3dsvg.glb", (gltf) => {
   const root = gltf.scene;
   scene.add(root);
 });
