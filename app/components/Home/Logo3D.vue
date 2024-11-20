@@ -26,7 +26,7 @@ const ld3d = ref();
 // 3D logo is wrapped in a <ClientOnly> component,
 // so we can use useBreakpoints instead of useMediaQuery
 const useBreakpointsObject = useBreakpoints(breakpoints);
-const windowSize = useWindowSize();
+const { width } = useWindowSize();
 
 function getRendererDims(): [number, number] {
   if (useBreakpointsObject.smaller("xs").value)
@@ -84,7 +84,7 @@ onMounted(() => {
   controls.target = new Vector3(0, 0, 0);
 
   // throttled to 200ms to prevent it from calling hundreds of times a second when resizing
-  watchThrottled(windowSize, () => {
+  watchThrottled(width, () => {
     [ rendWidth, rendHeight ] = getRendererDims();
     camera.aspect = rendWidth / rendHeight;
     camera.updateProjectionMatrix();
