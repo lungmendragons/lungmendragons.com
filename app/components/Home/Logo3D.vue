@@ -7,7 +7,16 @@ import LogoBlackText from "~/components/Logo/BlackText.vue";
 import { isDark } from "~/utils/theme";
 import { breakpoints } from "~/utils/breakpoints";
 
-import * as THREE from "three";
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+  SRGBColorSpace,
+  PCFSoftShadowMap,
+  AmbientLight,
+  DirectionalLight,
+  Vector3,
+} from "three";
 import { TrackballControls } from "three/addons/controls/TrackballControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
@@ -29,27 +38,27 @@ function getRendererDims(): [number, number] {
 
 let [ rendWidth, rendHeight ] = getRendererDims();
 
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(70, rendWidth / rendHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+const scene = new Scene();
+const camera = new PerspectiveCamera(70, rendWidth / rendHeight, 0.1, 1000);
+const renderer = new WebGLRenderer({ antialias: true, alpha: true });
 
 renderer.setPixelRatio(rendWidth / rendHeight);
 renderer.setClearColor(0x000000, 0);
 renderer.setSize(rendWidth, rendHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.outputColorSpace = SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = PCFSoftShadowMap;
 
-const ambientLight = new THREE.AmbientLight(0x404040, 3); // soft white light
+const ambientLight = new AmbientLight(0x404040, 3); // soft white light
 scene.add(ambientLight);
 
-const directionalLight1 = new THREE.DirectionalLight(0xFFFFFF, 5);
+const directionalLight1 = new DirectionalLight(0xFFFFFF, 5);
 directionalLight1.position.set(0, 2, 3);
 directionalLight1.castShadow = true;
 directionalLight1.shadow.bias = -0.00001;
 scene.add(directionalLight1);
 
-const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 5);
+const directionalLight2 = new DirectionalLight(0xFFFFFF, 5);
 directionalLight2.position.set(0, 0, -3);
 directionalLight2.castShadow = true;
 directionalLight2.shadow.bias = -0.00001;
@@ -72,7 +81,7 @@ onMounted(() => {
   controls.noPan = true;
   controls.dynamicDampingFactor = 0.03;
   controls.noZoom = true;
-  controls.target = new THREE.Vector3(0, 0, 0);
+  controls.target = new Vector3(0, 0, 0);
 
   // throttled to 200ms to prevent it from calling hundreds of times a second when resizing
   watchThrottled(windowSize, () => {
@@ -89,6 +98,15 @@ onMounted(() => {
     controls.update();
     renderer.render(scene, camera);
   };
+});
+
+onUnmounted(() => {
+  scene.clear();
+  camera.clear();
+  renderer.dispose();
+  ambientLight.dispose();
+  directionalLight1.dispose();
+  directionalLight2.dispose();
 });
 </script>
 
