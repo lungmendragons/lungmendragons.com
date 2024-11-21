@@ -20,6 +20,7 @@ import Link from "~/components/Link.global.vue";
       Please note that it is not formatted for mobile. You will have an easier time on desktop screens.
     </em>
     <iframe
+      credentialless
       src="https://stripedypaper.github.io/ak-guesser/"
       title="Arknights Guesser"
       frameborder="0"

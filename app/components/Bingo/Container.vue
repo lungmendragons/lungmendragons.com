@@ -209,6 +209,7 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
 
       <NFlex class="mx-auto">
         <iframe
+          credentialless
           class="mx-auto"
           width="800"
           height="450"

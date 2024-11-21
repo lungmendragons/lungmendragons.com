@@ -5,8 +5,6 @@ import Components from "unplugin-vue-components/vite";
 // import { cjsInterop } from "vite-plugin-cjs-interop";
 import IconsResolver from "unplugin-icons/resolver";
 
-const isProd = process.env.NODE_ENV === "production";
-
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-06",
@@ -64,43 +62,48 @@ export default defineNuxtConfig({
         "font-src": [
           "'self'",
         ],
-        "frame-src": [
-          "https://www.youtube.com/embed/", // for bingo3
-          "https://stripedypaper.github.io/ak-guesser/", // for guesser
-        ],
         "img-src": [
           "'self'",
-          "blob:",
           "data:",
-          "https:",
-        ],
-        "media-src": [
-          "'self'",
-          "blob:",
           "https:",
         ],
         "script-src": [
           "'strict-dynamic'",
-          "'nonce-{{nonce}}'", // generated automatically with nonce: true setting above
+          "'nonce-{{nonce}}'", // generated automatically
         ],
         "style-src": [
           "'self'",
-          /* Nuxt apps use a LOT of inline styles (including ours) and trying to configure the CSP
-             to allow them without 'unsafe-inline' would be a waste of time. As per the docs:
-                "Allowing 'unsafe-inline' for styles is widely considered as acceptable. Known exploits
-                are not common and center around the injection of image urls in CSS. This risk can be
-                eliminated if you set the img-src policy properly."
-             https://nuxt-security.vercel.app/documentation/advanced/strict-csp#strict-dynamic-csp-level-3 */
           "'unsafe-inline'",
         ],
       },
-      crossOriginEmbedderPolicy: isProd ? "credentialless" : false,
+      crossOriginEmbedderPolicy: "credentialless",
+      crossOriginResourcePolicy: "cross-origin",
       strictTransportSecurity: {
         // 2 years is recommended:
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
         maxAge: 63072000,
         includeSubdomains: true,
         preload: true,
+      },
+    },
+  },
+  routeRules: {
+    // These are required for iframes to load on Firefox and Safari.
+    // Chromium browsers (Chrome/Edge/Opera/Samsung) only need crossOriginEmbedderPolicy: "credentialless".
+    // See https://developer.mozilla.org/en-US/docs/Web/Security/IFrame_credentialless
+    // I exclusively use Firefox (desktop) and Safari (phone) so I won't accept any solution that excludes those. - Tobo
+    "/guesser": {
+      security: {
+        headers: {
+          crossOriginEmbedderPolicy: "unsafe-none",
+        },
+      },
+    },
+    "/bingo3": {
+      security: {
+        headers: {
+          crossOriginEmbedderPolicy: "unsafe-none",
+        },
       },
     },
   },
