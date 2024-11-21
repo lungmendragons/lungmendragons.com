@@ -1,4 +1,8 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: "Guides | Lungmen Dragons",
+});
+
 const KVs = ref<[{
   key: string;
   data: {

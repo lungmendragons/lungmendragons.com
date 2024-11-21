@@ -6,6 +6,10 @@
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 
+useSeoMeta({
+  title: "Markdown Reference | Lungmen Dragons",
+});
+
 const content = ref<string>("");
 
 function getDateString(): string {

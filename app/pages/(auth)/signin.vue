@@ -5,6 +5,10 @@ definePageMeta({
   auth: { only: "guest" },
 });
 
+useSeoMeta({
+  title: "Sign in | Lungmen Dragons",
+});
+
 const signInFormInst = ref<FormInst | null>(null);
 
 const signInForm = ref({

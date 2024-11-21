@@ -14,6 +14,10 @@ definePageMeta({
   auth: { only: "user" },
 });
 
+useSeoMeta({
+  title: "Draft Editor | Lungmen Dragons",
+});
+
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 
 const dialog = useDialog();

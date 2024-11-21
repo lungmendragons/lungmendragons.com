@@ -1,5 +1,9 @@
 <script setup>
 import { items } from "~/utils/timeline-items";
+
+useSeoMeta({
+  title: "Timeline | Lungmen Dragons",
+});
 </script>
 
 <template>

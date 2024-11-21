@@ -5,6 +5,10 @@ import { type Tool, toolIndex } from "~/utils/resources/tools";
 import HeroiconsInformationCircle from "~icons/heroicons/information-circle";
 import { type CSSProperties, onBeforeMount, ref } from "vue";
 
+useSeoMeta({
+  title: "Arknights Resource Index | Lungmen Dragons",
+});
+
 onBeforeMount(() => {
   sortTools("name");
 });

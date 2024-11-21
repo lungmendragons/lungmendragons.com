@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import Link from "~/components/Link.global.vue";
 // Link is supposed to be auto-imported by nuxt automatically I don't understand why it isn't
+
+useSeoMeta({
+  title: "Bingo Lockout 3 | Lungmen Dragons",
+});
 </script>
 
 <template>

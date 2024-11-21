@@ -8,6 +8,10 @@ definePageMeta({
   auth: { only: "user" },
 });
 
+useSeoMeta({
+  title: "Post Content | Lungmen Dragons",
+});
+
 const { client } = useAuth();
 const { data: session } = await client.getSession();
 

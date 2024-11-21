@@ -10,6 +10,10 @@ definePageMeta({
   auth: { only: "user" },
 });
 
+useSeoMeta({
+  title: "Profile | Lungmen Dragons",
+});
+
 const message = useMessage();
 const { client } = useAuth();
 const { data: session } = await client.getSession();

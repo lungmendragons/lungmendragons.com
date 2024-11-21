@@ -27,6 +27,10 @@ function getDateString(time: string): string {
   );
 };
 
+useSeoMeta({
+  title: () => `${requested.value.title} | Lungmen Dragons`,
+});
+
 onMounted(() => {
   // todo: improve this fetch, ugly as hell, feels inefficient
   $fetch(`/api/pages/guides/${slug}`)

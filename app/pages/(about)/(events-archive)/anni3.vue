@@ -6,6 +6,10 @@ import { grid } from "~/utils/events-archive/anni3-grid";
 import { NButton, useModal } from "naive-ui";
 import { h } from "vue";
 
+useSeoMeta({
+  title: "Third Anniversary Crossword | Lungmen Dragons",
+});
+
 const modal = useModal();
 
 function showClue(c: Clue) {
