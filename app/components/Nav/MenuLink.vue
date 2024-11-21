@@ -6,11 +6,11 @@ const {
   activeClass = "",
   style = "",
 } = defineProps<{
-  to: string
-  external?: boolean
-  target?: "_blank" | "_parent" | "_self" | "_top" | (string & {}) | null
-  activeClass?: string
-  style?: string
+  to?: string;
+  external?: boolean;
+  target?: "_blank" | "_parent" | "_self" | "_top" | (string & {}) | null;
+  activeClass?: string;
+  style?: string;
 }>();
 </script>
 
