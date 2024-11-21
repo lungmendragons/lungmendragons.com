@@ -1,4 +1,7 @@
 <script setup lang="ts">
+// todo: cache recently viewed pages (won't be a problem immediately but needs doing)
+// KV read units can quickly add up, see https://developers.cloudflare.com/workers/platform/pricing/#key-value-storage-backend
+
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
@@ -25,7 +28,7 @@ function getDateString(time: string): string {
 };
 
 onMounted(() => {
-  // todo: improve this fetch, ugly as hell
+  // todo: improve this fetch, ugly as hell, feels inefficient
   $fetch(`/api/pages/guides/${slug}`)
     .then((page) => {
       console.log(page);
