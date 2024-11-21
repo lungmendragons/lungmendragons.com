@@ -33,7 +33,11 @@ function getRendererDims(): [number, number] {
     return [ 80, 80 ];
   if (useBreakpointsObject.smaller("sm").value)
     return [ 96, 96 ];
-  return [ 128, 128 ];
+  if (useBreakpointsObject.smaller("md").value)
+    return [ 120, 120 ];
+  if (useBreakpointsObject.smaller("lg").value)
+    return [ 144, 144 ];
+  return [ 168, 168 ];
 };
 
 let [ rendWidth, rendHeight ] = getRendererDims();
@@ -119,11 +123,11 @@ onUnmounted(() => {
     <div ref="logo3dContainer">
       <div ref="ld3d" />
     </div>
-    <div :style="{ padding: 'auto 0', maxHeight: '8rem', maxWidth: '380px' }">
+    <div :style="{ padding: 'auto 0' }">
       <component
         :is="isDark ? LogoWhiteText : LogoBlackText"
-        :style="{ objectFit: 'contain', maxHeight: '8rem' }"
-        class="w-52 xs:w-64 sm:w-80"
+        :style="{ objectFit: 'contain' }"
+        class="w-52 xs:w-64 sm:w-80 md:w-96 lg:w-[28rem]"
       />
     </div>
   </NFlex>
