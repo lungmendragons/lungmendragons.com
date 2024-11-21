@@ -129,14 +129,8 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
   <NScrollbar class="max-h-[70vh]">
     <NFlex
       vertical
-      class="
-        bingo3-wrapper
-        px-2 md:px-8
-        bg-fixed
-        bg-top
-        bg-no-repeat
-        bg-cover"
-    >
+      id="bingo3-wrapper"
+      class="px-2 md:px-8">
       <NFlex
         vertical
         class="px-2 my-8 w-full md:w-3/4 mx-auto"
@@ -275,8 +269,12 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
 </template>
 
 <style scoped>
-.bingo3-wrapper {
-  background-image: "/ld-events/bingo3/主界面_EN_BG.png";
+#bingo3-wrapper {
+  background-image: url("/ld-events/bingo3/主界面_EN_BG.png");
+  background-attachment: fixed;
+  background-position: top;
+  background-repeat: no-repeat;
+  background-size: cover;
   font-family: NewTegomin, sans-serif;
 }
 
