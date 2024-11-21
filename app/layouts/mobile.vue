@@ -3,11 +3,55 @@ import NavFooter from "~/components/Nav/Footer.vue";
 import NavSidebar from "~/components/Nav/Sidebar.vue";
 import NavTopbar from "~/components/Nav/Topbar.vue";
 import { useMediaQuery, useToggle, useWindowSize } from "@vueuse/core";
+import { useNotifStore } from "~/stores/notifs";
 
 // useMediaQuery is only called once
 const isXL = useMediaQuery(mediaQuery.minWidth.xl);
 const toggleCollapseMobile = useToggle(isXL);
 const { width } = useWindowSize();
+
+const { session } = useAuth();
+const notification = useNotification();
+const notifStore = useNotifStore();
+const notifFuncPtrs = {
+  create: notification.create,
+  info: notification.info,
+  success: notification.success,
+  warning: notification.warning,
+  error: notification.error,
+};
+
+function doNotif(item: any) {
+  if (
+    item.data.timeStart > Date.now()
+    || item.data.timeEnd < Date.now()
+  ) {
+    return;
+  };
+
+  // @ts-expect-error implicit any
+  const notifFunc = notifFuncPtrs[item.data.notifFunc];
+  const notifObject = {
+    title: item.data.title,
+    description: item.data.description,
+    content: item.data.content,
+    onClose: () => notifStore.addToDismissed(item.key),
+  };
+  notifFunc(notifObject);
+};
+
+onMounted(() => {
+  if (session) {
+    const dismissed = notifStore.getDismissed();
+    $fetch("/api/notifs")
+      .then((kvArray) => {
+        kvArray.forEach((item) => {
+          // @ts-expect-error possibly null
+          if (!dismissed.includes(item.key)) doNotif(item);
+        });
+      });
+  };
+});
 </script>
 
 <template>
