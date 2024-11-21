@@ -4,13 +4,13 @@ import { NButton, useThemeVars } from "naive-ui";
 import { useMediaQuery } from "@vueuse/core";
 
 import Socials from "./Socials.vue";
-import { sidebarMenu } from "~/utils/menu";
+import { getSidebarMenu } from "~/utils/menu";
 
 import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
 import MdiHeart from "~icons/mdi/heart";
 
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
-const isMD = useMediaQuery("(min-width: 768px)");
+const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const themeVars = useThemeVars();
 const route = useRoute(); // nuxt
 
@@ -19,7 +19,7 @@ const selectedKey = ref<string | null>(null);
 
 onBeforeMount(() => {
   /* route.name needs to be identical to corresponding key in menu.ts
-     if not, nothing is highlighted - not a problem but makes for better UX
+     if not, nothing is highlighted (not breaking but makes for better UX)
      e.g. at lungmendragons.com/guides, route.name = "guides" */
   selectedKey.value = route.name as string;
   menuInst.value?.showOption(route.name as string);
@@ -39,7 +39,7 @@ onBeforeMount(() => {
     <NMenu
       ref="menuInst"
       v-model:value="selectedKey"
-      :options="sidebarMenu"
+      :options="getSidebarMenu()"
       :root-indent="18"
       :indent="12"
       responsive

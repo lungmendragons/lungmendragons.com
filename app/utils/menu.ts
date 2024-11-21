@@ -1,5 +1,4 @@
 import CarbonEarthFilled from "~icons/carbon/earth-filled";
-// import HeroiconsUser from "~icons/heroicons/user";
 import HeroiconsBookOpen from "~icons/heroicons/book-open";
 import HeroiconsBookmark from "~icons/heroicons/bookmark";
 import HeroiconsPuzzlePiece from "~icons/heroicons/puzzle-piece";
@@ -10,43 +9,35 @@ import HeroiconsOutlineExternalLink from "~icons/heroicons-outline/external-link
 import HeroiconsOutlineLibrary from "~icons/heroicons-outline/library";
 import TablerClock from "~icons/tabler/clock";
 import TablerHome from "~icons/tabler/home";
+import HeroiconsPencilSquareSolid from "~icons/heroicons/pencil-square-solid";
+import HeroiconsCloudArrowUp from "~icons/heroicons/cloud-arrow-up";
 
 import { type MenuOption, NIcon } from "naive-ui";
 import { type Component, h } from "vue";
 import NavMenuLink from "~/components/Nav/MenuLink.vue";
 import LogoIconSwitcher from "~/components/Logo/IconSwitcher.vue";
 
-// const { status, data } = useAuth();
-
 function renderIcon(icon: Component) {
   return () => h(
     NIcon,
     null,
-    { default: () => h(icon) },
+    () => h(icon),
   );
 };
 
-export const sidebarMenu: MenuOption[] = [
-  // {
-  //   label: () => h(
-  //     NavMenuLink,
-  //     { to: "/profile" },
-  //     { default: () => data.value?.user?.email },
-  //   ),
-  //   key: "profile",
-  //   icon: renderIcon(HeroiconsUser),
-  //   show: status.value === "authenticated",
-  // },
-  // {
-  //   key: "divider-1",
-  //   type: "divider",
-  //   show: status.value === "authenticated",
-  // },
+function sidebarMenuDivider(index: number): MenuOption {
+  return {
+    key: `divider-${index}`,
+    type: "divider",
+  };
+};
+
+const sidebarMenuMain: MenuOption[] = [
   {
     label: () => h(
       NavMenuLink,
       { to: "/" },
-      { default: () => "Home" },
+      () => "Home",
     ),
     key: "index",
     icon: renderIcon(TablerHome),
@@ -65,7 +56,7 @@ export const sidebarMenu: MenuOption[] = [
         label: () => h(
           NavMenuLink,
           null,
-          { default: () => "Players" },
+          () => "Players",
         ),
         key: "players",
         icon: renderIcon(CarbonEarthFilled),
@@ -76,7 +67,7 @@ export const sidebarMenu: MenuOption[] = [
         label: () => h(
           NavMenuLink,
           { to: "/timeline" },
-          { default: () => "Timeline" },
+          () => "Timeline",
         ),
         key: "timeline",
         icon: renderIcon(TablerClock),
@@ -90,7 +81,7 @@ export const sidebarMenu: MenuOption[] = [
             label: () => h(
               NavMenuLink,
               { to: "/anni3" },
-              { default: () => "Third Anniversary" },
+              () => "Third Anniversary",
             ),
             key: "anni3",
             icon: renderIcon(HeroiconsStar),
@@ -99,7 +90,7 @@ export const sidebarMenu: MenuOption[] = [
             label: () => h(
               NavMenuLink,
               { to: "/bingo3" },
-              { default: () => "Bingo Lockout 3" },
+              () => "Bingo Lockout 3",
             ),
             key: "bingo3",
             icon: renderIcon(HeroiconsTrophy),
@@ -108,10 +99,9 @@ export const sidebarMenu: MenuOption[] = [
       },
     ],
   },
-  {
-    key: "divider-1",
-    type: "divider",
-  },
+];
+
+const sidebarMenuGameResources: MenuOption[] = [
   {
     label: "Arknights",
     key: "arknights",
@@ -128,7 +118,7 @@ export const sidebarMenu: MenuOption[] = [
         label: () => h(
           NavMenuLink,
           { to: "/guides" },
-          { default: () => "Guides" },
+          () => "Guides",
         ),
         key: "guides",
         icon: renderIcon(HeroiconsBookOpen),
@@ -137,7 +127,7 @@ export const sidebarMenu: MenuOption[] = [
         label: () => h(
           NavMenuLink,
           { to: "/resources" },
-          { default: () => "Resource Index" },
+          () => "Resource Index",
         ),
         key: "resources",
         icon: renderIcon(HeroiconsBookmark),
@@ -146,7 +136,7 @@ export const sidebarMenu: MenuOption[] = [
         label: () => h(
           NavMenuLink,
           { to: "/guesser" },
-          { default: () => "Arknights Guesser" },
+          () => "Arknights Guesser",
         ),
         key: "guesser",
         icon: renderIcon(HeroiconsPuzzlePiece),
@@ -173,24 +163,70 @@ export const sidebarMenu: MenuOption[] = [
     disabled: true,
     extra: "[WIP]",
   },
+];
+
+const sidebarMenuExternalLinks: MenuOption[] = [
   {
-    key: "divider-3",
-    type: "divider",
-  },
-  {
-    label: () => h(NavMenuLink, {
-      to: "https://forms.gle/SfZmwk1ogpLp1UdHA",
-      target: "_blank",
-    }, { default: () => "Submit a Video" }),
+    label: () => h(
+      NavMenuLink,
+      {
+        to: "https://forms.gle/SfZmwk1ogpLp1UdHA",
+        target: "_blank",
+      },
+      () => "Submit a Video",
+    ),
     key: "submit-video",
     icon: renderIcon(HeroiconsOutlineExternalLink),
   },
   {
-    label: () => h(NavMenuLink, {
-      to: "https://forms.gle/oXEMezJqYFXcrs6bA",
-      target: "_blank",
-    }, { default: () => "Open Recruitment" }),
+    label: () => h(
+      NavMenuLink,
+      {
+        to: "https://forms.gle/oXEMezJqYFXcrs6bA",
+        target: "_blank",
+      },
+      () => "Open Recruitment",
+    ),
     key: "open-recruitment",
     icon: renderIcon(HeroiconsOutlineExternalLink),
   },
 ];
+
+const sidebarMenuWriter: MenuOption[] = [
+  {
+    label: () => h(
+      NavMenuLink,
+      { to: "/write" },
+      () => "Write",
+    ),
+    key: "write",
+    icon: renderIcon(HeroiconsPencilSquareSolid),
+  },
+  {
+    label: () => h(
+      NavMenuLink,
+      { to: "/post" },
+      () => "Post",
+    ),
+    key: "post",
+    icon: renderIcon(HeroiconsCloudArrowUp),
+  },
+];
+
+export function getSidebarMenu(roles?: string[]): MenuOption[] {
+  let divider = 1;
+  const menu = [
+    ...sidebarMenuMain,
+    sidebarMenuDivider(divider++),
+    ...sidebarMenuGameResources,
+    sidebarMenuDivider(divider++),
+  ];
+
+  if (roles && roles.includes("writer")) {
+    menu.push(...sidebarMenuWriter);
+    menu.push(sidebarMenuDivider(divider++));
+  };
+
+  menu.push(...sidebarMenuExternalLinks);
+  return menu;
+}
