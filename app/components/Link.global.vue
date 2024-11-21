@@ -12,10 +12,10 @@ defineProps<{
 <template>
   <NuxtLink :custom="true" :external="external">
     <NA
-      id="na"
+      class="na"
       rel="noopener noreferrer"
       :label="label"
-      :to="to"
+      :href="to"
       :target="target ?? '_blank'">
       <slot />
       <ExternalLinkIcon v-if="external" small />
@@ -24,5 +24,5 @@ defineProps<{
 </template>
 
 <style scoped>
-#na:hover { text-decoration: underline }
+.na:hover { text-decoration: underline }
 </style>
