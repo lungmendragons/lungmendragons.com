@@ -118,8 +118,7 @@ onUnmounted(() => {
   <NFlex
     justify="center"
     align="center"
-    :style="{ maxHeight: '10rem' }"
-  >
+    :style="{ maxHeight: '10rem' }">
     <div ref="logo3dContainer">
       <div ref="ld3d" />
     </div>

@@ -50,8 +50,7 @@ function renderImage(src: string): () => VNode {
           hover:underline
           text-blue-400"
         :href="props.assets.url.href"
-        target="_blank"
-      >
+        target="_blank">
         {{ props.assets.url.text }}
       </NuxtLink>
     </template>

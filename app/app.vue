@@ -51,8 +51,7 @@ onMounted(() => isLoaded.value = true);
 <template>
   <NConfigProvider
     :theme="theme"
-    :theme-overrides="themeOverrides"
-  >
+    :theme-overrides="themeOverrides">
     <NuxtRouteAnnouncer />
     <NGlobalStyle />
 
@@ -83,8 +82,7 @@ onMounted(() => isLoaded.value = true);
       <NFlex
         vertical
         justify="center"
-        :style="{ width: '100vw', height: '100vh' }"
-      >
+        :style="{ width: '100vw', height: '100vh' }">
         <LogoColorIcon :style="{ width: 72, height: 72, margin: '12px auto' }" />
         <LoadingDotsAnim :style="{ width: 24, height: 24, margin: '0 auto' }" />
       </NFlex>

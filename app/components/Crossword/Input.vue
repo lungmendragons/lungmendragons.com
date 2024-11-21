@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = defineProps<{
-  r: number
-  c: number
-  clue: number
-  numbered: boolean
-  coloured: boolean
+  r: number;
+  c: number;
+  clue: number;
+  numbered: boolean;
+  coloured: boolean;
 }>();
 </script>
 
@@ -14,8 +14,7 @@ const props = defineProps<{
       'max-h-[calc(100vw/14)] md:max-h-[50px]',
       `row-[${props.r + 1}_${props.r + 2}]`,
       `col-[${props.c + 1}_${props.c + 2}]`,
-    ]"
-  >
+    ]">
     <input
       type="text"
       maxlength="1"
@@ -31,8 +30,7 @@ const props = defineProps<{
       :style="{
         color: 'black',
         backgroundColor: props.coloured ? 'rgb(96 165 250)' : '',
-      }"
-    >
+      }">
     <span
       v-if="props.numbered"
       class="
@@ -42,8 +40,7 @@ const props = defineProps<{
         text-[11px] md:text-base
         text-black/50
         left-0.5 md:left-1
-        -top-[calc(100vw/14+5px)] md:-top-[51px]"
-    >
+        -top-[calc(100vw/14+5px)] md:-top-[51px]">
       {{ props.clue }}
     </span>
   </div>
