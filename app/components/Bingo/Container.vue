@@ -39,18 +39,13 @@ const cols = [
             round: true,
             bordered: false,
           },
-          {
-            default: () => tagKey,
-          },
+          () => tagKey,
         );
       });
       return h(
         NFlex,
         null,
-        [
-          row.player,
-          tags,
-        ],
+        () => [ row.player, tags ],
       );
     },
   },
@@ -242,7 +237,7 @@ onMounted(() => {
               :tab="renderTab(`/ld-events/bingo3/category/${c.key}.png`, c.title)">
               <NDataTable
                 :columns="cols"
-                :data="sorted[c.key]"
+                :data="getData(c.key)"
                 :max-height="310"
                 :pagination="false"
                 :bordered="false"
