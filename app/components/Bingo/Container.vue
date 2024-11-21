@@ -11,7 +11,6 @@ const tournamentTime = new Date(Date.UTC(2024, 3, 13, 23, 0, 0)).toLocaleString(
   { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" },
 );
 
-// const isDark = useDark();
 const applyFilter = ref(true);
 const toggleFilter = useToggle(applyFilter);
 
@@ -19,29 +18,6 @@ const sorted = ref<BingoSorted>({});
 const dataQF: BingoSorted = {};
 const dataPB: BingoSorted = {};
 const rankKey = ref("rank.qf");
-
-Object.keys(submissions).forEach((category: string) => {
-  dataQF[category] = submissions[category].filter((entry: BingoEntry) => entry.rank.qf > 0);
-  dataPB[category] = submissions[category].sort((a: BingoEntry, b: BingoEntry) => a.rank.pb > b.rank.pb ? 1 : -1);
-});
-
-function toggleData(): void {
-  sorted.value = applyFilter.value ? dataQF : dataPB;
-};
-
-function toggleRankCol(): void {
-  rankKey.value = applyFilter.value ? "rank.qf" : "rank.pb";
-};
-
-function handleUpdateValue(): void {
-  toggleFilter();
-  toggleData();
-  toggleRankCol();
-};
-
-onMounted(() => {
-  toggleData();
-});
 
 const cols = [
   reactive({
@@ -88,13 +64,29 @@ const cols = [
     title: "Submitted",
     className: "w-[32%] md:w-[40%]",
     render(row: BingoEntry) {
-      // new Date(row.submitted).toLocaleString(
-      //   undefined, { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit", timeZoneName:"short" }
-      // );
       return h(NTime, { time: new Date(row.submitted) });
     },
   },
 ];
+
+function toggleData(): void {
+  sorted.value = applyFilter.value ? dataQF : dataPB;
+};
+
+function toggleRankCol(): void {
+  rankKey.value = applyFilter.value ? "rank.qf" : "rank.pb";
+};
+
+function getData(category: string): BingoEntry[] {
+  // @ts-expect-error possibly undefined
+  return sorted.value[category];
+};
+
+function handleUpdateValue(): void {
+  toggleFilter();
+  toggleData();
+  toggleRankCol();
+};
 
 function renderTab(src: string, label: string) {
   return () => h(
@@ -123,6 +115,17 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
   }
   return style;
 };
+
+Object.keys(submissions).forEach((category: string) => {
+  // @ts-expect-error possibly undefined
+  dataQF[category] = submissions[category].filter((entry: BingoEntry) => entry.rank.qf > 0);
+  // @ts-expect-error possibly undefined
+  dataPB[category] = submissions[category].sort((a: BingoEntry, b: BingoEntry) => a.rank.pb > b.rank.pb ? 1 : -1);
+});
+
+onMounted(() => {
+  toggleData();
+});
 </script>
 
 <template>
@@ -133,37 +136,31 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
       class="px-2 md:px-8">
       <NFlex
         vertical
-        class="px-2 my-8 w-full md:w-3/4 mx-auto"
-      >
+        class="px-2 my-8 w-full md:w-3/4 mx-auto">
         <NFlex
           justify="center"
           align="end"
-          class="mb-3"
-        >
+          class="mb-3">
           <img
             class="drop-shadow-[0_0_4px_black]"
             src="/ld-events/bingo3/logo-en-white-02.png"
-            width="242"
-          >
+            width="242">
           <img
             class="drop-shadow-[0_0_4px_black] mb-2.5"
             src="/ld-events/bingo3/ld-logo-full-d7d7d7-01-a90.png"
-            width="220"
-          >
+            width="220">
         </NFlex>
         <NFlex
           id="heroText"
           vertical
-          class="mx-auto px-3 md:px-9 py-6 bg-black/[65%]"
-        >
+          class="mx-auto px-3 md:px-9 py-6 bg-black/[65%]">
           <div class="text-sm md:text-lg drop-shadow-[0_1px_3px_black] text-white">
             A path through the tundra has been charted, but we still need assistants for our team.
             Do you have what it takes to brave the icefields or will you get lost in the snow?
             Join us once again for another Bingo Lockout Tournament,
             <NuxtLink
               href="https://twitter.com/ArknightsEN/status/1769561921563644077"
-              target="_blank"
-            >
+              target="_blank">
               sponsored by Arknights EN.
             </NuxtLink>
           </div>
@@ -171,15 +168,13 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
             In case you missed it, you can watch all the highlights from
             <NuxtLink
               href="https://www.youtube.com/watch?v=BCMHZfOMAwM"
-              target="_blank"
-            >
+              target="_blank">
               Day 1
             </NuxtLink>
             and
             <NuxtLink
               href="https://www.youtube.com/watch?v=CwZMzno4lIQ"
-              target="_blank"
-            >
+              target="_blank">
               Day 2
             </NuxtLink>
             on YouTube.
@@ -192,8 +187,7 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
             Note: The finals are
             <NuxtLink
               href="https://twitter.com/LungmenDragons/status/1777887243442499682"
-              target="_blank"
-            >
+              target="_blank">
               rescheduled
             </NuxtLink>
             to 1 day later than previously stated. The time you see above is the new start time.
@@ -217,14 +211,12 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
       </NFlex>
       <NFlex
         justify="end"
-        class="mt-8"
-      >
+        class="mt-8">
         <NSwitch
           v-model:value="applyFilter"
           :rail-style="railStyle"
           default-value="true"
-          :on-update:value="handleUpdateValue"
-        >
+          :on-update:value="handleUpdateValue">
           <template #checked>
             Qualifying rules
           </template>
@@ -236,22 +228,18 @@ function railStyle({ focused, checked }: { focused: boolean; checked: boolean })
       <!-- Only 3 entries in Row A, min height is needed otherwise it's really annoying to navigate -->
       <NCard
         class="md:min-h-[470px] mb-8"
-        content-style="padding:8px"
-      >
+        content-style="padding:8px">
         <NTabs
           animated
           type="line"
           justify-content="space-evenly"
-          pane-class="py-0"
-        >
+          pane-class="py-0">
           <template
             v-for="c of categories"
-            :key="c.key"
-          >
+            :key="c.key">
             <NTabPane
               :name="c.key"
-              :tab="renderTab(`/ld-events/bingo3/category/${c.key}.png`, c.title)"
-            >
+              :tab="renderTab(`/ld-events/bingo3/category/${c.key}.png`, c.title)">
               <NDataTable
                 :columns="cols"
                 :data="sorted[c.key]"
