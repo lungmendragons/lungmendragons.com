@@ -10,6 +10,7 @@ import Fa6BrandsDiscord from "~icons/fa6-brands/discord";
 import Fa6BrandsBluesky from "~icons/fa6-brands/bluesky";
 import Fa6BrandsXTwitter from "~icons/fa6-brands/x-twitter";
 
+const notFound = ref(false);
 const slug = useRoute().params.slug || "index";
 const authorImage = ref("");
 const requested = ref({
@@ -35,13 +36,24 @@ onMounted(() => {
   // todo: improve this fetch, ugly as hell, feels inefficient
   $fetch(`/api/pages/guides/${slug}`)
     .then((page) => {
-      console.log(page);
       requested.value = page;
       $fetch(`/api/users/${page.author}`)
         .then((user) => {
           requested.value.author = user?.name as unknown as string;
           authorImage.value = user?.image as unknown as string;
         });
+    })
+    .catch((error) => {
+      if (error.statusCode === 404) {
+        notFound.value = true;
+        requested.value = {
+          title: "404 Not Found",
+          description: "An error occurred while fetching the requested content.",
+          author: "",
+          time: "",
+          content: "![404 Not Found](/official/stickers/fb7c333e68c5a8a967d72deb77104735.png)",
+        };
+      };
     });
 });
 </script>
@@ -55,7 +67,7 @@ onMounted(() => {
       <NP class="text-[0.7rem] leading-[1rem] md:text-sm my-3">
         <em>{{ requested.description }}</em>
       </NP>
-      <NFlex align="center">
+      <NFlex v-if="!notFound" align="center">
         <NAvatar
           v-if="authorImage"
           round
@@ -119,6 +131,11 @@ onMounted(() => {
           <em>This author hasn't set a flair.</em>
         </span>
       </NFlex>
+    </NCard>
+    <NCard v-else-if="notFound">
+      <span class="text-[grey]">
+        <em>You made Jessica sad.</em>
+      </span>
     </NCard>
   </NFlex>
 </template>
