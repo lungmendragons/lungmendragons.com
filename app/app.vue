@@ -41,7 +41,7 @@ const isDark = useDark();
 const favicon = computed(() => isDark.value ? "/svg/logo/LDAngledColored.svg" : "/svg/logo/LDAngledBlack.svg");
 useFavicon(favicon);
 
-const isXL = useMediaQuery(mediaQuery.minWidth.xl);
+const isXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const layout = computed(() => isXL.value ? "desktop" : "mobile");
 const isLoaded = ref(false);
 

@@ -1,6 +1,15 @@
-type BreakpointObject = Record<"xxs" | "xs" | "sm" | "md" | "lg" | "xl" | "xxl", string>;
+type Queries = "minWidth" | "maxWidth" | "minHeight" | "maxHeight";
 
-// does setting a type here break the 3D logo responsive dimensions?
+interface Breakpoints {
+  xxs?: string;
+  xs?: string;
+  sm: string;
+  md: string;
+  lg: string;
+  xl?: string;
+  xxl?: string;
+};
+
 export const breakpoints = {
   // Custom
   xxs: "360px",
@@ -14,7 +23,7 @@ export const breakpoints = {
   xxl: "1536px",
 };
 
-export const mediaQuery: Record<"minWidth" | "maxWidth", BreakpointObject> = {
+export const mediaQuery: Record<Queries, Breakpoints> = {
   minWidth: {
     xxs: `(min-width: ${breakpoints.xxs})`,
     xs: `(min-width: ${breakpoints.xs})`,
@@ -32,5 +41,15 @@ export const mediaQuery: Record<"minWidth" | "maxWidth", BreakpointObject> = {
     lg: `(max-width: ${breakpoints.lg})`,
     xl: `(max-width: ${breakpoints.xl})`,
     xxl: `(max-width: ${breakpoints.xxl})`,
+  },
+  minHeight: {
+    sm: "(min-height: 360px)",
+    md: "(min-height: 400px)",
+    lg: "(min-height: 440px)",
+  },
+  maxHeight: {
+    sm: "(max-height: 360px)",
+    md: "(max-height: 400px)",
+    lg: "(max-height: 440px)",
   },
 };
