@@ -178,18 +178,6 @@ const sidebarMenuExternalLinks: MenuOption[] = [
     key: "submit-video",
     icon: renderIcon(HeroiconsOutlineExternalLink),
   },
-  {
-    label: () => h(
-      NavMenuLink,
-      {
-        to: "https://forms.gle/oXEMezJqYFXcrs6bA",
-        target: "_blank",
-      },
-      () => "Open Recruitment",
-    ),
-    key: "open-recruitment",
-    icon: renderIcon(HeroiconsOutlineExternalLink),
-  },
 ];
 
 const sidebarMenuWriter: MenuOption[] = [

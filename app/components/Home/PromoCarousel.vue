@@ -7,7 +7,7 @@ import Link from "~/components/Link.global.vue";
   <NFlex justify="center" :style="{ margin: '1.5rem 0' }">
     <NCarousel
       autoplay
-      effect="card"
+      show-arrow
       draggable
       class="
         h-32 sm:h-44 md:h-52 lg:h-64 xl:h-80
@@ -15,11 +15,6 @@ import Link from "~/components/Link.global.vue";
       <NCarouselItem class="w-1/5">
         <Link to="https://www.youtube.com/@LungmenDragons/join">
           <img class="object-cover my-0 mx-auto h-full" src="/carousel/membership.png">
-        </Link>
-      </NCarouselItem>
-      <NCarouselItem class="w-1/5">
-        <Link to="https://forms.gle/oXEMezJqYFXcrs6bA">
-          <img class="object-cover my-0 mx-auto h-full" src="/carousel/recruitment.png">
         </Link>
       </NCarouselItem>
       <NCarouselItem class="w-1/5">
