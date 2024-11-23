@@ -6,7 +6,7 @@ import { useMediaQuery, useToggle, useWindowSize } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
 // useMediaQuery is only called once
-const isXL = useMediaQuery(mediaQuery.minWidth.xl);
+const isXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const toggleCollapseMobile = useToggle(isXL);
 const { width } = useWindowSize();
 

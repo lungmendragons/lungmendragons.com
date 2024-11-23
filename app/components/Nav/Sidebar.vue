@@ -11,6 +11,8 @@ import MdiHeart from "~icons/mdi/heart";
 
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
+const isLG = useMediaQuery(mediaQuery.minWidth.lg);
+const showSocials = useMediaQuery(mediaQuery.minHeight.md);
 const themeVars = useThemeVars();
 const route = useRoute(); // nuxt
 
@@ -46,45 +48,43 @@ onBeforeMount(() => {
       accordion
     />
     <NFlex vertical style="margin: 0.5rem">
-      <Socials class="p-2" />
-      <NButton
-        strong
-        round
-        tag="a"
-        href="https://ko-fi.com/lungmendragons"
-        target="_blank"
-        rel="noopener noreferrer"
-        type="primary"
-        :style="{
-          width: '100%',
-          margin: '0.125rem 0',
-        }">
-        <template #icon>
-          <NIcon>
-            <MdiHeart />
-          </NIcon>
-        </template>
-        Support us
-      </NButton>
-      <NButton
-        strong
-        round
-        tag="a"
-        href="https://www.youtube.com/@LungmenDragons/join"
-        target="_blank"
-        rel="noopener noreferrer"
-        color="#E23232"
-        :style="{
-          width: '100%',
-          margin: '0.125rem 0',
-        }">
-        <template #icon>
-          <NIcon>
-            <Fa6BrandsYoutube />
-          </NIcon>
-        </template>
-        YouTube Membership
-      </NButton>
+      <Socials v-if="showSocials" class="p-2" />
+      <NFlex justify="space-around" :vertical="isLG">
+        <NButton
+          :size="isMD && showSocials ? 'medium' : 'tiny'"
+          strong
+          round
+          tag="a"
+          href="https://ko-fi.com/lungmendragons"
+          target="_blank"
+          rel="noopener noreferrer"
+          type="primary"
+          class="w-[40%] lg:w-full text-[0.7rem] md:text-sm">
+          <template #icon>
+            <NIcon :size="isMD ? 18 : 12">
+              <MdiHeart />
+            </NIcon>
+          </template>
+          Support
+        </NButton>
+        <NButton
+          :size="isMD && showSocials ? 'medium' : 'tiny'"
+          strong
+          round
+          tag="a"
+          href="https://www.youtube.com/@LungmenDragons/join"
+          target="_blank"
+          rel="noopener noreferrer"
+          color="#E23232"
+          class="w-[50%] lg:w-full text-[0.7rem] md:text-sm">
+          <template #icon>
+            <NIcon :size="isMD ? 18 : 12">
+              <Fa6BrandsYoutube />
+            </NIcon>
+          </template>
+          Membership
+        </NButton>
+      </NFlex>
     </NFlex>
   </NFlex>
 </template>

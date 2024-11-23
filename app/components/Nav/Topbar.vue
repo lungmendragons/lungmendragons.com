@@ -12,7 +12,7 @@ import LogoBlackFull from "~/components/Logo/BlackFull.vue";
 
 const { toggleMenu } = defineProps<{ toggleMenu: () => void }>();
 const moreThanLG = useMediaQuery(mediaQuery.minWidth.lg);
-const moreThanXL = useMediaQuery(mediaQuery.minWidth.xl);
+const moreThanXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const themeVars = useThemeVars();
 const showUserDrawer = ref(false);
 

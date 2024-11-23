@@ -6,7 +6,7 @@ import { useMediaQuery, useToggle } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
 // useMediaQuery is only called once
-const menuCollapse = useMediaQuery(mediaQuery.maxWidth.xl);
+const menuCollapse = useMediaQuery(mediaQuery.maxWidth.xl as string);
 const toggleCollapseDesktop = useToggle(menuCollapse);
 
 const { session } = useAuth();
