@@ -69,9 +69,10 @@ onMounted(() => {
     <NLayout>
       <NDrawer
         v-model:show="isXL"
-        :width="width * 0.8"
-        placement="left">
-        <NDrawerContent>
+        placement="left"
+        :width="width * 0.4"
+        :style="{ minWidth: '280px' }">
+        <NDrawerContent :body-content-style="{ padding: '12px' }">
           <NavSidebar drawer />
         </NDrawerContent>
       </NDrawer>

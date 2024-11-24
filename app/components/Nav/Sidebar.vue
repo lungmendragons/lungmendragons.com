@@ -35,18 +35,20 @@ onBeforeMount(() => {
     :style="{
       height: '100%',
       overflow: isMD ? 'auto' : 'hidden',
-      padding: isMD ? '12px' : '0',
+      padding: isLG ? '12px' : '0',
       backgroundColor: drawer ? '' : themeVars.cardColor,
     }">
-    <NMenu
-      ref="menuInst"
-      v-model:value="selectedKey"
-      :options="getSidebarMenu()"
-      :root-indent="18"
-      :indent="12"
-      responsive
-      accordion
-    />
+    <NScrollbar>
+      <NMenu
+        ref="menuInst"
+        v-model:value="selectedKey"
+        :options="getSidebarMenu()"
+        :root-indent="18"
+        :indent="12"
+        responsive
+        accordion
+      />
+    </NScrollbar>
     <NFlex vertical style="margin: 0.5rem">
       <Socials v-if="showSocials" class="p-2" />
       <NFlex justify="space-around" :vertical="isLG">
