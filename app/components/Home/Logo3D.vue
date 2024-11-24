@@ -118,15 +118,15 @@ onUnmounted(() => {
   <NFlex
     justify="center"
     align="center"
+    :size="0"
     :style="{ maxHeight: '10rem' }">
     <div ref="logo3dContainer">
       <div ref="ld3d" />
     </div>
-    <div :style="{ padding: 'auto 0' }">
+    <div>
       <component
         :is="isDark ? LogoWhiteText : LogoBlackText"
-        :style="{ objectFit: 'contain' }"
-        class="w-52 xs:w-64 sm:w-80 md:w-96 lg:w-[28rem]"
+        class="w-52 xs:w-64 sm:w-80 md:w-96 lg:w-[28rem] object-contain mx-1.5 md:mx-2"
       />
     </div>
   </NFlex>
