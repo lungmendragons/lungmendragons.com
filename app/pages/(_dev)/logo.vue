@@ -7,6 +7,10 @@ import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
 import LogoWhiteFull from "~/components/Logo/WhiteFull.vue";
 import LogoWhiteIcon from "~/components/Logo/WhiteIcon.vue";
 import LogoWhiteText from "~/components/Logo/WhiteText.vue";
+
+definePageMeta({
+  auth: { only: "admin" },
+});
 </script>
 
 <template>
