@@ -1,7 +1,4 @@
 <script lang="ts" setup>
-import NavFooter from "~/components/Nav/Footer.vue";
-import NavSidebar from "~/components/Nav/Sidebar.vue";
-import NavTopbar from "~/components/Nav/Topbar.vue";
 import { useMediaQuery, useToggle } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
@@ -62,7 +59,7 @@ onMounted(() => {
       minHeight: '100vh',
     }">
     <NLayoutHeader bordered>
-      <NavTopbar :toggle-menu="toggleCollapseDesktop" />
+      <NavTopbarDesktop :toggle-menu="toggleCollapseDesktop" />
     </NLayoutHeader>
 
     <NLayout has-sider>
