@@ -19,20 +19,15 @@ const { client } = useAuth();
 const { data: session } = await client.getSession();
 const sessionRef = toRef(session);
 const uploadRef = ref<UploadInst>();
+const upload = useUpload("/api/images/avatar", { method: "PUT", multiple: false });
 
 async function onFileSelect({ file }: UploadCustomRequestOptions): Promise<void> {
   if (session) {
-    const currentAvatar = session.user.image?.slice(8); // remove "/images/"
-    const formData = new FormData();
-    formData.append("files", file.file as File);
-    await $fetch("/api/images/avatar", {
-      method: "PUT",
-      body: formData,
-    })
-      .then((value: any) => {
-        const blob = value as BlobObject;
+    const currentAvatar = session.user.image?.slice(8); // remove "/images/" from pathname
+    await upload(file.file as File)
+      .then((blob: BlobObject) => {
         client.updateUser({ image: `/images/${blob.pathname}` });
-        sessionRef.value!.user.image = `/images/${blob.pathname}`;
+        session.user.image = `/images/${blob.pathname}`;
         if (currentAvatar) {
           deleteAvatar(currentAvatar);
           message.success("Avatar uploaded.");
