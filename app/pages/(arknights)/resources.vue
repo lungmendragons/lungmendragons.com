@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ResourceItem from "~/components/ResourceIndex/Item.vue";
 import { categoryOptions, languageOptions, sortOptions } from "~/utils/resources/filters";
-import { type Tool, toolIndex } from "~/utils/resources/tools";
+import type { Tool } from "~/utils/resources/tools";
 import HeroiconsInformationCircle from "~icons/heroicons/information-circle";
 import { type CSSProperties, onBeforeMount, ref } from "vue";
 
@@ -13,8 +13,12 @@ onBeforeMount(() => {
   sortTools("name");
 });
 
-const tools = ref<Tool[]>(toolIndex);
+type ResourceIndexKVReturn = Array<{ key: string; data: Tool }>;
 
+const { user } = useAuth();
+const showAddResource = ref(false);
+const itemToEdit = ref<{ id: string; data: Tool } | undefined>();
+const tools: ResourceIndexKVReturn = await $fetch("/api/pages/resources", { method: "GET" });
 const filters = ref({
   search: ref(""),
   category: ref<string[]>([]),
@@ -24,39 +28,50 @@ const filters = ref({
   dead: ref(false),
 });
 
+function addNewResource(): void {
+  itemToEdit.value = undefined;
+  showAddResource.value = true;
+};
+
+function setItemToEdit(id: string, data: Tool): void {
+  itemToEdit.value = { id, data };
+  showAddResource.value = true;
+};
+
 function sortTools(value: string): void {
   switch (value) {
     case "author":
-      tools.value.sort((a, b) => a.author.localeCompare(b.author));
+      tools.sort((a, b) => a.data.author.localeCompare(b.data.author));
       break;
     case "name":
     default:
-      tools.value.sort((a, b) => a.name.localeCompare(b.name));
+      tools.sort((a, b) => a.data.name.localeCompare(b.data.name));
       break;
   }
 };
 
-function searchFilter(items: Tool[]): Tool[] {
+function searchFilter(
+  items: ResourceIndexKVReturn,
+): ResourceIndexKVReturn {
   const f = filters.value;
   const search = f.search;
   const langFilter = f.languages.length > 0;
   const catgFilter = f.category.length > 0;
   return items.filter((x) => {
     if (
-      (f.recommended && !x.recommended)
-      || (!f.dead && x.dead)
+      (f.recommended && !x.data.recommended)
+      || (!f.dead && x.data.dead)
 
       // there's probably a better way to do this but it works so i don't care
-      || ((search.length > 0 && !x.name.toLowerCase().includes(search.toLowerCase()))
-        && (search.length > 0 && !x.description.toLowerCase().includes(search.toLowerCase()))
-        && (search.length > 0 && !x.author.toLowerCase().includes(search.toLowerCase())))
+      || ((search.length > 0 && !x.data.name.toLowerCase().includes(search.toLowerCase()))
+        && (search.length > 0 && !x.data.description.toLowerCase().includes(search.toLowerCase()))
+        && (search.length > 0 && !x.data.author.toLowerCase().includes(search.toLowerCase())))
 
-      || (langFilter && !x.languages.some((y: string) => f.languages.includes(y)))
-      || (catgFilter && !f.category.includes(x.category))
+      || (langFilter && !x.data.languages.some((y: string) => f.languages.includes(y)))
+      || (catgFilter && !f.category.includes(x.data.category))
     ) {
       return false;
     };
-
     return true;
   });
 };
@@ -179,11 +194,31 @@ function deadSwitchStyle({
           </div>
         </NTooltip>
       </NFlex>
+      <!-- @vue-expect-error role property does not exist on user type -->
+      <NCard v-if="user?.role === 'admin'">
+        <span class="mr-2">
+          Admin view:
+        </span>
+        <NButton type="primary" @click="addNewResource()">
+          Add a resource
+        </NButton>
+      </NCard>
     </NSpace>
     <NList hoverable bordered>
-      <NListItem v-for="item in searchFilter(tools)" :key="item.name">
-        <ResourceItem v-bind="item" />
+      <NListItem v-for="item in searchFilter(tools)" :key="item.key">
+        <ResourceItem
+          :id="item.key"
+          :data="item.data"
+          :edit-fn="setItemToEdit"
+        />
       </NListItem>
     </NList>
+    <NDrawer
+      v-model:show="showAddResource"
+      to="#page-content-container"
+      placement="right"
+      :width="360">
+      <ResourceIndexAdd :item="itemToEdit" />
+    </NDrawer>
   </div>
 </template>

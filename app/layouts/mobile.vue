@@ -1,8 +1,5 @@
 <script lang="ts" setup>
-import NavFooter from "~/components/Nav/Footer.vue";
-import NavSidebar from "~/components/Nav/Sidebar.vue";
-import NavTopbar from "~/components/Nav/Topbar.vue";
-import { useMediaQuery, useToggle, useWindowSize } from "@vueuse/core";
+import { useMediaQuery, useToggle, useWindowSize, useElementVisibility } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
 // useMediaQuery is only called once
@@ -20,6 +17,10 @@ const notifFuncPtrs = {
   warning: notification.warning,
   error: notification.error,
 };
+
+const watchHideTopbar = ref();
+const targetIsVisible = useElementVisibility(watchHideTopbar);
+const hideScrolling = ref(false);
 
 function doNotif(item: any) {
   if (
@@ -39,6 +40,10 @@ function doNotif(item: any) {
   };
   notifFunc(notifObject);
 };
+
+watch(targetIsVisible, (isVisible) => {
+  hideScrolling.value = !isVisible;
+});
 
 onMounted(() => {
   if (session) {
@@ -63,7 +68,10 @@ onMounted(() => {
       minHeight: '100vh',
     }">
     <NLayoutHeader bordered>
-      <NavTopbar :toggle-menu="toggleCollapseMobile" />
+      <NavTopbarMobile
+        :toggle-menu="toggleCollapseMobile"
+        :hide-scrolling="hideScrolling"
+      />
     </NLayoutHeader>
 
     <NLayout>
@@ -87,6 +95,7 @@ onMounted(() => {
           width: '100%',
           paddingTop: '1rem',
         }">
+        <div ref="watchHideTopbar" />
         <div id="page-content">
           <slot />
         </div>

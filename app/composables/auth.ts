@@ -1,5 +1,6 @@
 import { defu } from "defu";
 import { createAuthClient } from "better-auth/client";
+import { adminClient, inferAdditionalFields } from "better-auth/client/plugins";
 import type {
   InferSessionFromClient,
   InferUserFromClient,
@@ -21,6 +22,16 @@ export function useAuth() {
     fetchOptions: {
       headers,
     },
+    plugins: [
+      adminClient(),
+      inferAdditionalFields({
+        user: {
+          role: {
+            type: "string",
+          },
+        },
+      }),
+    ],
   });
 
   const options = defu(useRuntimeConfig().public.auth as Partial<RuntimeAuthConfig>, {

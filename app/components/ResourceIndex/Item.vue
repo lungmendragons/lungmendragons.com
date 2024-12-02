@@ -12,10 +12,19 @@ import HeroiconsTableCells from "~icons/heroicons/table-cells";
 import HeroiconsWrenchScrewdriver from "~icons/heroicons/wrench-screwdriver";
 import HeroiconsXMark from "~icons/heroicons/x-mark";
 
-const props = defineProps<Tool>();
+const {
+  id,
+  data,
+  editFn,
+} = defineProps<{
+  id: string;
+  data: Tool;
+  editFn: (id: string, data: Tool) => void;
+}>();
+const { user } = useAuth();
 
 function getCategoryIcon(category: string): Component {
-  if (props.dead)
+  if (data.dead)
     return HeroiconsXMark;
 
   switch (category) {
@@ -43,14 +52,14 @@ function getCategoryIcon(category: string): Component {
       <NThing>
         <template #header>
           <NuxtLink
-            :href="props.url"
+            :href="data.url"
             target="_blank"
             class="text-2xl text-blue-400 hover:underline">
             <NIcon>
-              <component :is="getCategoryIcon(props.category)" class="size-7 text-[2rem] mr-4" />
+              <component :is="getCategoryIcon(data.category)" class="size-7 text-[2rem] mr-4" />
             </NIcon>
             <span class="ml-4 mr-2">
-              {{ props.name }}
+              {{ data.name }}
             </span>
             <ExternalLinkIcon size="l" class-name="text-lg translate-y-2" />
           </NuxtLink>
@@ -58,20 +67,20 @@ function getCategoryIcon(category: string): Component {
 
         <template #description>
           <div class="text-xs italic text-neutral-400">
-            {{ props.author }}
+            {{ data.author }}
           </div>
         </template>
 
         <template #footer>
           <NSpace size="small">
-            <template v-if="props.languages.length === 0">
+            <template v-if="data.languages.length === 0">
               <NTag :bordered="false" size="small">
-                {{ props.category }}
+                {{ data.category }}
               </NTag>
             </template>
             <template v-else>
               <NTag
-                v-for="lang in props.languages"
+                v-for="lang in data.languages"
                 :key="lang"
                 :bordered="false"
                 size="small">
@@ -81,21 +90,31 @@ function getCategoryIcon(category: string): Component {
           </NSpace>
         </template>
 
-        {{ props.description }}
+        <!-- @vue-expect-error role property does not exist on user type -->
+        <template #action v-if="user?.role === 'admin'">
+          <NButton
+            type="primary"
+            size="small"
+            @click="editFn(id, data)">
+            Admin: Edit
+          </NButton>
+        </template>
+
+        {{ data.description }}
       </NThing>
     </NFlex>
     <NFlex vertical>
-      <NAlert v-if="props.success" type="success">
-        {{ props.success }}
+      <NAlert v-if="data.success" type="success">
+        {{ data.success }}
       </NAlert>
-      <NAlert v-if="props.error" type="error">
-        {{ props.error }}
+      <NAlert v-if="data.error" type="error">
+        {{ data.error }}
       </NAlert>
-      <NAlert v-if="props.warning" type="warning">
-        {{ props.warning }}
+      <NAlert v-if="data.warning" type="warning">
+        {{ data.warning }}
       </NAlert>
-      <NAlert v-if="props.info" type="info">
-        {{ props.info }}
+      <NAlert v-if="data.info" type="info">
+        {{ data.info }}
       </NAlert>
     </NFlex>
   </NSpace>

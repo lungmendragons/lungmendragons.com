@@ -61,7 +61,7 @@ const sidebarMenuMain: MenuOption[] = [
         key: "players",
         icon: renderIcon(CarbonEarthFilled),
         disabled: true,
-        extra: "[WIP]",
+        // extra: "[WIP]",
       },
       {
         label: () => h(
@@ -146,7 +146,7 @@ const sidebarMenuGameResources: MenuOption[] = [
         key: "lungmen-toolbox",
         icon: renderIcon(HeroiconsWrenchScrewdriver),
         disabled: true,
-        extra: "[WIP]",
+        // extra: "[WIP]",
       },
     ],
   },
@@ -161,7 +161,7 @@ const sidebarMenuGameResources: MenuOption[] = [
       },
     ),
     disabled: true,
-    extra: "[WIP]",
+    // extra: "[WIP]",
   },
 ];
 

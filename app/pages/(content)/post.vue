@@ -5,7 +5,7 @@ import { useMarkdownStore } from "~/stores/markdown";
 import type { WIP } from "~/utils/markdown-editor";
 
 definePageMeta({
-  auth: { only: "user" },
+  auth: { only: "writer" },
 });
 
 useSeoMeta({

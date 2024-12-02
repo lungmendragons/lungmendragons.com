@@ -12,6 +12,13 @@ export function serverAuth() {
         }),
         type: "sqlite",
       },
+      user: {
+        additionalFields: {
+          role: {
+            type: "string",
+          },
+        },
+      },
       secondaryStorage: {
         get: key => hubKV().getItemRaw(`_auth:${key}`),
         set: (key, value, ttl) => {
