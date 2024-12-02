@@ -4,6 +4,8 @@ import { nanoid } from "nanoid";
 import sizeOf from "image-size";
 
 export default eventHandler(async (event) => {
+  console.log("marker 1 -- start of event handler");
+
   assertMethod(event, [ "POST", "PUT", "PATCH" ]);
 
   const form = await readFormData(event);
@@ -14,6 +16,8 @@ export default eventHandler(async (event) => {
       statusMessage: "Missing file",
     });
   };
+
+  console.log("marker 2 -- file is present");
 
   try {
     ensureBlob(file, {
@@ -26,6 +30,8 @@ export default eventHandler(async (event) => {
     });
   }
 
+  console.log("marker 3 -- file is within size limits");
+
   try {
     ensureBlob(file, {
       types: [ "image/png", "image/jpeg" ],
@@ -37,9 +43,13 @@ export default eventHandler(async (event) => {
     });
   }
 
+  console.log("marker 4 -- file is a valid image format");
+
   const uint8a = await file.arrayBuffer()
     .then(buf => new Uint8Array(buf));
   const { width, height } = sizeOf(uint8a);
+
+  console.log("marker 5 -- image dimensions are known");
 
   if (!width || !height) {
     throw createError({
@@ -47,6 +57,8 @@ export default eventHandler(async (event) => {
       statusMessage: "Invalid file",
     });
   };
+
+  console.log("marker 6 -- image dimensions can be read");
 
   // todo: simple image crop function so this hardcoded enforcement is no longer needed
   // the available packages are surprisingly shit
@@ -59,6 +71,8 @@ export default eventHandler(async (event) => {
       statusMessage: "File rejected: Image must be square",
     });
   };
+
+  console.log("marker 7 -- image dimensions are valid");
 
   const ext = file.name.split(".").pop();
   const id = nanoid(16);
@@ -75,6 +89,8 @@ export default eventHandler(async (event) => {
       statusMessage: `Storage error: ${e.message}`,
     });
   }
+
+  console.log("marker 8 -- image put to blob");
 
   return objects;
 });

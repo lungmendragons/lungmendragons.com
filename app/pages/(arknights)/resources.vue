@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ResourceItem from "~/components/ResourceIndex/Item.vue";
-import { categoryOptions, languageOptions, sortOptions } from "~/utils/resources/filters";
-import type { Tool } from "~/utils/resources/tools";
+import { type Tool, categoryOptions, languageOptions, sortOptions } from "~/utils/resource-index";
 import HeroiconsInformationCircle from "~icons/heroicons/information-circle";
 import { type CSSProperties, onBeforeMount, ref } from "vue";
 

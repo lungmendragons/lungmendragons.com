@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { Tool } from "~/utils/resources/tools";
 import type { Component } from "vue";
-import { languageOptions } from "~/utils/resources/filters";
+import { type Tool, languageOptions } from "~/utils/resource-index";
 import HeroiconsBookOpen from "~icons/heroicons/book-open";
 import HeroiconsBookmark from "~icons/heroicons/bookmark";
 import HeroiconsCodeBracket from "~icons/heroicons/code-bracket";

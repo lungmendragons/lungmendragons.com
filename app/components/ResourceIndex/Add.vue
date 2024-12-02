@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { nanoid } from "nanoid";
 import type { FormInst } from "naive-ui";
-import type { Tool } from "~/utils/resources/tools";
+import type { Tool } from "~/utils/resource-index";
 
 const { item } = defineProps<{
   item?: {

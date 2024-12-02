@@ -1,5 +1,20 @@
 import { ref } from "vue";
 
+export interface Tool {
+  name: string;
+  description: string;
+  category: string;
+  languages: string[];
+  author: string;
+  url: string;
+  success?: string;
+  info?: string;
+  warning?: string;
+  error?: string;
+  recommended?: boolean;
+  dead?: boolean;
+}
+
 export const categoryOptions = ref([
   {
     label: "Tools",
