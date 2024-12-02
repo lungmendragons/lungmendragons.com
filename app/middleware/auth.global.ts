@@ -6,20 +6,20 @@ type MiddlewareOptions = false | {
     | "user"
     | "writer"
     | "member"
-    | "admin"
-  redirectUserTo?: string
-  redirectGuestTo?: string
+    | "admin";
+  redirectUserTo?: string;
+  redirectGuestTo?: string;
 };
 
 declare module "#app" {
   interface PageMeta {
-    auth?: MiddlewareOptions
+    auth?: MiddlewareOptions;
   }
 };
 
 declare module "vue-router" {
   interface RouteMeta {
-    auth?: MiddlewareOptions
+    auth?: MiddlewareOptions;
   }
 };
 
@@ -40,7 +40,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.client)
     await fetchSession();
 
-  if (only === "user" && !loggedIn.value) {
+  if (only && [ "user", "writer", "member", "admin" ].includes(only) && !loggedIn.value) {
     if (to.path === redirectGuestTo)
       return; // Avoid infinite redirect
     return navigateTo(redirectGuestTo);
