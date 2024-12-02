@@ -2,6 +2,7 @@
 // todo: would like to give users more customisation
 // very basic profile will do for now
 
+import type { UploadCustomRequestOptions, UploadInst } from "naive-ui";
 import type { BlobObject } from "@nuxthub/core";
 import { toRef } from "@vueuse/core";
 
@@ -17,13 +18,19 @@ const message = useMessage();
 const { client } = useAuth();
 const { data: session } = await client.getSession();
 const sessionRef = toRef(session);
-const upload = useUpload("/api/images/avatar", { method: "PUT", multiple: false });
+const uploadRef = ref<UploadInst>();
 
-async function onFileSelect({ target }: Event) {
+async function onFileSelect({ file }: UploadCustomRequestOptions): Promise<void> {
   if (session) {
     const currentAvatar = session.user.image?.slice(8); // remove "/images/"
-    await upload(target as HTMLInputElement)
-      .then((blob: BlobObject) => {
+    const formData = new FormData();
+    formData.append("files", file.file as File);
+    await $fetch("/api/images/avatar", {
+      method: "PUT",
+      body: formData,
+    })
+      .then((value: any) => {
+        const blob = value as BlobObject;
         client.updateUser({ image: `/images/${blob.pathname}` });
         sessionRef.value!.user.image = `/images/${blob.pathname}`;
         if (currentAvatar) {
@@ -32,8 +39,12 @@ async function onFileSelect({ target }: Event) {
         }
       })
       .catch((error) => {
-        message.error(error.statusMessage);
+        message.error(`Upload failed: ${error.statusMessage}`);
       });
+
+    // if not cleared then it'll upload an array of files if user changes it again
+    // immediately after, because of how the naive-ui component works
+    uploadRef.value?.clear();
   };
 };
 
@@ -62,11 +73,16 @@ async function deleteAvatar(pathname: string) {
       Verified: {{ sessionRef.user.emailVerified ? "yes" : "no" }}
     </NFlex>
     <br>
-    <input
-      accept="jpeg, png"
-      type="file"
+    <NUpload
+      ref="uploadRef"
       name="file"
-      @change="onFileSelect">
+      accept="image/jpeg,image/png"
+      :show-file-list="false"
+      :custom-request="onFileSelect">
+      <NButton type="primary">
+        Update avatar
+      </NButton>
+    </NUpload>
     <div :style="{ fontSize: '0.7rem', margin: '4px 0' }">
       JPG or PNG, &lt;2MB, square dimensions
     </div>
