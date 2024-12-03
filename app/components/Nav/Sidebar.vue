@@ -9,6 +9,7 @@ import { getSidebarMenu } from "~/utils/menu";
 import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
 import MdiHeart from "~icons/mdi/heart";
 
+const { user } = useAuth();
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const isLG = useMediaQuery(mediaQuery.minWidth.lg);
@@ -39,10 +40,11 @@ onBeforeMount(() => {
       backgroundColor: drawer ? '' : themeVars.cardColor,
     }">
     <NScrollbar>
+      <!-- @vue-expect-error prop "role" does not exist -->
       <NMenu
         ref="menuInst"
         v-model:value="selectedKey"
-        :options="getSidebarMenu()"
+        :options="getSidebarMenu(user?.role)"
         :root-indent="18"
         :indent="12"
         responsive
