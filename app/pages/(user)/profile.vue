@@ -27,7 +27,7 @@ async function onFileSelect({ file }: UploadCustomRequestOptions): Promise<void>
     await upload(file.file as File)
       .then((blob: BlobObject) => {
         client.updateUser({ image: `/images/${blob.pathname}` });
-        session.user.image = `/images/${blob.pathname}`;
+        sessionRef.value!.user.image = `/images/${blob.pathname}`;
         if (currentAvatar) {
           deleteAvatar(currentAvatar);
           message.success("Avatar uploaded.");
