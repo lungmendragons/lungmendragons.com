@@ -11,6 +11,7 @@ import TablerClock from "~icons/tabler/clock";
 import TablerHome from "~icons/tabler/home";
 import HeroiconsPencilSquareSolid from "~icons/heroicons/pencil-square-solid";
 import HeroiconsCloudArrowUp from "~icons/heroicons/cloud-arrow-up";
+import MaterialSymbolsNotificationAddOutlineRounded from "~icons/material-symbols/notification-add-outline-rounded?width=24px&height=24px";
 
 import { type MenuOption, NIcon } from "naive-ui";
 import { type Component, h } from "vue";
@@ -201,7 +202,19 @@ const sidebarMenuWriter: MenuOption[] = [
   },
 ];
 
-export function getSidebarMenu(roles?: string[]): MenuOption[] {
+const sidebarMenuAdmin: MenuOption[] = [
+  {
+    label: () => h(
+      NavMenuLink,
+      { to: "/notifs" },
+      () => "Create Notification",
+    ),
+    key: "notifs",
+    icon: renderIcon(MaterialSymbolsNotificationAddOutlineRounded),
+  },
+];
+
+export function getSidebarMenu(role?: string): MenuOption[] {
   let divider = 1;
   const menu = [
     ...sidebarMenuMain,
@@ -210,9 +223,14 @@ export function getSidebarMenu(roles?: string[]): MenuOption[] {
     sidebarMenuDivider(divider++),
   ];
 
-  if (roles && roles.includes("writer")) {
-    menu.push(...sidebarMenuWriter);
-    menu.push(sidebarMenuDivider(divider++));
+  if (role) {
+    if (role === "writer") {
+      menu.push(...sidebarMenuWriter);
+      menu.push(sidebarMenuDivider(divider++));
+    } else if (role === "admin") {
+      menu.push(...sidebarMenuAdmin);
+      menu.push(sidebarMenuDivider(divider++));
+    };
   };
 
   menu.push(...sidebarMenuExternalLinks);
