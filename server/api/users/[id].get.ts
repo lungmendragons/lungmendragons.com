@@ -8,8 +8,8 @@ export default eventHandler(async (event) => {
   };
 
   const db = hubDatabase();
-  await db.exec("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, text TEXT, created_at INTEGER)");
-  const result = await db.prepare("SELECT name, image FROM user WHERE id = ?1").bind(id).first();
+  // await db.exec("CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, text TEXT, created_at INTEGER)");
+  const result = await db.prepare("SELECT name, image, youtube, bilibili, discord, bluesky, twitter, reddit FROM user WHERE id = ?1").bind(id).first();
 
   return result;
 });

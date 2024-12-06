@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { D1Dialect } from "@atinux/kysely-d1";
-import { admin } from "better-auth/plugins";
+import { admin, username } from "better-auth/plugins";
 
 let _auth: ReturnType<typeof betterAuth>;
 export function serverAuth() {
@@ -14,8 +14,46 @@ export function serverAuth() {
       },
       user: {
         additionalFields: {
-          role: {
+          permissions: {
+            type: "number",
+            required: true,
+            defaultValue: 1,
+            input: false,
+          },
+          flair: {
             type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          youtube: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          bilibili: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          discord: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          bluesky: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          twitter: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          reddit: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
           },
         },
       },
@@ -41,6 +79,7 @@ export function serverAuth() {
       },
       plugins: [
         admin(),
+        username(),
       ],
     });
   }

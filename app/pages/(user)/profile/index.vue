@@ -20,6 +20,7 @@ const { data: session } = await client.getSession();
 const sessionRef = toRef(session);
 const uploadRef = ref<UploadInst>();
 const upload = useUpload("/api/images/avatar", { method: "PUT", multiple: false });
+const showEditSocials = ref(false);
 
 async function onFileSelect({ file }: UploadCustomRequestOptions): Promise<void> {
   if (session) {
@@ -63,9 +64,29 @@ async function deleteAvatar(pathname: string) {
         :style="{ maxHeight: '150px', maxWidth: '150px' }"
         :src="sessionRef.user.image ?? 'https://i0.wp.com/sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png'"
       />
-      Joined: {{ new Date(sessionRef.user.createdAt).toUTCString() }}
-      <br>
-      Verified: {{ sessionRef.user.emailVerified ? "yes" : "no" }}
+      <NFlex vertical>
+        <span>
+          Joined: {{ new Date(sessionRef.user.createdAt).toUTCString() }}
+        </span>
+        <span>
+          Verified: {{ sessionRef.user.emailVerified ? "yes" : "no" }}
+        </span>
+        <UserSocials
+          :youtube="sessionRef.user.youtube"
+          :bilibili="sessionRef.user.bilibili"
+          :discord="sessionRef.user.discord"
+          :bluesky="sessionRef.user.bluesky"
+          :twitter="sessionRef.user.twitter"
+          :reddit="sessionRef.user.reddit"
+        />
+        <NButton
+          type="primary"
+          size="small"
+          style="width:128px"
+          @click="showEditSocials = true">
+          Edit socials
+        </NButton>
+      </NFlex>
     </NFlex>
     <br>
     <NUpload
@@ -79,7 +100,14 @@ async function deleteAvatar(pathname: string) {
       </NButton>
     </NUpload>
     <div :style="{ fontSize: '0.7rem', margin: '4px 0' }">
-      JPG or PNG, &lt;2MB, square dimensions
+      JPG or PNG, max 2 MB
     </div>
+    <NDrawer
+      v-model:show="showEditSocials"
+      to="#page-content-container"
+      placement="right"
+      :width="360">
+      <UserEditSocials />
+    </NDrawer>
   </NCard>
 </template>
