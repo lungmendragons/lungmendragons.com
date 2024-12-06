@@ -233,16 +233,16 @@ onMounted(() => {
         </NDropdown>
       </template>
       <NAlert
-        title="Note: 18 November 2024"
+        title="Note: 3 December 2024"
         type="info"
         :style="{ marginBottom: '1rem' }">
         Currently all posts will be posted in <strong>/guides/your-url-here</strong>.
         There will be more flexibility in the future. I'll move posts accordingly to requested URLs when that happens,
         but doing so may lead to dead links if you are unable to update publicly posted links to your content. <br> - Tobo
       </NAlert>
-      <NAlert type="info" :style="{ marginBottom: '1rem' }">
+      <!-- <NAlert type="info" :style="{ marginBottom: '1rem' }">
         The post location and URL cannot be changed after the post is live.
-      </NAlert>
+      </NAlert> -->
       <NForm
         ref="postFormRef"
         :model="postFormValue"
