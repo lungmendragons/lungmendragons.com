@@ -12,6 +12,8 @@ const {
   activeClass?: string;
   style?: string;
 }>();
+
+const loadingBar = useLoadingBar();
 </script>
 
 <template>
@@ -20,7 +22,8 @@ const {
     :external="external"
     :target="target"
     :active-class="activeClass"
-    :style="style">
+    :style="style"
+    @click="loadingBar.start()">
     <slot />
   </NuxtLink>
 </template>

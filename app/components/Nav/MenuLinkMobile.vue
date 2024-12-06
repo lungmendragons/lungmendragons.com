@@ -13,6 +13,7 @@ const {
   style?: string;
 }>();
 
+const loadingBar = useLoadingBar();
 const toggleCollapseMobile = inject("toggleCollapseMobile") as () => boolean;
 </script>
 
@@ -23,7 +24,7 @@ const toggleCollapseMobile = inject("toggleCollapseMobile") as () => boolean;
     :target="target"
     :active-class="activeClass"
     :style="style"
-    @click="toggleCollapseMobile()">
+    @click="toggleCollapseMobile(); loadingBar.start()">
     <slot />
   </NuxtLink>
 </template>

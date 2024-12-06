@@ -11,6 +11,7 @@ provide("isXLProvide", isXL);
 provide("toggleCollapseMobile", toggleCollapseMobile);
 
 const { session } = useAuth();
+const loadingBar = useLoadingBar();
 const notification = useNotification();
 const notifStore = useNotifStore();
 const notifFuncPtrs = {
@@ -46,6 +47,10 @@ function doNotif(item: any) {
 
 watch(targetIsVisible, (isVisible) => {
   hideScrolling.value = !isVisible;
+});
+
+useRuntimeHook("page:loading:end", () => {
+  loadingBar.finish();
 });
 
 onMounted(() => {

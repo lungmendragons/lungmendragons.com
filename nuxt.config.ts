@@ -122,6 +122,7 @@ export default defineNuxtConfig({
           {
             "naive-ui": [
               "useDialog",
+              "useLoadingBar",
               "useMessage",
               "useModal",
               "useNotification",

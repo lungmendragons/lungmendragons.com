@@ -7,6 +7,7 @@ const menuCollapse = useMediaQuery(mediaQuery.maxWidth.xl as string);
 const toggleCollapseDesktop = useToggle(menuCollapse);
 
 const { session } = useAuth();
+const loadingBar = useLoadingBar();
 const notification = useNotification();
 const notifStore = useNotifStore();
 const notifFuncPtrs = {
@@ -36,6 +37,10 @@ function doNotif(item: any) {
   notifFunc(notifObject);
 };
 
+useRuntimeHook("page:loading:end", () => {
+  loadingBar.finish();
+});
+
 onMounted(() => {
   if (session) {
     const dismissed = notifStore.getDismissed();
@@ -43,7 +48,8 @@ onMounted(() => {
       .then((kvArray) => {
         kvArray.forEach((item) => {
           // @ts-expect-error possibly null
-          if (!dismissed.includes(item.key)) doNotif(item);
+          if (!dismissed.includes(item.key))
+            doNotif(item);
         });
       });
   };

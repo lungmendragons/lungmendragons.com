@@ -61,6 +61,7 @@ onMounted(() => isLoaded.value = true);
       notification.create({ ... });
     -->
     <NDialogProvider>
+    <NLoadingBarProvider>
     <NModalProvider>
     <NMessageProvider>
     <NNotificationProvider>
@@ -91,6 +92,7 @@ onMounted(() => isLoaded.value = true);
     </NNotificationProvider>
     </NMessageProvider>
     </NModalProvider>
+    </NLoadingBarProvider>
     </NDialogProvider>
   </NConfigProvider>
 </template>
