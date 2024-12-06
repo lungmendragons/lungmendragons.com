@@ -52,8 +52,8 @@ const { user, signOut, loggedIn } = useAuth();
       </NButton>
       <NuxtLink to="/">
         <component
-          class="ease"
           :is="isDark ? LogoColorIcon : LogoBlackIcon"
+          class="ease"
           :style="{ height: hideScrolling ? '1.375rem' : '2.5rem' }"
         />
       </NuxtLink>
@@ -134,16 +134,21 @@ const { user, signOut, loggedIn } = useAuth();
           </template>
           <template v-else>
             <NFlex>
-              <NuxtLink to="/signin">
-                <NButton type="primary">
+              <NavMenuLink to="/signin">
+                <NButton
+                  type="primary"
+                  @click="showUserDrawer = false">
                   Sign in
                 </NButton>
-              </NuxtLink>
-              <NuxtLink to="/signup">
-                <NButton type="primary" secondary>
+              </NavMenuLink>
+              <NavMenuLink to="/signup">
+                <NButton
+                  type="primary"
+                  secondary
+                  @click="showUserDrawer = false">
                   Sign up
                 </NButton>
-              </NuxtLink>
+              </NavMenuLink>
             </NFlex>
           </template>
         </NFlex>
