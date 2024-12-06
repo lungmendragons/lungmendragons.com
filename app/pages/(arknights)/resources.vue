@@ -17,7 +17,11 @@ type ResourceIndexKVReturn = Array<{ key: string; data: Tool }>;
 const { user } = useAuth();
 const showAddResource = ref(false);
 const itemToEdit = ref<{ id: string; data: Tool } | undefined>();
-const tools: ResourceIndexKVReturn = await $fetch("/api/pages/resources", { method: "GET" });
+
+// eslint-disable-next-line ts/ban-ts-comment
+// @ts-ignore - excessive stack depth when comparing types
+const tools = await $fetch("/api/pages/resources", { method: "GET" }) as ResourceIndexKVReturn;
+
 const filters = ref({
   search: ref(""),
   category: ref<string[]>([]),
@@ -193,8 +197,8 @@ function deadSwitchStyle({
           </div>
         </NTooltip>
       </NFlex>
-      <!-- @vue-expect-error role property does not exist on user type -->
-      <NCard v-if="user?.role === 'admin'">
+      <!-- @vue-expect-error permissions property does not exist on user type -->
+      <NCard v-if="user?.permissions & 128">
         <span class="mr-2">
           Admin view:
         </span>

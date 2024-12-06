@@ -1,6 +1,6 @@
 import { defu } from "defu";
 import { createAuthClient } from "better-auth/client";
-import { adminClient, inferAdditionalFields } from "better-auth/client/plugins";
+import { adminClient, inferAdditionalFields, usernameClient } from "better-auth/client/plugins";
 import type {
   InferSessionFromClient,
   InferUserFromClient,
@@ -24,10 +24,49 @@ export function useAuth() {
     },
     plugins: [
       adminClient(),
+      usernameClient(),
       inferAdditionalFields({
         user: {
-          role: {
+          permissions: {
+            type: "number",
+            required: true,
+            defaultValue: 1,
+            input: false,
+          },
+          flair: {
             type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          youtube: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          bilibili: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          discord: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          bluesky: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          twitter: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
+          },
+          reddit: {
+            type: "string",
+            defaultValue: "none",
+            input: false,
           },
         },
       }),

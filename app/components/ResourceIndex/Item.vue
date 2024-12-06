@@ -89,8 +89,8 @@ function getCategoryIcon(category: string): Component {
           </NSpace>
         </template>
 
-        <!-- @vue-expect-error role property does not exist on user type -->
-        <template #action v-if="user?.role === 'admin'">
+        <!-- @vue-expect-error permissions property does not exist on user type -->
+        <template v-if="user?.permissions & 128" #action>
           <NButton
             type="primary"
             size="small"

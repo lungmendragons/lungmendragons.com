@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FormInst } from "naive-ui";
+import type { FormInst, FormItemRule } from "naive-ui";
 
 definePageMeta({
   auth: { only: "guest" },
@@ -21,6 +21,21 @@ const rules = {
   username: {
     required: true,
     message: "Please input your username",
+    validator: (_rule: FormItemRule, value: string) => {
+      return new Promise<void>((resolve, reject) => {
+        const match = value.match(/([a-z0-9])+/gi);
+        // Ugly but I don't care rn
+        if (value.length === 0) {
+          reject(new Error("Must not be empty."));
+        } else if (!match || match.length > 1 || match[0] !== value) {
+          reject(new Error("Contains invalid characters. Must only contain letters or numbers."));
+        } else if (match[0].length < 5) {
+          reject(new Error("Must be at least 5 characters."));
+        } else {
+          resolve();
+        };
+      });
+    },
   },
   email: {
     required: true,
@@ -65,15 +80,29 @@ async function handleSignUp(event: MouseEvent) {
   const { error } = await auth.signUp.email({
     email: signUpForm.value?.email,
     password: signUpForm.value?.password,
-    // "name" is a required field, so treat is as username
+    // "name" is a required field regardless, so just make it identical to the username
+    // because signing in with username specifically requires "username" field
     name: signUpForm.value?.username,
+    username: signUpForm.value?.username,
   });
 
   if (error) {
-    notification.error({
-      title: "Sign up failed",
-      content: JSON.stringify(error),
-    });
+    if (error.message === "User with this email already exists") {
+      notification.error({
+        title: "Email already in use",
+        content: `Error ${error.status}: ${error.message}`,
+      });
+    } else if (error.status === 422) {
+      notification.error({
+        title: "Username is taken",
+        content: `Error ${error.status}: ${error.message}`,
+      });
+    } else {
+      notification.error({
+        title: "Sign up failed",
+        content: `Error ${error.status}: ${error.message}`,
+      });
+    }
   } else {
     await navigateTo("/profile");
     notification.success({ content: "Signed up." });

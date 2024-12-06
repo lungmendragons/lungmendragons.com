@@ -7,6 +7,9 @@ const isXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const toggleCollapseMobile = useToggle(isXL);
 const { width } = useWindowSize();
 
+provide("isXLProvide", isXL);
+provide("toggleCollapseMobile", toggleCollapseMobile);
+
 const { session } = useAuth();
 const notification = useNotification();
 const notifStore = useNotifStore();
@@ -52,7 +55,8 @@ onMounted(() => {
       .then((kvArray) => {
         kvArray.forEach((item) => {
           // @ts-expect-error possibly null
-          if (!dismissed.includes(item.key)) doNotif(item);
+          if (!dismissed.includes(item.key))
+            doNotif(item);
         });
       });
   };

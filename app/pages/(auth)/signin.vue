@@ -12,14 +12,14 @@ useSeoMeta({
 const signInFormInst = ref<FormInst | null>(null);
 
 const signInForm = ref({
-  email: "",
+  emailOrUsername: "",
   password: "",
 });
 
 const rules = {
-  email: {
+  emailOrUsername: {
     required: true,
-    message: "Please input your email",
+    message: "Please input your email or username",
   },
   password: {
     required: true,
@@ -57,15 +57,24 @@ async function handleSignIn(event: MouseEvent) {
     return;
   };
 
-  const { error } = await auth.signIn.email({
-    email: signInForm.value?.email,
-    password: signInForm.value?.password,
-  });
+  let data: any;
 
-  if (error) {
+  if (signInForm.value?.emailOrUsername.includes("@")) {
+    data = await auth.signIn.email({
+      email: signInForm.value?.emailOrUsername,
+      password: signInForm.value?.password,
+    });
+  } else {
+    data = await auth.signIn.username({
+      username: signInForm.value?.emailOrUsername,
+      password: signInForm.value?.password,
+    });
+  };
+
+  if (data.error) {
     notification.error({
       title: "Sign in failed",
-      content: JSON.stringify(error),
+      content: JSON.stringify(data.error),
     });
   } else {
     await navigateTo("/profile");
@@ -89,8 +98,8 @@ async function handleSignIn(event: MouseEvent) {
           :show-label="false"
           :feedback-style="{ fontSize: '0.7rem' }">
           <NInput
-            v-model:value="signInForm.email"
-            placeholder="Email"
+            v-model:value="signInForm.emailOrUsername"
+            placeholder="Email or username"
           />
         </NFormItem>
         <NFormItem

@@ -4,19 +4,14 @@
 
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
-import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
-import Fa6BrandsBilibili from "~icons/fa6-brands/bilibili";
-import Fa6BrandsDiscord from "~icons/fa6-brands/discord";
-import Fa6BrandsBluesky from "~icons/fa6-brands/bluesky";
-import Fa6BrandsXTwitter from "~icons/fa6-brands/x-twitter";
 
 const notFound = ref(false);
 const slug = useRoute().params.slug || "index";
-const authorImage = ref("");
+// const authorImage = ref("");
 const requested = ref({
   title: "Loading...",
   description: "",
-  author: "",
+  author: {} as any,
   time: "",
   content: "Loading...",
 });
@@ -39,8 +34,7 @@ onMounted(() => {
       requested.value = page;
       $fetch(`/api/users/${page.author}`)
         .then((user) => {
-          requested.value.author = user?.name as unknown as string;
-          authorImage.value = user?.image as unknown as string;
+          requested.value.author = user;
         });
     })
     .catch((error) => {
@@ -69,16 +63,16 @@ onMounted(() => {
       </NP>
       <NFlex v-if="!notFound" align="center">
         <NAvatar
-          v-if="authorImage"
+          v-if="requested.author.image"
           round
-          :src="authorImage"
+          :src="requested.author.image"
           :size="24"
         />
         <NIcon v-else :size="24">
           <HeroiconsUserCircle />
         </NIcon>
         <div class="text-xs md:text-sm">
-          {{ requested.author }}
+          {{ requested.author.name }}
         </div>
         <NDivider vertical />
         <NIcon :size="24">
@@ -99,32 +93,23 @@ onMounted(() => {
       <NFlex vertical :size="12">
         <NFlex>
           <NAvatar
-            v-if="authorImage"
+            v-if="requested.author.image"
             round
-            :src="authorImage"
+            :src="requested.author.image"
             :size="48"
           />
           <NFlex vertical :size="10">
             <span class="text-xl leading-5 md:text-2xl md:leading-6 font-bold">
-              {{ requested.author }}
+              {{ requested.author.name }}
             </span>
-            <NFlex>
-              <NIcon>
-                <Fa6BrandsYoutube />
-              </NIcon>
-              <NIcon>
-                <Fa6BrandsBilibili />
-              </NIcon>
-              <NIcon>
-                <Fa6BrandsDiscord />
-              </NIcon>
-              <NIcon>
-                <Fa6BrandsBluesky />
-              </NIcon>
-              <NIcon>
-                <Fa6BrandsXTwitter />
-              </NIcon>
-            </NFlex>
+            <UserSocials
+              :youtube="requested.author.youtube ?? ''"
+              :bilibili="requested.author.bilibili ?? ''"
+              :discord="requested.author.discord ?? ''"
+              :bluesky="requested.author.bluesky ?? ''"
+              :twitter="requested.author.twitter ?? ''"
+              :reddit="requested.author.reddit ?? ''"
+            />
           </NFlex>
         </NFlex>
         <span class="text-[0.7rem] leading-[0.7rem]">

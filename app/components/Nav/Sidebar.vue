@@ -10,6 +10,7 @@ import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
 import MdiHeart from "~icons/mdi/heart";
 
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
+const { user } = useAuth();
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const isLG = useMediaQuery(mediaQuery.minWidth.lg);
 const showSocials = useMediaQuery(mediaQuery.minHeight.md);
@@ -39,10 +40,11 @@ onBeforeMount(() => {
       backgroundColor: drawer ? '' : themeVars.cardColor,
     }">
     <NScrollbar>
+      <!-- @vue-expect-error prop "permissions" does not exist -->
       <NMenu
         ref="menuInst"
         v-model:value="selectedKey"
-        :options="getSidebarMenu()"
+        :options="getSidebarMenu(drawer, user?.permissions)"
         :root-indent="18"
         :indent="12"
         responsive

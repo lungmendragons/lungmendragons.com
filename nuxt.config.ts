@@ -5,6 +5,8 @@ import Components from "unplugin-vue-components/vite";
 // import { cjsInterop } from "vite-plugin-cjs-interop";
 import IconsResolver from "unplugin-icons/resolver";
 
+const isProd = process.env.NODE_ENV === "production";
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-06",
@@ -76,7 +78,7 @@ export default defineNuxtConfig({
           "'unsafe-inline'",
         ],
       },
-      crossOriginEmbedderPolicy: "credentialless",
+      crossOriginEmbedderPolicy: isProd ? "credentialless" : false,
       crossOriginResourcePolicy: "cross-origin",
       strictTransportSecurity: {
         // 2 years is recommended:
