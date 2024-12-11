@@ -52,6 +52,11 @@ const loading = ref(false);
 const notification = useNotification();
 const auth = useAuth();
 
+async function isUsernameAvailable(username: string): Promise<boolean> {
+  const result = await $fetch(`/api/users/profile/${username}`);
+  return result === undefined;
+}
+
 async function handleSignUp(event: MouseEvent) {
   event.preventDefault();
 
@@ -73,6 +78,15 @@ async function handleSignUp(event: MouseEvent) {
   });
 
   if (!isValid) {
+    loading.value = false;
+    return;
+  }
+
+  if (!await isUsernameAvailable(signUpForm.value?.username)) {
+    notification.error({
+      title: "Username is taken",
+      content: "Please choose another username.",
+    });
     loading.value = false;
     return;
   }
