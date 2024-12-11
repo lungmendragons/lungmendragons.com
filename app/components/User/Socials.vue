@@ -50,7 +50,7 @@ function socialIsPresent(social: string | undefined) {
         Bilibili
       </NTooltip>
     </Link>
-    <Link v-if="socialIsPresent(props.discord)" :to="props.discord">
+    <template v-if="socialIsPresent(props.discord)">
       <NTooltip trigger="hover">
         <template #trigger>
           <NButton text>
@@ -59,9 +59,9 @@ function socialIsPresent(social: string | undefined) {
             </NIcon>
           </NButton>
         </template>
-        Discord
+        Discord: {{ props.discord }}
       </NTooltip>
-    </Link>
+    </template>
     <Link v-if="socialIsPresent(props.bluesky)" :to="props.bluesky">
       <NTooltip trigger="hover">
         <template #trigger>
