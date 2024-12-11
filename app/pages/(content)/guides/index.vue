@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import LoadingDotsAnim from "~/components/SVG/LoadingDotsAnim.vue";
+import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
+
 useSeoMeta({
   title: "Guides | Lungmen Dragons",
 });
@@ -14,6 +17,8 @@ const KVs = ref<[{
     authorImage?: Ref<string>;
   };
 }] | []>([]);
+
+const isLoaded = ref(false);
 
 // This block is a complete mess and I make no apology for it. If you can
 // do this without TypeScript insulting your bloodline in your IDE then you
@@ -33,7 +38,10 @@ onMounted(() => {
         KVs.value.push({ key: item.key, data: { ...item.data, author: name, authorImage: image } });
       });
     })
-    .then(() => console.log(KVs));
+    .then(() => {
+      KVs.value.sort((a, b) => b.data.time - a.data.time);
+      isLoaded.value = true;
+    });
 });
 
 function getDateString(time: number): string {
@@ -46,6 +54,15 @@ function getDateString(time: number): string {
 
 <template>
   <NFlex class="w-full md:w-4/5 max-w-[800px] mx-auto">
+    <Teleport to="#page-content" :disabled="isLoaded">
+      <NFlex
+        vertical
+        justify="center"
+        :style="{ display: isLoaded ? 'none' : 'flex', margin: 'auto', height: '70svh' }">
+        <LogoColorIcon :style="{ width: 72, height: 72, margin: '12px auto' }" />
+        <LoadingDotsAnim :style="{ width: 24, height: 24, margin: '0 auto' }" />
+      </NFlex>
+    </Teleport>
     <NList hoverable clickable>
       <template v-for="item in KVs" :key="item.key">
         <NListItem @click="navigateTo(`/guides/${item.key.split(':').pop()}`)">
