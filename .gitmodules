@@ -1,0 +1,3 @@
+[submodule "submodules/ArknightsResource"]
+	path = submodules/ArknightsResource
+	url = https://github.com/fexli/ArknightsResource
