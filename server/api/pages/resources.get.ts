@@ -1,6 +1,6 @@
 import type { StorageValue } from "unstorage";
 
-export default eventHandler(async () => {
+export default cachedEventHandler(async () => {
   const keys = await hubKV().keys("resourceindex");
 
   if (!keys.length) {
@@ -17,4 +17,7 @@ export default eventHandler(async () => {
   };
 
   return KVs;
+}, {
+  maxAge: 300, // 5 minutes
+  getKey: event => event.path,
 });

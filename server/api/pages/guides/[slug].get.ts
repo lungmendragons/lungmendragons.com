@@ -8,7 +8,7 @@ interface Post {
   content: string;
 };
 
-export default eventHandler(async (event) => {
+export default cachedEventHandler(async (event) => {
   const { slug } = event.context.params || {};
   if (!slug) {
     throw createError({ statusCode: 400, statusMessage: "Missing slug." });
@@ -21,4 +21,7 @@ export default eventHandler(async (event) => {
   };
 
   return post;
+}, {
+  maxAge: 3600, // 1 hour
+  getKey: event => event.path,
 });

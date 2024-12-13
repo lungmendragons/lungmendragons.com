@@ -36,6 +36,7 @@ export default defineNuxtConfig({
     database: true,
     kv: true,
     blob: true,
+    cache: true,
   },
   nitro: {
     esbuild: {
