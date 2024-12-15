@@ -1,3 +1,6 @@
 [submodule "submodules/ArknightsResource"]
 	path = submodules/ArknightsResource
 	url = https://github.com/fexli/ArknightsResource
+[submodule "submodules/ArknightsGameData_YoStar"]
+	path = submodules/ArknightsGameData_YoStar
+	url = https://github.com/Kengxxiao/ArknightsGameData_YoStar
