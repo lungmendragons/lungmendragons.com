@@ -27,7 +27,6 @@ onMounted(() => {
   $fetch("/api/pages")
     .then((kvArray) => {
       kvArray.forEach((item) => {
-        console.log(item);
         const name = ref<string>("");
         const image = ref<string>("");
         // @ts-expect-error possibly null/not assignable/property does not exist
