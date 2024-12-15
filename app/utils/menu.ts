@@ -56,11 +56,7 @@ function sidebarMenuMain(linkComponent: Component): MenuOption[] {
       ),
       children: [
         {
-          label: () => h(
-            linkComponent,
-            null,
-            () => "Players",
-          ),
+          label: "Players",
           key: "players",
           icon: renderIcon(CarbonEarthFilled),
           disabled: true,
