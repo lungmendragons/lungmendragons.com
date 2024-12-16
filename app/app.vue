@@ -5,12 +5,12 @@ useSeoMeta({
     "Arknights EN's most reputable competitive strategy group and community event organiser. " +
     "See the highest level of skill Terra has to offer.",
   ogTitle: "Lungmen Dragons",
-  ogUrl: "https://www.lungmendragons.com",
+  ogUrl: "https://lungmendragons.com",
   ogDescription:
     "Arknights EN's most reputable competitive strategy group and community event organiser. " +
     "See the highest level of skill Terra has to offer.",
   ogImage: {
-    url: "https://www.lungmendragons.com/og/logo-card-large.png",
+    url: "https://lungmendragons.com/og/logo-card-large.png",
     width: 1200,
     height: 630,
     type: "image/png",
@@ -21,7 +21,7 @@ useSeoMeta({
   twitterDescription:
     "Arknights EN's most reputable competitive strategy group and community event organiser. " +
     "See the highest level of skill Terra has to offer.",
-  twitterImage: "https://www.lungmendragons.com/og/logo-card-large.png",
+  twitterImage: "https://lungmendragons.com/og/logo-card-large.png",
   twitterImageAlt: "Lungmen Dragons logo, with blue and red accent colors, displayed on a solid black background.",
   twitterSite: "@LungmenDragons",
   twitterCreator: "@LungmenDragons",
