@@ -201,7 +201,7 @@ export const items = [
     color: Colour.normal,
     time: "May 2024",
     icon: HeroiconsGlobeAsiaAustralia,
-    content: renderFlex([ "In collaboration with strategy groups from the CN, JP, KR, and TW servers, we represented EN's participation in a global tournament in Mizuki & Caerula Arbor, played at difficulty 15." ]),
+    content: renderFlex([ "In collaboration with strategy groups from servers worldwide - SC, JP, KR, and TC - we represented EN's participation in a global tournament in Mizuki & Caerula Arbor, played at difficulty 15." ]),
   },
   {
     title: "3rd Anniversary",
