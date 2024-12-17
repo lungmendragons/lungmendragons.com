@@ -126,8 +126,8 @@ onMounted(() => {
 <template>
   <NScrollbar class="max-h-[70vh]">
     <NFlex
-      vertical
       id="bingo3-wrapper"
+      vertical
       class="px-2 md:px-8">
       <NFlex
         vertical
@@ -253,7 +253,7 @@ onMounted(() => {
 
 <style scoped>
 #bingo3-wrapper {
-  background-image: url("/ld-events/bingo3/主界面_EN_BG.png");
+  background-image: url("/ld-events/bingo3/typhon-bg.png");
   background-attachment: fixed;
   background-position: top;
   background-repeat: no-repeat;

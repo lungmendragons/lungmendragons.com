@@ -5,9 +5,11 @@
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 
+const { user } = useAuth();
 const notFound = ref(false);
-const slug = useRoute().params.slug || "index";
-// const authorImage = ref("");
+const slug = useRoute().params.slug as string || "index";
+
+const authorId = ref("");
 const requested = ref({
   title: "Loading...",
   description: "",
@@ -32,6 +34,7 @@ onMounted(() => {
   $fetch(`/api/pages/guides/${slug}`)
     .then((page) => {
       requested.value = page;
+      authorId.value = page.author;
       $fetch(`/api/users/${page.author}`)
         .then((user) => {
           requested.value.author = user;
@@ -81,6 +84,13 @@ onMounted(() => {
         <div class="text-xs md:text-sm">
           {{ getDateString(requested.time) }}
         </div>
+        <NDivider v-if="authorId === user?.id" vertical />
+        <MarkdownEditDrawer
+          v-if="authorId === user?.id"
+          :slug="slug"
+          :author-id="authorId"
+          :requested="requested"
+        />
       </NFlex>
     </NCard>
     <NCard>

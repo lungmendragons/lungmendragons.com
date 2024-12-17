@@ -29,7 +29,7 @@ useSeoMeta({
         Google Sheet.
       </Link>
     </div>
-    <div class="mb-4">
+    <div>
       The full playlist of stream VODs, highlight videos and funny moments can be found
       <Link
         external
@@ -37,6 +37,9 @@ useSeoMeta({
         label="IS4 Bingo Lockout Playlist">
         on YouTube.
       </Link>
+    </div>
+    <div class="mb-4 text-xs">
+      <em>(Note: If you see a "blocked page" message where the YouTube embed should be, try refreshing the page.)</em>
     </div>
     <BingoContainer />
   </NFlex>

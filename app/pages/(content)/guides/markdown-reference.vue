@@ -3,11 +3,14 @@
 // Cloudflare KV storage is good for letting the writers do their thing, and good for shorter posts,
 // but given the length of the content here, we can just fetch it from a file within the repo itself.
 
-import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 
 useSeoMeta({
   title: "Markdown Reference | Lungmen Dragons",
+});
+
+definePageMeta({
+  auth: { only: "writer" },
 });
 
 const content = ref<string>("");
@@ -41,9 +44,11 @@ onMounted(() => {
         </em>
       </NP>
       <NFlex align="center">
-        <NIcon :size="24">
-          <HeroiconsUserCircle />
-        </NIcon>
+        <NAvatar
+          round
+          src="/images/avatar/BpfjRhiKAsuyJGQO.png"
+          :size="24"
+        />
         <div class="text-xs md:text-sm">
           toboruo
         </div>

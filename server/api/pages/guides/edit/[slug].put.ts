@@ -7,13 +7,6 @@ export default eventHandler(async (event) => {
     });
   };
 
-  if (await hubKV().has(`guides:${slug}`)) {
-    throw createError({
-      statusCode: 409,
-      message: "Slug already exists",
-    });
-  }
-
   const { body } = await readBody(event);
 
   await hubKV().set(`guides:${slug}`, body);
