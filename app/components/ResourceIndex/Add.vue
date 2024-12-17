@@ -95,7 +95,7 @@ const languageOptions = [
   },
 ];
 
-function handleValidateClick(e: MouseEvent) {
+function handleConfirmClick(e: MouseEvent) {
   e.preventDefault();
   formRef.value?.validate((errors) => {
     if (!errors) {
@@ -211,10 +211,15 @@ async function putResource() {
         />
       </NFormItem>
       <NFormItem>
-        <NButton @click="handleValidateClick">
-          Validate
+        <NButton type="primary" @click="handleConfirmClick">
+          Confirm
         </NButton>
       </NFormItem>
+      <span>
+        Please allow up to 1 hour for changes to appear as the page's API response is cached.
+        Visiting the page in private/incognito mode should show the changes immediately,
+        but you will not be able to edit the updated version until the cached response expires.
+      </span>
     </NForm>
   </NDrawerContent>
 </template>
