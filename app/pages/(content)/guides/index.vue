@@ -11,7 +11,6 @@ const KVs = ref<[{
   data: {
     title: string;
     description: string;
-    content: string;
     time: number;
     author: Ref<string>;
     authorImage?: Ref<string>;
@@ -20,22 +19,32 @@ const KVs = ref<[{
 
 const isLoaded = ref(false);
 
-// This block is a complete mess and I make no apology for it. If you can
-// do this without TypeScript insulting your bloodline in your IDE then you
-// should probably be making more important things than an Arknights website.
+// This block is a complete mess and I make no apology for it
 onMounted(() => {
   $fetch("/api/pages")
-    .then((kvArray) => {
-      kvArray.forEach((item) => {
+    .then((guides: any) => {
+      for (const guide of guides) {
         const name = ref<string>("");
         const image = ref<string>("");
-        // @ts-expect-error possibly null/not assignable/property does not exist
-        $fetch(`/api/users/${item.data.author}`).then(user => name.value = user.name);
-        // @ts-expect-error as above
-        $fetch(`/api/users/${item.data.author}`).then(user => image.value = user.image);
+        $fetch(`/api/users/${guide.metadata.author}`).then((user) => {
+          // @ts-expect-error possibly null/not assignable/property does not exist
+          name.value = user.name;
+          // @ts-expect-error as above
+          image.value = user.image;
+        });
+
         // @ts-expect-error leave me alone
-        KVs.value.push({ key: item.key, data: { ...item.data, author: name, authorImage: image } });
-      });
+        KVs.value.push({
+          key: guide.key,
+          data: {
+            title: guide.metadata.title,
+            description: guide.metadata.description,
+            time: guide.metadata.time,
+            author: name,
+            authorImage: image,
+          },
+        });
+      }
     })
     .then(() => {
       KVs.value.sort((a, b) => b.data.time - a.data.time);

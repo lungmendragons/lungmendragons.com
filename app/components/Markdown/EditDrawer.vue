@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { slug, requested } = defineProps<{
+const { slug, authorId, requested } = defineProps<{
   slug: string;
   authorId: string;
   requested: {
@@ -36,9 +36,9 @@ async function handleConfirmEdit(event: Event) {
       body: {
         title: editPage.value.title,
         description: editPage.value.description,
-        content: editPage.value.content,
-        author: requested.author,
+        author: authorId,
         time: requested.time,
+        content: editPage.value.content,
       },
     },
   }).then(async () => {

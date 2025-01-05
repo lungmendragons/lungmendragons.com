@@ -1,31 +1,16 @@
-import type { StorageValue } from "unstorage";
+// import type { StorageValue } from "unstorage";
 
 export default cachedEventHandler(async () => {
-  // const { namespace } = event.context.params || {};
-  // if (!namespace) {
-  //   throw createError({
-  //     statusCode: 400,
-  //     message: "Missing namespace",
-  //   });
-  // };
+  const guides = await hubKV().get("guides-index");
 
-  // const keys = await hubKV().keys(namespace);
-  const keys = await hubKV().keys("guides"); // temporary
-
-  if (!keys.length) {
+  if (!guides) {
     throw createError({
       statusCode: 404,
-      message: "No keys found",
+      message: "No guides found",
     });
   };
 
-  const KVs: StorageValue[] = [];
-  for (const key of keys) {
-    const data = await hubKV().get(key);
-    KVs.push({ key, data });
-  };
-
-  return KVs;
+  return guides;
 }, {
   maxAge: 300, // 5 minutes
   getKey: event => event.path,
