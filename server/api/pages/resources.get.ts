@@ -1,22 +1,14 @@
-import type { StorageValue } from "unstorage";
-
 export default cachedEventHandler(async () => {
-  const keys = await hubKV().keys("resourceindex");
+  const index = await hubKV().get("resource-index");
 
-  if (!keys.length) {
+  if (!index) {
     throw createError({
       statusCode: 404,
-      message: "No keys found",
+      message: "Resource index not found",
     });
   };
 
-  const KVs: StorageValue[] = [];
-  for (const key of keys) {
-    const data = await hubKV().get(key);
-    KVs.push({ key, data });
-  };
-
-  return KVs;
+  return index;
 }, {
   maxAge: 300, // 5 minutes
   getKey: event => event.path,

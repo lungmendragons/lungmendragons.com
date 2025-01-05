@@ -5,7 +5,7 @@ import Link from "~/components/Link.global.vue";
 
 <template>
   <NFlex justify="center" :style="{ margin: '1.5rem 0' }">
-    <NCarousel
+    <!-- <NCarousel
       autoplay
       show-arrow
       draggable
@@ -22,6 +22,12 @@ import Link from "~/components/Link.global.vue";
           <img class="object-cover my-0 mx-auto h-full" src="/carousel/video-submit.png">
         </Link>
       </NCarouselItem>
-    </NCarousel>
+    </NCarousel> -->
+    <Link to="https://forms.gle/SfZmwk1ogpLp1UdHA">
+      <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-[440px] md:w-[480px]" src="/carousel/video-submit.png">
+    </Link>
+    <Link to="https://www.youtube.com/@LungmenDragons/join">
+      <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-[440px] md:w-[480px]" src="/carousel/membership.png">
+    </Link>
   </NFlex>
 </template>
