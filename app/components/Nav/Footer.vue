@@ -20,7 +20,7 @@ const isMD = useMediaQuery(mediaQuery.minWidth.md);
           style="font-size: 0.75rem"
           :size="2">
           <span>
-            &copy; 2024 Lungmen Dragons. All rights reserved.
+            &copy; 2024-2025 Lungmen Dragons. All rights reserved.
           </span>
           <NFlex
             align="center"
