@@ -25,16 +25,16 @@ const isSM = useMediaQuery(mediaQuery.minWidth.sm);
       padding: '1.5rem',
     }">
     <div :style="{
-      fontSize: isSM ? '1.5rem' : '1.1rem',
-      lineHeight: isSM ? '2rem' : '1rem',
+      fontSize: isSM ? '1.2rem' : '1rem',
+      lineHeight: isSM ? '1.5rem' : '0.8rem',
       fontWeight: '800',
     }">
-      Join our community!
+      Join our Discord community!
     </div>
     <div :style="{
-      margin: '0.5rem auto 0.625rem auto',
-      fontSize: isSM ? '0.875rem' : '0.75rem',
-      lineHeight: '1.25rem',
+      margin: '0.375rem auto 0.5rem auto',
+      fontSize: isSM ? '0.75rem' : '0.625rem',
+      lineHeight: '1rem',
       maxWidth: '24rem',
       textWrap: 'balance',
     }">
@@ -47,6 +47,7 @@ const isSM = useMediaQuery(mediaQuery.minWidth.sm);
       target="_blank"
       rel="noopener noreferrer"
       color="#5662f6"
+      size="small"
       class="hover:bg-[#7c84f5]"
       :style="{ color: 'white', margin: '0 auto' }">
       <template #icon>
