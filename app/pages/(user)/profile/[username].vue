@@ -10,6 +10,7 @@ const username = useRoute().params.username;
 const userRef = ref({
   name: "",
   image: "",
+  flair: "",
   createdAt: "",
   youtube: "",
   bilibili: "",
@@ -42,6 +43,9 @@ onMounted(() => {
         :src="userRef.image ?? 'https://i0.wp.com/sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png'"
       />
       <NFlex vertical>
+        <span v-if="!userRef.flair || userRef.flair !== 'none'">
+          <em>{{ userRef.flair }}</em>
+        </span>
         <span>
           Joined: {{ new Date(userRef.createdAt).toUTCString() }}
         </span>

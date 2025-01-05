@@ -123,7 +123,7 @@ onMounted(() => {
           </NFlex>
         </NFlex>
         <span class="text-[0.7rem] leading-[0.7rem]">
-          <em>This author hasn't set a flair.</em>
+          <em>{{ requested.author.flair }}</em>
         </span>
       </NFlex>
     </NCard>

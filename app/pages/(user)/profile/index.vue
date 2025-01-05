@@ -65,6 +65,9 @@ async function deleteAvatar(pathname: string) {
         :src="sessionRef.user.image ?? 'https://i0.wp.com/sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png'"
       />
       <NFlex vertical>
+        <div v-if="!sessionRef.user.flair || sessionRef.user.flair !== 'none'">
+          <em>{{ sessionRef.user.flair }}</em>
+        </div>
         <span>
           Joined: {{ new Date(sessionRef.user.createdAt).toUTCString() }}
         </span>
