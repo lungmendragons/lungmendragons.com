@@ -69,7 +69,8 @@ async function handleConfirmEdit(event: Event) {
       v-model:show="showEdit"
       to="#page-content-container"
       placement="right"
-      :width="360">
+      resizable
+      :default-width="360">
       <NDrawerContent title="Edit Post" closable>
         <NFlex vertical>
           <NInput v-model:value="editPage.title" placeholder="Title" />
