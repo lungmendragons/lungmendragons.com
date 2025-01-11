@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import { Octokit } from "octokit";
+
 definePageMeta({
   auth: { only: "admin" },
 });
+
+const octokit = new Octokit({ auth: process.env.GITHUB_API_TOKEN });
 
 const akr: Array<{
   path: string;
@@ -81,12 +85,18 @@ async function update(f: {
   found: Ref<number>;
 }): Promise<void> {
   miniConsole.value += `Update requested: /${f.path}\n`;
-  $fetch(`/api/assets/update/${f.path}`, { method: "GET" })
-    .then((res: any) => {
-      miniConsole.value += `Processing ${res.data.length} files...\n`;
-      f.found.value = res.data.length;
-      updateFolder(f.path, f.filter, res.data);
-    });
+  octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+    owner: "fexli",
+    repo: "ArknightsResource",
+    path: f.path,
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  }).then((res: any) => {
+    miniConsole.value += `Processing ${res.data.length} files...\n`;
+    f.found.value = res.data.length;
+    updateFolder(f.path, f.filter, res.data);
+  });
 }
 
 async function updateFolder(path: string, filter: string[] | null, files: any[]): Promise<void> {
@@ -117,29 +127,33 @@ async function updateFolder(path: string, filter: string[] | null, files: any[])
 onBeforeMount(() => {
   for (const f of akr) {
     $fetch(`/api/assets/blob/${f.path}`, { method: "GET" })
-      .then((res: any) => {
-        miniConsole.value += `${f.path}: ${res} items found\n`;
-        f.blobs.value = res;
-      });
+      .then((res: any) => f.blobs.value = res);
   }
 });
 
 onMounted(() => {
-  $fetch("/api/assets/blob", { method: "GET" })
-    .then((res) => {
-      for (const f of akr) {
-        f.found.value = res.data.tree.filter((item: any) => {
-          return item.path.startsWith(f.path) && item.type === "blob";
-        }).length;
-      }
-    })
-    .catch((err) => {
-      miniConsole.value = `Error: ${err}\n`;
-    })
-    .finally(() => {
-      loading.value = false;
-      miniConsole.value += "Ready\n";
-    });
+  octokit.request("GET /repos/{owner}/{repo}/git/trees/{tree_sha}", {
+    owner: "fexli",
+    repo: "ArknightsResource",
+    tree_sha: "df6c6721e17fbd62428d681efbe6d6dbcc289948", // temporary - replace with func to get latest sha
+    recursive: "true",
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  }).then((res) => {
+    for (const f of akr) {
+      f.found.value = res.data.tree.filter((item: any) => {
+        return item.path.startsWith(f.path)
+          && item.type === "blob"
+          && (!f.filter || f.filter.some(prefix => item.path.includes(prefix)));
+      }).length;
+    }
+  }).catch((err) => {
+    miniConsole.value = `Error: ${err}\n`;
+  }).finally(() => {
+    loading.value = false;
+    miniConsole.value += "Ready\n";
+  });
 });
 </script>
 
