@@ -10,6 +10,7 @@ const props = defineProps<{
   drafts: WIP[];
   saveFn: () => void;
   overwriteFn: (arg: number) => void;
+  loadFn: (arg: number) => void;
   deleteFn: (data: WIP, type: string) => void;
 }>();
 </script>
@@ -36,6 +37,13 @@ const props = defineProps<{
           <NListItem>
             <template #suffix>
               <NFlex vertical>
+                <NButton
+                  type="primary"
+                  secondary
+                  size="small"
+                  @click="props.loadFn(wip.time)">
+                  Load
+                </NButton>
                 <NButton
                   type="primary"
                   secondary

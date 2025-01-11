@@ -113,6 +113,18 @@ const saveDraft = useDebounceFn(() => {
     : message.error("You can save a maximum of 20 drafts.");
 }, 1000);
 
+const loadDraft = useDebounceFn((timeToFind: number) => {
+  const loaded = markdownStore.getSavedDraft(timeToFind);
+  if (loaded) {
+    doRestore(loaded.title, loaded.description, loaded.content);
+    forceAddRecent();
+    showSavedDrafts.value = false;
+    message.success("Draft loaded.");
+  } else {
+    message.error("Draft not found.");
+  };
+}, 1000);
+
 const saveDraftOverwrite = useDebounceFn((timeToOverwrite: number) => {
   const msg = markdownStore.saveDraftOverwrite({
     title: title.value,
@@ -219,6 +231,12 @@ onMounted(() => {
             :size="isMD ? 'medium' : 'small'"
             type="primary"
             @click="showSavedDrafts = true">
+            Load draft
+          </NButton>
+          <NButton
+            :size="isMD ? 'medium' : 'small'"
+            type="primary"
+            @click="showSavedDrafts = true">
             Save draft
           </NButton>
           <NButton
@@ -284,6 +302,7 @@ onMounted(() => {
         drawer-title="Saved Drafts"
         :drafts="savedDrafts"
         :save-fn="saveDraft"
+        :load-fn="loadDraft"
         :overwrite-fn="saveDraftOverwrite"
         :delete-fn="handleConfirmDelete"
       />

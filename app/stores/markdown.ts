@@ -82,6 +82,10 @@ export const useMarkdownStore = defineStore("markdown", () => {
     };
   };
 
+  function getSavedDraft(timeToFind: number): WIP | undefined {
+    return wip.value.savedDrafts.find(wip => wip.time === timeToFind);
+  };
+
   function getSavedDrafts(): WIP[] {
     return wip.value.savedDrafts;
   };
@@ -105,6 +109,7 @@ export const useMarkdownStore = defineStore("markdown", () => {
     clearWipHistory,
     saveDraft,
     saveDraftOverwrite,
+    getSavedDraft,
     getSavedDrafts,
     deleteDraft,
   };
