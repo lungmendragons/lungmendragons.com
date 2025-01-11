@@ -1,13 +1,8 @@
 <script setup lang="ts">
-import { NButton } from "naive-ui";
-
 definePageMeta({
   auth: { only: "admin" },
 });
 
-// const { data } = await useFetch(`/api/assets/${opObj.id}`);
-
-// const akrPath = "submodules/ArknightsResource/";
 const akr: Array<[string, Ref<number>, Ref<number>]> = [
   [ "camplogo", ref(0), ref(0) ],
   [ "charpor", ref(0), ref(0) ],
@@ -24,9 +19,10 @@ const akr: Array<[string, Ref<number>, Ref<number>]> = [
 const miniConsole = ref("");
 
 async function update(f: [string, Ref<number>, Ref<number>]) {
+  miniConsole.value += `Update requested: /${f[0]}\n`;
   $fetch(`/api/assets/${f[0]}`, { method: "GET" })
     .then((res) => {
-      miniConsole.value += `Processing ${res} files in /${f[0]} ...\n`;
+      miniConsole.value += `Processing ${res} files...\n`;
       f[1].value = res;
       updateFolder(f[0]);
     });
@@ -38,19 +34,6 @@ async function updateFolder(f: string) {
       miniConsole.value += `${res}\n`;
     });
 }
-
-// onMounted(() => {
-//   akr.forEach((f) => {
-//     checkFolder(f[0]).then((n) => {
-//       f[2].value = n;
-//     });
-//   });
-// });
-
-// async function checkFolder(f: string) {
-//   const n = await $fetch(`/api/assets/update/${f}`, { method: "GET" });
-//   return n;
-// }
 </script>
 
 <template>
@@ -77,9 +60,9 @@ async function updateFolder(f: string) {
 #console {
   display: flex;
   flex-direction: column-reverse;
-  height: 300px;
+  height: 500px;
   overflow: scroll;
-  width: 500px;
+  width: 600px;
   padding: 0 8px;
   background-color: #0003;
 }

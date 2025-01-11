@@ -1,11 +1,19 @@
-import fs from "node:fs";
-import path from "node:path";
+import { Octokit } from "octokit";
 
-const akrPath = "submodules/ArknightsResource/";
+const octokit = new Octokit({ auth: process.env.GITHUB_API_TOKEN });
 
 export default eventHandler(async (event) => {
   const { folder } = event.context.params || {};
-  const folderPath = path.resolve(akrPath, folder); // folder.name);
-  const files = fs.readdirSync(folderPath);
-  return files.length;
+
+  const assets = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+    owner: "fexli",
+    repo: "ArknightsResource",
+    path: folder,
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+
+  // @ts-expect-error length does not exist on type
+  return assets.data.length;
 });

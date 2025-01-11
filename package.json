@@ -46,6 +46,7 @@
     "nuxt-gtag": "^3.0.1",
     "nuxt-security": "^2.0.0",
     "nuxtjs-naive-ui": "^1.0.2",
+    "octokit": "^4.1.0",
     "pinia": "^2.2.6",
     "three": "^0.170.0",
     "unstorage": "^1.13.1",

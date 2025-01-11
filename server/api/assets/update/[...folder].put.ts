@@ -1,7 +1,7 @@
-import fs from "node:fs";
-import path from "node:path";
+import { Octokit } from "octokit";
 
-const akrPath = "submodules/ArknightsResource/";
+const octokit = new Octokit({ auth: process.env.GITHUB_API_TOKEN });
+
 const akr = [
   { name: "camplogo", filter: null },
   { name: "charpor", filter: null },
@@ -18,31 +18,50 @@ const akr = [
 
 export default eventHandler(async (event) => {
   const { folder } = event.context.params || {};
-  const uploaded: string[] = [];
-  console.log(folder);
 
-  const folderPath = path.resolve(akrPath, folder); // folder.name);
-  const files = fs.readdirSync(folderPath);
+  const assets = await octokit.request("GET /repos/{owner}/{repo}/contents/{path}", {
+    owner: "fexli",
+    repo: "ArknightsResource",
+    path: folder,
+    headers: {
+      "X-GitHub-Api-Version": "2022-11-28",
+    },
+  });
+
+  const uploaded: string[] = [];
+  let skipped = 0;
 
   // @ts-expect-error possible undefined
   const filter = akr.find(f => f.name === folder).filter || null;
 
-  for (const file of files) {
-    if (filter && !filter.some(f => file.startsWith(f)))
-      continue;
-
-    const fullPath = path.join(folderPath, file);
-    const stats = fs.statSync(fullPath);
-    const exists = await hubBlob().get(`akresource/${folder}/${file}`);
-
-    if (exists || !stats.isFile()) {
-      console.log(`Skipped: ${file}`);
+  // @ts-expect-error must be iterator
+  for (const file of assets.data) {
+    if (file.type !== "file") {
+      skipped++;
       continue;
     }
 
-    const fileBuffer = fs.readFileSync(fullPath);
-    const fileName = path.basename(fullPath);
-    const blob = new Blob([ fileBuffer ], { type: "image/png" });
+    if (filter && !filter.some(f => file.name.startsWith(f))) {
+      skipped++;
+      continue;
+    }
+
+    const exists = await hubBlob().get(`akresource/${file.path}`);
+    if (exists) {
+      skipped++;
+      continue;
+    }
+
+    const response = await fetch(file.download_url);
+    if (response.status !== 200) {
+      throw createError({
+        statusCode: response.status,
+        statusMessage: `File rejected: ${response.statusText}`,
+      });
+    }
+
+    const imgBlob = await response.blob();
+    const blob = new Blob([ imgBlob ], { type: "image/png" });
 
     try {
       ensureBlob(blob, {
@@ -67,7 +86,7 @@ export default eventHandler(async (event) => {
     }
 
     try {
-      const object = await hubBlob().put(fileName, blob, { prefix: `akresource/${folder}/` });
+      const object = await hubBlob().put(file.name, blob, { prefix: `akresource/${folder}/` });
       uploaded.push(object.pathname);
       // console.log(`Uploaded: ${fileName} to ${object.pathname}`);
     } catch (e: any) {
@@ -78,5 +97,5 @@ export default eventHandler(async (event) => {
     }
   }
 
-  return `Uploaded ${uploaded.length} files:\n${uploaded.join("\n")}\n`;
+  return `Uploaded ${uploaded.length} files:\n${uploaded.join("\n")}\n(Skipped ${skipped} files)\n`;
 });
