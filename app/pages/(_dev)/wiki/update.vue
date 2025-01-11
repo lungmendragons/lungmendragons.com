@@ -3,50 +3,161 @@ definePageMeta({
   auth: { only: "admin" },
 });
 
-const akr: Array<[string, Ref<number>, Ref<number>]> = [
-  [ "camplogo", ref(0), ref(0) ],
-  [ "charpor", ref(0), ref(0) ],
-  [ "equip", ref(0), ref(0) ],
-  [ "equipt", ref(0), ref(0) ],
-  [ "equiptc", ref(0), ref(0) ],
-  [ "skills", ref(0), ref(0) ],
-  [ "avatar/ASSISTANT", ref(0), ref(0) ],
-  [ "charpack", ref(0), ref(0) ],
-  [ "items", ref(0), ref(0) ],
-  [ "kvimg", ref(0), ref(0) ],
+const akr: Array<{
+  path: string;
+  filter: string[] | null;
+  blobs: Ref<number>;
+  found: Ref<number>;
+}> = [
+  {
+    path: "avatar/ASSISTANT",
+    filter: [ "char_", "token_" ],
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "camplogo",
+    filter: null,
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "charpack",
+    filter: [ "char_" ],
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "charpor",
+    filter: null,
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "equip",
+    filter: null,
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "equipt",
+    filter: null,
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "equiptc",
+    filter: null,
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "items",
+    filter: [ "MTL_" ],
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "kvimg",
+    filter: [ "brand_" ],
+    blobs: ref(0),
+    found: ref(0),
+  },
+  {
+    path: "skills",
+    filter: null,
+    blobs: ref(0),
+    found: ref(0),
+  },
 ];
 
 const miniConsole = ref("");
+const loading = ref(true);
 
-async function update(f: [string, Ref<number>, Ref<number>]) {
-  miniConsole.value += `Update requested: /${f[0]}\n`;
-  $fetch(`/api/assets/${f[0]}`, { method: "GET" })
-    .then((res) => {
-      miniConsole.value += `Processing ${res} files...\n`;
-      f[1].value = res;
-      updateFolder(f[0]);
+async function update(f: {
+  path: string;
+  filter: string[] | null;
+  blobs: Ref<number>;
+  found: Ref<number>;
+}): Promise<void> {
+  miniConsole.value += `Update requested: /${f.path}\n`;
+  $fetch(`/api/assets/update/${f.path}`, { method: "GET" })
+    .then((res: any) => {
+      miniConsole.value += `Processing ${res.data.length} files...\n`;
+      f.found.value = res.data.length;
+      updateFolder(f.path, f.filter, res.data);
     });
 }
 
-async function updateFolder(f: string) {
-  $fetch(`/api/assets/update/${f}`, { method: "PUT" })
-    .then((res) => {
-      miniConsole.value += `${res}\n`;
-    });
+async function updateFolder(path: string, filter: string[] | null, files: any[]): Promise<void> {
+  const formData = new FormData();
+  for (const file of files) {
+    if (file.type !== "file") {
+      miniConsole.value += `! skipped ${file.name} (bad type)\n`;
+      continue;
+    }
+    if (filter && !filter.some(prefix => file.name.startsWith(prefix))) {
+      miniConsole.value += `! skipped ${file.name} (filtered prefix)\n`;
+      continue;
+    }
+
+    const response = await fetch(file.download_url);
+    const blob = await response.blob();
+    formData.append("files", blob, `${path}/${file.name}`);
+  }
+
+  $fetch(`/api/assets/update`, {
+    method: "PUT",
+    body: formData,
+  }).then((res) => {
+    miniConsole.value += `${res}\n`;
+  });
 }
+
+onBeforeMount(() => {
+  for (const f of akr) {
+    $fetch(`/api/assets/blob/${f.path}`, { method: "GET" })
+      .then((res: any) => {
+        miniConsole.value += `${f.path}: ${res} items found\n`;
+        f.blobs.value = res;
+      });
+  }
+});
+
+onMounted(() => {
+  $fetch("/api/assets/blob", { method: "GET" })
+    .then((res) => {
+      for (const f of akr) {
+        f.found.value = res.data.tree.filter((item: any) => {
+          return item.path.startsWith(f.path) && item.type === "blob";
+        }).length;
+      }
+    })
+    .catch((err) => {
+      miniConsole.value = `Error: ${err}\n`;
+    })
+    .finally(() => {
+      loading.value = false;
+      miniConsole.value += "Ready\n";
+    });
+});
 </script>
 
 <template>
   <NFlex vertical>
     <NFlex
       v-for="f of akr"
-      :key="f[0]"
+      :key="f.path"
       align="center">
       <NButton style="width:150px" @click="update(f)">
-        {{ f[0] }}
+        {{ f.path }}
       </NButton>
-      <!-- {{ f[2] }}/{{ f[1] }} -->
-      <!-- <NSpin size="small" :show="f[1]" /> -->
+      <div v-if="loading">
+        Please wait...
+      </div>
+      <div v-else :style="{ color: f.blobs.value === f.found.value ? 'unset' : 'red' }">
+        {{ f.blobs }}/{{ f.found }}
+      </div>
     </NFlex>
     <div id="console">
       <div>
@@ -60,7 +171,7 @@ async function updateFolder(f: string) {
 #console {
   display: flex;
   flex-direction: column-reverse;
-  height: 500px;
+  height: 250px;
   overflow: scroll;
   width: 600px;
   padding: 0 8px;
