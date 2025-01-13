@@ -90,12 +90,12 @@ function getCategoryIcon(category: string): Component {
         </template>
 
         <!-- @vue-expect-error permissions property does not exist on user type -->
-        <template v-if="user?.permissions & 128" #action>
+        <template v-if="user?.permissions & 4" #action>
           <NButton
             type="primary"
             size="small"
             @click="editFn(id, data)">
-            Admin: Edit
+            Member view: Edit
           </NButton>
         </template>
 

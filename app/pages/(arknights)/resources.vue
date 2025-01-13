@@ -198,9 +198,9 @@ function deadSwitchStyle({
         </NTooltip>
       </NFlex>
       <!-- @vue-expect-error permissions property does not exist on user type -->
-      <NCard v-if="user?.permissions & 128">
+      <NCard v-if="user?.permissions & 4">
         <span class="mr-2">
-          Admin view:
+          Member view:
         </span>
         <NButton type="primary" @click="addNewResource()">
           Add a resource
