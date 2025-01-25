@@ -66,20 +66,22 @@ onMounted(() => isLoaded.value = true);
     <NMessageProvider>
     <NNotificationProvider>
 
-    <main data-allow-mismatch="children" />
+    <main />
 
     <!--
       Deferring content with a loading screen until app mounted avoids annoying FOUC problems
       From what I can tell it's also significantly faster. like minimum 5x faster
     -->
-    <Teleport defer to="main">
+    <ClientOnly>
+      <Teleport defer to="#teleports">
       <NuxtLayout :name="layout">
         <NuxtPage />
       </NuxtLayout>
     </Teleport>
+    </ClientOnly>
 
     <!-- Loading screen during hydration, shouldn't exceed ~500ms or so -->
-    <Teleport to="main" :disabled="isLoaded">
+    <Teleport to="#teleports" :disabled="isLoaded">
       <NFlex
         vertical
         justify="center"
