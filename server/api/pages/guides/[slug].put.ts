@@ -15,7 +15,7 @@ export default eventHandler(async (event) => {
   }
 
   const { body } = await readBody(event);
-  const bodyMeta = {
+  const metadata = {
     title: body.title,
     description: body.description,
     author: body.author,
@@ -25,7 +25,7 @@ export default eventHandler(async (event) => {
   const index = await hubKV().get("guides-index") as Array<any>;
 
   const x = index.findIndex(item => item.key === slug);
-  x > -1 ? index[x].data = bodyMeta : index.push({ key: slug, bodyMeta });
+  x > -1 ? index[x].data = metadata : index.push({ key: slug, metadata });
 
   await hubKV().set(`guides:${slug}`, body);
   await hubKV().set("guides-index", index);
