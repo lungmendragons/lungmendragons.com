@@ -74,7 +74,7 @@ function getCategoryIcon(category: string): Component {
           <NSpace size="small">
             <template v-if="data.languages.length === 0">
               <NTag :bordered="false" size="small">
-                {{ data.category }}
+                N/A
               </NTag>
             </template>
             <template v-else>
