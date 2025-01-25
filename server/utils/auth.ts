@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { D1Dialect } from "@atinux/kysely-d1";
+import { D1Dialect } from "kysely-d1";
 import { admin, username } from "better-auth/plugins";
 
 let _auth: ReturnType<typeof betterAuth>;
@@ -8,6 +8,7 @@ export function serverAuth() {
     _auth = betterAuth({
       database: {
         dialect: new D1Dialect({
+          // @ts-expect-error dump() missing from import
           database: hubDatabase(),
         }),
         type: "sqlite",
