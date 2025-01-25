@@ -62,8 +62,8 @@ onMounted(() => isLoaded.value = true);
     -->
     <NDialogProvider>
     <NLoadingBarProvider>
-    <NModalProvider>
     <NMessageProvider>
+    <NModalProvider>
     <NNotificationProvider>
 
     <main />
@@ -74,10 +74,10 @@ onMounted(() => isLoaded.value = true);
     -->
     <ClientOnly>
       <Teleport defer to="#teleports">
-      <NuxtLayout :name="layout">
-        <NuxtPage />
-      </NuxtLayout>
-    </Teleport>
+        <NuxtLayout :name="layout">
+          <NuxtPage />
+        </NuxtLayout>
+      </Teleport>
     </ClientOnly>
 
     <!-- Loading screen during hydration, shouldn't exceed ~500ms or so -->
@@ -92,8 +92,8 @@ onMounted(() => isLoaded.value = true);
     </Teleport>
 
     </NNotificationProvider>
-    </NMessageProvider>
     </NModalProvider>
+    </NMessageProvider>
     </NLoadingBarProvider>
     </NDialogProvider>
   </NConfigProvider>

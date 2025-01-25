@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import ResourceItem from "~/components/ResourceIndex/Item.vue";
 import { type Tool, categoryOptions, languageOptions, sortOptions } from "~/utils/resource-index";
 import HeroiconsInformationCircle from "~icons/heroicons/information-circle";
-import { type CSSProperties, onBeforeMount, ref } from "vue";
+import MageMessageDotsRoundPlus from "~icons/mage/message-dots-round-plus?width=24px&height=24px";
+import type { CSSProperties } from "vue";
+import ResourceIndexSuggest from "~/components/ResourceIndex/Suggest.vue";
 
 useSeoMeta({
   title: "Arknights Resource Index | Lungmen Dragons",
@@ -15,6 +16,7 @@ onBeforeMount(() => {
 type ResourceIndexKVReturn = Array<{ key: string; data: Tool }>;
 
 const { user } = useAuth();
+const modal = useModal();
 const showAddResource = ref(false);
 const itemToEdit = ref<{ id: string; data: Tool } | undefined>();
 
@@ -34,6 +36,15 @@ const filters = ref({
 function addNewResource(): void {
   itemToEdit.value = undefined;
   showAddResource.value = true;
+};
+
+function userSuggestion(): void {
+  const m = modal.create({
+    title: "Suggest an addition",
+    preset: "card",
+    class: "w-[340px]",
+    content: () => h(ResourceIndexSuggest, { modal: m, user }),
+  });
 };
 
 function setItemToEdit(id: string, data: Tool): void {
@@ -163,39 +174,55 @@ function deadSwitchStyle({
             Show dead resources
           </NSpace>
         </NFlex>
-        <NTooltip
-          placement="bottom-end"
-          trigger="click"
-          :width="300">
-          <template #trigger>
-            <NButton secondary class="mx-auto md:mx-0">
-              <template #icon>
-                <NIcon class="text-2xl mr-1">
-                  <HeroiconsInformationCircle />
-                </NIcon>
-              </template>
-              <span class="text-xs lg:text-sm">
-                What's included here?
+        <NFlex :size="6" class="flex-col md:flex-row mx-auto md:mx-0">
+          <NButton
+            secondary
+            type="primary"
+            class="mx-auto md:mx-0"
+            @click="userSuggestion">
+            <template #icon>
+              <NIcon class="text-2xl mr-1">
+                <MageMessageDotsRoundPlus />
+              </NIcon>
+            </template>
+            <span class="text-xs lg:text-sm">
+              Suggestions
+            </span>
+          </NButton>
+          <NTooltip
+            placement="bottom-end"
+            trigger="click"
+            :width="300">
+            <template #trigger>
+              <NButton secondary class="mx-auto md:mx-0">
+                <template #icon>
+                  <NIcon class="text-2xl mr-1">
+                    <HeroiconsInformationCircle />
+                  </NIcon>
+                </template>
+                <span class="text-xs lg:text-sm">
+                  What's included here?
+                </span>
+              </NButton>
+            </template>
+            <div>
+              This index consists of every Arknights resource we know of. This includes, but is not limited to,
+              <span class="font-bold text-green-500">
+                online calculators, informative spreadsheets, planners, asset folders, and wikis,
               </span>
-            </NButton>
-          </template>
-          <div>
-            This index consists of every Arknights resource we know of. This includes, but is not limited to,
-            <span class="font-bold text-green-500">
-              online calculators, informative spreadsheets, planners, asset folders, and wikis,
-            </span>
-            plus a miscellany of others. This also includes abandoned resources, which are filtered out by
-            default, but you can toggle them into view. We have not included
-            <span class="font-bold text-red-500">
-              anything that would violate Arknights' terms of service,
-            </span>
-            such as automation software, nor have we included
-            <span class="font-bold text-red-500">
-              links which no longer work
-            </span>
-            or return 404 errors.
-          </div>
-        </NTooltip>
+              plus a miscellany of others. This also includes abandoned resources, which are filtered out by
+              default, but you can toggle them into view. We have not included
+              <span class="font-bold text-red-500">
+                anything that would violate Arknights' terms of service,
+              </span>
+              such as automation software, nor have we included
+              <span class="font-bold text-red-500">
+                links which no longer work
+              </span>
+              or return 404 errors.
+            </div>
+          </NTooltip>
+        </NFlex>
       </NFlex>
       <!-- @vue-expect-error permissions property does not exist on user type -->
       <NCard v-if="user?.permissions & 4">
@@ -209,7 +236,7 @@ function deadSwitchStyle({
     </NSpace>
     <NList hoverable bordered>
       <NListItem v-for="item in searchFilter(tools)" :key="item.key">
-        <ResourceItem
+        <ResourceIndexItem
           :id="item.key"
           :data="item.data"
           :edit-fn="setItemToEdit"
