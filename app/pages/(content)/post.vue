@@ -38,14 +38,17 @@ const postFormValue = ref({
 });
 
 const postLocations: Ref<CascaderOption[]> = ref([
-  // todo: get from server when more namespaces exist
   {
     label: "Guides",
     value: "guides",
     children: [
       {
-        label: "(index)",
+        label: "Arknights",
         value: "guides/index",
+      },
+      {
+        label: "Arknights: Endfield",
+        value: "guides/endfield",
       },
     ],
   },
@@ -70,7 +73,7 @@ const postFormRules = {
         if (!value) {
           reject(new Error("Value is undefined"));
         } else if (value.slice(0, 6) !== "guides") {
-          reject(new Error("Temporary: Must be posted in /guides"));
+          reject(new Error("Must be posted in /guides"));
         } else {
           resolve();
         };
@@ -133,7 +136,7 @@ function getSlugLabel(): string {
   if (items?.slice(-1)[0] === "index") {
     return `${items?.slice(0, -1).join("/")}/`;
   } else {
-    return `${items?.slice(0, -1).join("/")}/`;
+    return `${items?.join("/")}/`;
   };
 };
 
@@ -171,8 +174,10 @@ async function handlePost(event: Event) {
   //   return;
   // }
 
+  const isEndfield = location.value?.includes("endfield") ? "endfield/" : "";
+
   // todo: update this once there are other namespaces than /guides/
-  $fetch(`/api/pages/guides/${slug.value}`, {
+  $fetch(`/api/pages/guides/${isEndfield}${slug.value}`, {
     method: "PUT",
     body: {
       body: {
@@ -183,13 +188,15 @@ async function handlePost(event: Event) {
         content: content.value,
       },
     },
-  }).then(async ({ slug }) => {
+  })
+  // @ts-expect-error go away
+  .then(async ({ slug }) => {
     notification.success({
       title: "Posted!",
       content: () => h(
         Link,
-        { to: `/guides/${slug}`, label: title.value },
-        { default: () => `https://www.lungmendragons.com/guides/${slug}` },
+        { to: `/guides/${isEndfield}${slug}`, label: title.value },
+        { default: () => `https://www.lungmendragons.com/guides/${isEndfield}${slug}` },
       ),
       meta: new Date(Date.now()).toLocaleString(),
     });
@@ -233,12 +240,13 @@ onMounted(() => {
         </NDropdown>
       </template>
       <NAlert
-        title="Note: 3 December 2024"
+        title="Note: 25 January 2025"
         type="info"
         :style="{ marginBottom: '1rem' }">
-        Currently all posts will be posted in <strong>/guides/your-url-here</strong>.
-        There will be more flexibility in the future. I'll move posts accordingly to requested URLs when that happens,
-        but doing so may lead to dead links if you are unable to update publicly posted links to your content. <br> - Tobo
+        Arknights guides will be posted to <strong>/guides/your-url-here</strong>.<br>
+        🌟 Endfield guides will be posted to <strong>/guides/endfield/your-url-here</strong>.<br>
+        Lungmen Dragons is primarily an Arknights group so the links will likely stay this way.
+        Should a change ever be necessary I'll make sure they redirect automatically. <br> - Tobo
       </NAlert>
       <!-- <NAlert type="info" :style="{ marginBottom: '1rem' }">
         The post location and URL cannot be changed after the post is live.

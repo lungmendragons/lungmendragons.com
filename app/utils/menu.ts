@@ -161,8 +161,23 @@ function sidebarMenuGameResources(linkComponent: Component): MenuOption[] {
           style: { width: "1.25rem" },
         },
       ),
-      disabled: true,
-      // extra: "[WIP]",
+      children: [
+        {
+          label: () => h(
+            linkComponent,
+            { to: "/guides/endfield" },
+            () => "Guides",
+          ),
+          key: "guides/endfield",
+          icon: renderIcon(HeroiconsBookOpen),
+        },
+        {
+          label: "Resource Index",
+          key: "resources/endfield",
+          icon: renderIcon(HeroiconsBookmark),
+          disabled: true,
+        },
+      ],
     },
   ];
 }
