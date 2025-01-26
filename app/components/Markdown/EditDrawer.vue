@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { slug, authorId, requested } = defineProps<{
+const { slug, authorId, requested, isEndfield = false } = defineProps<{
   slug: string;
   authorId: string;
   requested: {
@@ -9,6 +9,7 @@ const { slug, authorId, requested } = defineProps<{
     author: any;
     time: string;
   };
+  isEndfield: boolean;
 }>();
 
 const { session } = useAuth();
@@ -29,8 +30,12 @@ async function handleConfirmEdit(event: Event) {
 
   loadingEdit.value = true;
 
+  const fetchString = isEndfield
+    ? `/api/pages/guides/endfield/edit/${slug}`
+    : `/api/pages/guides/edit/${slug}`;
+
   // todo: update this once there are other namespaces than /guides/
-  $fetch(`/api/pages/guides/edit/${slug}`, {
+  $fetch(fetchString, {
     method: "PUT",
     body: {
       body: {

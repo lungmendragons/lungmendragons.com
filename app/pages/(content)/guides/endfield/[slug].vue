@@ -90,6 +90,7 @@ onMounted(() => {
           :slug="slug"
           :author-id="authorId"
           :requested="requested"
+          :is-endfield="true"
         />
       </NFlex>
     </NCard>
