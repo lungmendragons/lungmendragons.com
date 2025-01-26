@@ -24,9 +24,8 @@ export default eventHandler(async (event) => {
 
   const index = await hubKV().get("guides-endfield-index") as Array<any>;
 
-  if (index.length === 0) {
-    index.push({ key: slug, metadata });
-    // await hubKV().set("guides-endfield-index", [{ key: slug, metadata }]);
+  if (!index) {
+    await hubKV().set("guides-endfield-index", [{ key: slug, metadata }]);
   } else {
     const x = index.findIndex(item => item.key === slug);
     x > -1 ? index[x].data = metadata : index.push({ key: slug, metadata });

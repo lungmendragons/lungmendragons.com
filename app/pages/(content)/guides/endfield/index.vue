@@ -23,7 +23,6 @@ const isLoaded = ref(false);
 onMounted(() => {
   $fetch("/api/pages/guides/endfield")
     .then((guides: any) => {
-      console.log(guides);
       for (const guide of guides) {
         const name = ref<string>("");
         const image = ref<string>("");
