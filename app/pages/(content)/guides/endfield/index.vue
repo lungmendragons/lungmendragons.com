@@ -62,7 +62,7 @@ function getDateString(time: number): string {
 
 <template>
   <NFlex vertical class="w-full md:w-4/5 max-w-[800px] mx-auto">
-    <!-- <Teleport to="#teleports" :disabled="isLoaded">
+    <Teleport to="#teleports" :disabled="isLoaded">
       <NFlex
         vertical
         justify="center"
@@ -70,7 +70,7 @@ function getDateString(time: number): string {
         <LogoColorIcon :style="{ width: 72, height: 72, margin: '12px auto' }" />
         <LoadingDotsAnim :style="{ width: 24, height: 24, margin: '0 auto' }" />
       </NFlex>
-    </Teleport> -->
+    </Teleport>
     <NFlex align="center" class="mb-2">
       <NImage
         src="/official/endfield-icon.png"
@@ -79,10 +79,7 @@ function getDateString(time: number): string {
       />
       <span class="text-2xl">Arknights: Endfield Guides</span>
     </NFlex>
-    <NAlert type="info" style="margin: 0 auto">
-      This page will appear shortly; this notice is a placeholder. Check back in a few hours.
-    </NAlert>
-    <!-- <NList hoverable clickable>
+    <NList hoverable clickable>
       <template v-for="item in KVs" :key="item.key">
         <NListItem @click="navigateTo(`/guides/endfield/${item.key.split(':').pop()}`)">
           <NThing class="thing">
@@ -113,7 +110,7 @@ function getDateString(time: number): string {
           </NThing>
         </NListItem>
       </template>
-    </NList> -->
+    </NList>
   </NFlex>
 </template>
 
