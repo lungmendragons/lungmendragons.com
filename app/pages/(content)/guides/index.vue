@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import LoadingDotsAnim from "~/components/SVG/LoadingDotsAnim.vue";
 import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
+import { useMediaQuery } from "@vueuse/core";
 
 useSeoMeta({
   title: "Guides | Lungmen Dragons",
 });
+
+const moreThanXS = useMediaQuery(mediaQuery.minWidth.xs as string);
 
 const KVs = ref<[{
   key: string;
@@ -73,11 +76,19 @@ function getDateString(time: number): string {
     </Teleport>
     <NFlex align="center" class="mb-2">
       <NImage
+        preview-disabled
         src="/official/arknights-icon.png"
-        width="48"
-        height="48"
+        :style="{ paddingLeft: moreThanXS ? '1.25rem' : '0.25rem' }"
+        :width="36"
+        :height="36"
       />
-      <span class="text-2xl">Arknights Guides</span>
+      <span
+        :style="{
+          fontSize: moreThanXS ? '1.5rem' : '1.25rem',
+          fontWeight: '900',
+        }">
+        Arknights Guides
+      </span>
     </NFlex>
     <NList hoverable clickable>
       <template v-for="item in KVs" :key="item.key">
