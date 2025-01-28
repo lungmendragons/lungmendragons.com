@@ -10,7 +10,7 @@
 
 </div>
 
-Lungmen Dragons are Arknights EN's biggest competitive strategy group and community event organiser. This repository contains the source code for our website, a community resource for Arknights players. Built on Nuxt 3 (Vue + Vite + TypeScript), Naive UI, BetterAuth, and deployed to Cloudflare via NuxtHub.
+Lungmen Dragons are Arknights EN's most recognized competitive strategy group and community event organizer. This repository contains the source code for our website, a community resource for Arknights players. Built on Nuxt 3 (Vue + Vite + TypeScript), Naive UI, BetterAuth, and deployed to Cloudflare via NuxtHub.
 
 ```sh
 git clone https://github.com/toboruo/lungmendragons.git
