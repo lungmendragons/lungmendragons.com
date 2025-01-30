@@ -4,7 +4,9 @@ import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
 import { useMediaQuery } from "@vueuse/core";
 
 useSeoMeta({
-  title: "Guides | Lungmen Dragons",
+  title: "Arknights Guides | Lungmen Dragons",
+  ogTitle: "Arknights Guides | Lungmen Dragons",
+  ogUrl: "https://lungmendragons.com/guides",
 });
 
 const moreThanXS = useMediaQuery(mediaQuery.minWidth.xs as string);

@@ -4,7 +4,18 @@ import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
 import { useMediaQuery } from "@vueuse/core";
 
 useSeoMeta({
-  title: "Guides | Lungmen Dragons",
+  title: "Arknights: Endfield Guides | Lungmen Dragons",
+  ogTitle: "Arknights: Endfield Guides | Lungmen Dragons",
+  ogUrl: "https://lungmendragons.com/guides/endfield",
+  description:
+    "Hand-written guides and recommended builds for Arknights: Endfield, " +
+    "from the most recognized competitive strategy group in Arknights EN.",
+  ogDescription:
+    "Hand-written guides and recommended builds for Arknights: Endfield, " +
+    "from the most recognized competitive strategy group in Arknights EN.",
+  twitterDescription:
+    "Hand-written guides and recommended builds for Arknights: Endfield, " +
+    "from the most recognized competitive strategy group in Arknights EN.",
 });
 
 const moreThanXS = useMediaQuery(mediaQuery.minWidth.xs as string);
