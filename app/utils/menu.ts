@@ -19,6 +19,9 @@ import NavMenuLink from "~/components/Nav/MenuLink.vue";
 import NavMenuLinkMobile from "~/components/Nav/MenuLinkMobile.vue";
 import LogoIconSwitcher from "~/components/Logo/IconSwitcher.vue";
 
+// temp for SGL2
+import { NMarquee } from "naive-ui";
+
 function renderIcon(icon: Component) {
   return () => h(
     NIcon,
@@ -44,6 +47,42 @@ function sidebarMenuMain(linkComponent: Component): MenuOption[] {
       ),
       key: "index",
       icon: renderIcon(TablerHome),
+    },
+    {
+      label: () => h(
+        linkComponent,
+        { to: "/sgl2" },
+        () => h(
+          NMarquee,
+          null,
+          {
+            default: () => h(
+              "div",
+              {
+                style: {
+                  marginRight: "1rem",
+                  background: "linear-gradient(0deg, #7c99ec 40%, grey 70%)",
+                  "-webkit-background-clip": "text",
+                  "-webkit-text-fill-color": "transparent",
+                },
+              },
+              { default: () => "Skywalking Global League #2" },
+            )
+          },
+        ),
+      ),
+      key: "sgl2",
+      icon: () => h(
+        "img",
+        {
+          src: "/ld-events/sgl2/icon2.png",
+          style: {
+            width: "1.125rem",
+            marginTop: "1px",
+            filter: "drop-shadow(0 0 1px black)",
+          },
+        },
+      ),
     },
     {
       label: "Lungmen Dragons",

@@ -2,10 +2,7 @@ import AutoImport from "unplugin-auto-import/vite";
 import Icons from "unplugin-icons/vite";
 import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 import Components from "unplugin-vue-components/vite";
-// import { cjsInterop } from "vite-plugin-cjs-interop";
 import IconsResolver from "unplugin-icons/resolver";
-
-const isProd = process.env.NODE_ENV === "production";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -44,6 +41,9 @@ export default defineNuxtConfig({
         target: "esnext",
       },
     },
+    scheduledTasks: {
+      "*/5 * * * *": "gsheet",
+    },
     experimental: {
       tasks: true,
       openAPI: true,
@@ -79,8 +79,9 @@ export default defineNuxtConfig({
           "'unsafe-inline'",
         ],
       },
-      crossOriginEmbedderPolicy: isProd ? "credentialless" : false,
-      crossOriginResourcePolicy: "cross-origin",
+      crossOriginEmbedderPolicy:
+        // unsafe-none is required for youtube embeds to load on firefox/safari
+        "unsafe-none",
       strictTransportSecurity: {
         // 2 years is recommended:
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security#examples
