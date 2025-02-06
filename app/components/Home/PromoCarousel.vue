@@ -4,7 +4,7 @@ import Link from "~/components/Link.global.vue";
 </script>
 
 <template>
-  <NFlex justify="center" :style="{ margin: '1.5rem 0' }">
+  <NFlex justify="center">
     <!-- <NCarousel
       autoplay
       show-arrow
@@ -24,10 +24,10 @@ import Link from "~/components/Link.global.vue";
       </NCarouselItem>
     </NCarousel> -->
     <Link to="https://forms.gle/SfZmwk1ogpLp1UdHA">
-      <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-[440px] md:w-[480px]" src="/carousel/video-submit.png">
+      <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-96" src="/carousel/video-submit.png">
     </Link>
     <Link to="https://www.youtube.com/@LungmenDragons/join">
-      <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-[440px] md:w-[480px]" src="/carousel/membership.png">
+      <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-96" src="/carousel/membership.png">
     </Link>
   </NFlex>
 </template>
