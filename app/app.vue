@@ -36,6 +36,7 @@ import { theme, themeOverrides } from "~/utils/theme";
 import LoadingDotsAnim from "~/components/SVG/LoadingDotsAnim.vue";
 import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
 import { useFavicon, useMediaQuery, useDark } from "@vueuse/core";
+// import { NThemeEditor } from "naive-ui";
 
 const isDark = useDark();
 const favicon = computed(() => isDark.value ? "/svg/logo/LDAngledColored.svg" : "/svg/logo/LDAngledBlack.svg");
@@ -64,7 +65,7 @@ onMounted(() => isLoaded.value = true);
     <NLoadingBarProvider>
     <NMessageProvider>
     <NModalProvider>
-    <NNotificationProvider>
+    <NNotificationProvider to="#page-content-container">
 
     <main />
 
@@ -74,9 +75,11 @@ onMounted(() => isLoaded.value = true);
     -->
     <ClientOnly>
       <Teleport defer to="#teleports">
+        <!-- <NThemeEditor> -->
         <NuxtLayout :name="layout">
           <NuxtPage />
         </NuxtLayout>
+        <!-- </NThemeEditor> -->
       </Teleport>
     </ClientOnly>
 
