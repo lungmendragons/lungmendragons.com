@@ -1,14 +1,11 @@
 <script lang="ts" setup>
-import { useMediaQuery, useToggle, useWindowSize, useElementVisibility } from "@vueuse/core";
+import { useMediaQuery, useWindowSize, useElementVisibility } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
 // useMediaQuery is only called once
 const isXL = useMediaQuery(mediaQuery.minWidth.xl as string);
-const toggleCollapseMobile = useToggle(isXL);
+const collapse = ref<boolean>(isXL.value);
 const { width } = useWindowSize();
-
-provide("isXLProvide", isXL);
-provide("toggleCollapseMobile", toggleCollapseMobile);
 
 const { session } = useAuth();
 const loadingBar = useLoadingBar();
@@ -44,6 +41,13 @@ function doNotif(item: any) {
   };
   notifFunc(notifObject);
 };
+
+function toggleCollapseMobile(): void {
+  collapse.value = !collapse.value;
+};
+
+provide("isXLProvide", isXL);
+provide("toggleCollapseMobile", toggleCollapseMobile);
 
 watch(targetIsVisible, (isVisible) => {
   hideScrolling.value = !isVisible;
@@ -85,7 +89,7 @@ onMounted(() => {
 
     <NLayout>
       <NDrawer
-        v-model:show="isXL"
+        v-model:show="collapse"
         placement="left"
         :width="width * 0.4"
         :style="{ minWidth: '280px' }">

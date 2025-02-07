@@ -1,10 +1,13 @@
 <script lang="ts" setup>
-import { useMediaQuery, useToggle } from "@vueuse/core";
+import { useMediaQuery } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
 // useMediaQuery is only called once
-const menuCollapse = useMediaQuery(mediaQuery.maxWidth.xl as string);
-const toggleCollapseDesktop = useToggle(menuCollapse);
+const menuCollapse = useMediaQuery(
+  mediaQuery.maxWidth.xl as string,
+  { ssrWidth: 1600 },
+);
+const collapse = ref<boolean>(menuCollapse.value);
 
 const { session } = useAuth();
 const loadingBar = useLoadingBar();
@@ -35,6 +38,10 @@ function doNotif(item: any) {
     onClose: () => notifStore.addToDismissed(item.key),
   };
   notifFunc(notifObject);
+};
+
+function toggleCollapseDesktop(): void {
+  collapse.value = !collapse.value;
 };
 
 useRuntimeHook("page:loading:end", () => {
@@ -71,7 +78,7 @@ onMounted(() => {
     <NLayout has-sider>
       <NLayoutSider
         bordered
-        :collapsed="menuCollapse"
+        :collapsed="collapse"
         :collapsed-width="0"
         collapse-mode="transform">
         <NavSidebar />
