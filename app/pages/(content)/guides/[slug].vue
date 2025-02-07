@@ -7,7 +7,6 @@ import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 
 const { client } = useAuth();
 const { data: session } = await client.useSession(useFetch);
-
 const notFound = ref(false);
 const slug = useRoute().params.slug as string || "index";
 
@@ -96,9 +95,6 @@ onMounted(() => {
       </NFlex>
     </NCard>
     <NCard>
-      <template #empty>
-        <p>No content found.</p>
-      </template>
       <MarkdownRenderer v-if="requested.content" :content="requested.content" />
     </NCard>
     <NCard v-if="requested.author">
