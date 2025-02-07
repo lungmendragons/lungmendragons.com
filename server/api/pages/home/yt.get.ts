@@ -1,17 +1,15 @@
-export default eventHandler(async (event) => {
-  const config = useRuntimeConfig(event);
+export default cachedEventHandler(async () => {
+  const recent = await hubKV().get("home-yt-recent");
 
-  const res = await $fetch(
-    `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=UCS4VAQlO-ON54Ilt5ZUbdmg&key=${config.ytApiToken}`,
-    { method: "GET" }
-  ) as any;
-
-  const uploadsList = res.items[0].contentDetails.relatedPlaylists.uploads;
-
-  const recent = await $fetch(
-    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsList}&maxResults=1&key=${config.ytApiToken}`,
-    { method: "GET" }
-  ) as any;
+  if (!recent) {
+    throw createError({
+      statusCode: 404,
+      message: "Recent video not found",
+    });
+  };
 
   return recent;
+}, {
+  maxAge: 300, // 5 minutes
+  getKey: event => event.path,
 });

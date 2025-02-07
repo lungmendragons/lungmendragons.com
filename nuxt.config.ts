@@ -42,7 +42,7 @@ export default defineNuxtConfig({
       },
     },
     scheduledTasks: {
-      "*/5 * * * *": "gsheet",
+      "*/5 * * * *": [ "gsheet", "yt-recent" ],
     },
     experimental: {
       tasks: true,
