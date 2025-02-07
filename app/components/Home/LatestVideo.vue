@@ -53,3 +53,10 @@ onMounted(() => getLatestVideo());
     </template>
   </NCard>
 </template>
+
+<style scoped>
+@media (max-width: 990px) { iframe { width: 640px; height: 360px; } }
+@media (max-width: 768px) { iframe { width: 468px; height: 263px; } }
+@media (max-width: 540px) { iframe { width: 384px; height: 216px; } }
+@media (max-width: 420px) { iframe { width: 300px; height: 169px; } }
+</style>
