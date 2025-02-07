@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
 
-export default eventHandler(async () => {
-  const gscriptRegistration = process.env.GSHEET_REG;
-  const gscriptQualifiers = process.env.GSHEET_QF;
+export default eventHandler(async (event) => {
+  const config = useRuntimeConfig(event);
+  const gscriptRegistration = config.gsheetReg;
+  const gscriptQualifiers = config.gsheetQf;
   const gsheetRegistration: any = await $fetch(gscriptRegistration, { method: "GET" });
   const gsheetQualifiers: any = await $fetch(gscriptQualifiers, { method: "GET" });
 

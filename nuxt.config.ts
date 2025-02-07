@@ -180,4 +180,9 @@ export default defineNuxtConfig({
       },
     },
   },
+  runtimeConfig: {
+    ytApiToken: process.env.YOUTUBE_API_TOKEN,
+    gsheetReg: process.env.GSHEET_REG,
+    gsheetQf: process.env.GSHEET_QF,
+  },
 });

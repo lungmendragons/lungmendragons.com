@@ -1,23 +1,13 @@
 <script setup lang="ts">
 import { NMarquee } from "naive-ui";
 
-const API_TOKEN = process.env.YOUTUBE_API_TOKEN;
 const ytEmbed = ref("");
 const ytTitle = ref("...");
 const ytDesc = ref("...");
 const ytDate = ref("");
 
 async function getLatestVideo() {
-  const res = await $fetch(
-    `https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=UCS4VAQlO-ON54Ilt5ZUbdmg&key=${API_TOKEN}`,
-    { method: "GET" }
-  ) as any;
-  console.log(res);
-  const uploadsList = res.items[0].contentDetails.relatedPlaylists.uploads;
-  const recent = await $fetch(
-    `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsList}&maxResults=1&key=${API_TOKEN}`,
-    { method: "GET" }
-  ) as any;
+  const recent = await $fetch("/api/pages/home/yt", { method: "GET" }) as any;
   if (recent.items && recent.items.length > 0) {
     const v = recent.items[0];
     ytEmbed.value = `https://www.youtube.com/embed/${v.snippet.resourceId.videoId}`;
