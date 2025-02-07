@@ -49,12 +49,13 @@ async function setSocials() {
 <template>
   <NDrawerContent title="Edit socials" closable>
     <NFlex vertical>
-      <NInput v-model:value="socials.youtube" placeholder="youtube" />
-      <NInput v-model:value="socials.bilibili" placeholder="bilibili" />
-      <NInput v-model:value="socials.discord" placeholder="discord" />
-      <NInput v-model:value="socials.bluesky" placeholder="bluesky" />
-      <NInput v-model:value="socials.twitter" placeholder="twitter" />
-      <NInput v-model:value="socials.reddit" placeholder="reddit" />
+      All fields are optional.
+      <NInput v-model:value="socials.youtube" placeholder="youtube (link)" />
+      <NInput v-model:value="socials.bilibili" placeholder="bilibili (link)" />
+      <NInput v-model:value="socials.discord" placeholder="discord (username)" />
+      <NInput v-model:value="socials.bluesky" placeholder="bluesky (link)" />
+      <NInput v-model:value="socials.twitter" placeholder="twitter (link)" />
+      <NInput v-model:value="socials.reddit" placeholder="reddit (link)" />
       <NButton @click="handleConfirmClick">
         Confirm
       </NButton>
