@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { toRef } from "@vueuse/core";
-
-const { client, user } = useAuth();
-const { data: session } = await client.getSession();
-const sessionRef = toRef(session);
+const { client } = useAuth();
+const { data: session } = await client.useSession(useFetch);
 const message = useMessage();
 
 const socials = ref({
-  youtube: removeNone(sessionRef.value!.user.youtube),
-  bilibili: removeNone(sessionRef.value!.user.bilibili),
-  discord: removeNone(sessionRef.value!.user.discord),
-  bluesky: removeNone(sessionRef.value!.user.bluesky),
-  twitter: removeNone(sessionRef.value!.user.twitter),
-  reddit: removeNone(sessionRef.value!.user.reddit),
-  flair: removeNone(sessionRef.value!.user.flair),
+  youtube: removeNone(session.value?.user.youtube),
+  bilibili: removeNone(session.value?.user.bilibili),
+  discord: removeNone(session.value?.user.discord),
+  bluesky: removeNone(session.value?.user.bluesky),
+  twitter: removeNone(session.value?.user.twitter),
+  reddit: removeNone(session.value?.user.reddit),
+  flair: removeNone(session.value?.user.flair),
 });
 
-function removeNone(x: string) {
+function removeNone(x: string | undefined) {
   return x === "none" ? "" : x;
 }
 
@@ -26,18 +23,18 @@ function handleConfirmClick(e: MouseEvent) {
 };
 
 async function setSocials() {
-  $fetch(`/api/users/socials/${user.value?.id}`, {
+  $fetch(`/api/users/socials/${session.value?.user.id}`, {
     method: "PUT",
     body: socials.value,
   })
     .then(async () => {
-      sessionRef.value!.user.youtube = socials.value.youtube;
-      sessionRef.value!.user.bilibili = socials.value.bilibili;
-      sessionRef.value!.user.discord = socials.value.discord;
-      sessionRef.value!.user.bluesky = socials.value.bluesky;
-      sessionRef.value!.user.twitter = socials.value.twitter;
-      sessionRef.value!.user.reddit = socials.value.reddit;
-      sessionRef.value!.user.flair = socials.value.flair;
+      session.value!.user.youtube = socials.value.youtube ?? "";
+      session.value!.user.bilibili = socials.value.bilibili ?? "";
+      session.value!.user.discord = socials.value.discord ?? "";
+      session.value!.user.bluesky = socials.value.bluesky ?? "";
+      session.value!.user.twitter = socials.value.twitter ?? "";
+      session.value!.user.reddit = socials.value.reddit ?? "";
+      session.value!.user.flair = socials.value.flair ?? "";
       message.success("Socials updated.");
     })
     .catch((err) => {

@@ -2,15 +2,16 @@
 import type { MenuInst } from "naive-ui";
 import { NButton, useThemeVars } from "naive-ui";
 import { useMediaQuery } from "@vueuse/core";
-
 import Socials from "./Socials.vue";
 import { getSidebarMenu } from "~/utils/menu";
-
 import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
 import MdiHeart from "~icons/mdi/heart";
 
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
-const { user } = useAuth();
+
+const { client } = useAuth();
+const { data: session } = await client.useSession(useFetch);
+
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const isLG = useMediaQuery(mediaQuery.minWidth.lg);
 const showSocials = useMediaQuery(mediaQuery.minHeight.md);
@@ -40,11 +41,10 @@ onBeforeMount(() => {
       backgroundColor: drawer ? '' : themeVars.cardColor,
     }">
     <NScrollbar>
-      <!-- @vue-expect-error prop "permissions" does not exist -->
       <NMenu
         ref="menuInst"
         v-model:value="selectedKey"
-        :options="getSidebarMenu(drawer, user?.permissions)"
+        :options="getSidebarMenu(drawer, session?.user.permissions)"
         :root-indent="18"
         :indent="12"
         responsive

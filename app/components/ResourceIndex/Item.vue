@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Component } from "vue";
 import { type Tool, languageOptions } from "~/utils/resource-index";
+
 import HeroiconsBookOpen from "~icons/heroicons/book-open";
 import HeroiconsBookmark from "~icons/heroicons/bookmark";
 import HeroiconsCodeBracket from "~icons/heroicons/code-bracket";
@@ -20,7 +21,9 @@ const {
   data: Tool;
   editFn: (id: string, data: Tool) => void;
 }>();
-const { user } = useAuth();
+
+const { client } = useAuth();
+const { data: session } = await client.useSession(useFetch);
 
 function getCategoryIcon(category: string): Component {
   if (data.dead)
@@ -89,8 +92,7 @@ function getCategoryIcon(category: string): Component {
           </NSpace>
         </template>
 
-        <!-- @vue-expect-error permissions property does not exist on user type -->
-        <template v-if="user?.permissions & 4" #action>
+        <template v-if="session && (session.user.permissions & 4)" #action>
           <NButton
             type="primary"
             size="small"

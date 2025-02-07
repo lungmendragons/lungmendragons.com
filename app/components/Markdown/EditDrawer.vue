@@ -12,7 +12,9 @@ const { slug, authorId, requested, isEndfield = false } = defineProps<{
   isEndfield?: boolean;
 }>();
 
-const { session } = useAuth();
+const { client } = useAuth();
+const { data: session } = await client.useSession(useFetch);
+
 const notification = useNotification();
 const showEdit = ref(false);
 const loadingEdit = ref(false);

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { NIcon, useThemeVars } from "naive-ui";
+import { useThemeVars } from "naive-ui";
 import { isDark, toggleDark } from "~/utils/theme";
 
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
@@ -16,7 +16,9 @@ const moreThanXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const themeVars = useThemeVars();
 const showUserDrawer = ref(false);
 
-const { user, signOut, loggedIn } = useAuth();
+const { client, signOut } = useAuth();
+const { data: session } = await client.useSession(useFetch);
+const loggedIn = computed(() => !!session.value);
 </script>
 
 <template>
@@ -52,11 +54,11 @@ const { user, signOut, loggedIn } = useAuth();
     <NFlex align="center" :style="{ margin: '0.5rem 1rem 0.5rem 0' }">
       <template v-if="loggedIn">
         <template v-if="moreThanLG">
-          {{ user?.name }}
+          {{ session?.user.name }}
         </template>
         <NAvatar
           round
-          :src="user?.image"
+          :src="session?.user.image ?? undefined"
           :style="{ cursor: 'pointer' }"
           @click="showUserDrawer = true"
         />
@@ -96,9 +98,9 @@ const { user, signOut, loggedIn } = useAuth();
             <template v-if="loggedIn">
               <NAvatar
                 round
-                :src="user?.image"
+                :src="session?.user.image ?? undefined"
               />
-              {{ user?.name }}
+              {{ session?.user.name }}
             </template>
             <template v-else>
               <NAvatar round @click="showUserDrawer = true">

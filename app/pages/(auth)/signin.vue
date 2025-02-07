@@ -30,7 +30,7 @@ const rules = {
 const loading = ref(false);
 
 const notification = useNotification();
-const auth = useAuth();
+const { client } = useAuth();
 
 async function handleSignIn(event: MouseEvent) {
   event.preventDefault();
@@ -60,12 +60,12 @@ async function handleSignIn(event: MouseEvent) {
   let data: any;
 
   if (signInForm.value?.emailOrUsername.includes("@")) {
-    data = await auth.signIn.email({
+    data = await client.signIn.email({
       email: signInForm.value?.emailOrUsername,
       password: signInForm.value?.password,
     });
   } else {
-    data = await auth.signIn.username({
+    data = await client.signIn.username({
       username: signInForm.value?.emailOrUsername,
       password: signInForm.value?.password,
     });

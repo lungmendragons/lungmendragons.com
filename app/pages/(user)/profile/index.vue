@@ -4,7 +4,6 @@
 
 import type { UploadCustomRequestOptions, UploadInst } from "naive-ui";
 import type { BlobObject } from "@nuxthub/core";
-import { toRef } from "@vueuse/core";
 
 definePageMeta({
   auth: { only: "user" },
@@ -14,23 +13,23 @@ useSeoMeta({
   title: "Profile | Lungmen Dragons",
 });
 
-const message = useMessage();
 const { client } = useAuth();
-const { data: session } = await client.getSession();
-const sessionRef = toRef(session);
+const { data: session } = await client.useSession(useFetch);
+
+const message = useMessage();
 const uploadRef = ref<UploadInst>();
 const upload = useUpload("/api/images/avatar", { method: "PUT", multiple: false });
 const showEditSocials = ref(false);
 
 async function onFileSelect({ file }: UploadCustomRequestOptions): Promise<void> {
   if (session) {
-    const currentAvatar = session.user.image?.slice(8); // remove "/images/" from pathname
+    const currentAvatar = session.value?.user.image;
     await upload(file.file as File)
       .then((blob: BlobObject) => {
         client.updateUser({ image: `/images/${blob.pathname}` });
-        sessionRef.value!.user.image = `/images/${blob.pathname}`;
+        session.value!.user.image = `/images/${blob.pathname}`;
         if (currentAvatar) {
-          deleteAvatar(currentAvatar);
+          deleteAvatar(currentAvatar.slice(8)); // remove "/images/" from pathname
           message.success("Avatar uploaded.");
         }
       })
@@ -56,31 +55,31 @@ async function deleteAvatar(pathname: string) {
 </script>
 
 <template>
-  <NCard v-if="sessionRef" :title="sessionRef.user.name">
+  <NCard v-if="session" :title="session.user.name">
     <NFlex>
       <NImage
         width="150"
         height="150"
         :style="{ maxHeight: '150px', maxWidth: '150px' }"
-        :src="sessionRef.user.image ?? 'https://i0.wp.com/sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png'"
+        :src="session.user.image ?? 'https://i0.wp.com/sbcf.fr/wp-content/uploads/2018/03/sbcf-default-avatar.png'"
       />
       <NFlex vertical>
-        <div v-if="!sessionRef.user.flair || sessionRef.user.flair !== 'none'">
-          <em>{{ sessionRef.user.flair }}</em>
+        <div v-if="!session.user.flair || session.user.flair !== 'none'">
+          <em>{{ session.user.flair }}</em>
         </div>
         <span>
-          Joined: {{ new Date(sessionRef.user.createdAt).toUTCString() }}
+          Joined: {{ new Date(session.user.createdAt).toUTCString() }}
         </span>
         <span>
-          Verified: {{ sessionRef.user.emailVerified ? "yes" : "no" }}
+          Verified: {{ session.user.emailVerified ? "yes" : "no" }}
         </span>
         <UserSocials
-          :youtube="sessionRef.user.youtube"
-          :bilibili="sessionRef.user.bilibili"
-          :discord="sessionRef.user.discord"
-          :bluesky="sessionRef.user.bluesky"
-          :twitter="sessionRef.user.twitter"
-          :reddit="sessionRef.user.reddit"
+          :youtube="session.user.youtube"
+          :bilibili="session.user.bilibili"
+          :discord="session.user.discord"
+          :bluesky="session.user.bluesky"
+          :twitter="session.user.twitter"
+          :reddit="session.user.reddit"
         />
         <NButton
           type="primary"

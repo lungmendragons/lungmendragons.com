@@ -49,7 +49,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.meta?.auth === false)
     return;
 
-  const { user, loggedIn, options, fetchSession } = useAuth();
+  const { client, options } = useAuth();
+  const { data: session } = await client.useSession(useFetch);
+  const loggedIn = computed(() => !!session.value);
   const { only, redirectUserTo, redirectGuestTo, redirectUnauthorizedTo } = defu(to.meta?.auth, options);
 
   if (only && only === "guest" && loggedIn.value) {
@@ -60,7 +62,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If client-side, fetch session between each navigation
   if (import.meta.client)
-    await fetchSession();
+    await client.useSession(useFetch);
 
   if (only && only !== "guest" && !loggedIn.value) {
     if (to.path === redirectGuestTo)
@@ -68,8 +70,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo(redirectGuestTo);
   }
 
-  // @ts-expect-error prop permissions does not exist on type
-  if (only && only !== "guest" && !hasPerm(user.value?.permissions, only)) {
+  if (only && only !== "guest" && session.value && !hasPerm(session.value.user.permissions, only)) {
     if (to.path === redirectUnauthorizedTo)
       return; // Avoid infinite redirect
     return navigateTo(redirectUnauthorizedTo ?? "/401");

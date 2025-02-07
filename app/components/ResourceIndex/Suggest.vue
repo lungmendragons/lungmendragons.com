@@ -3,10 +3,10 @@ import type { FormInst } from "naive-ui";
 
 const {
   modal,
-  user,
+  session,
 } = defineProps<{
   modal: any;
-  user: any;
+  session: any;
 }>();
 
 const formRef = ref<FormInst | null>(null);
@@ -56,8 +56,8 @@ function doSubmit() {
     body: {
       data: formValue.value,
       user: {
-        id: user.value?.id,
-        name: user.value?.name,
+        id: session.value?.user.id,
+        name: session.value?.user.name,
       },
       time: Date.now(),
     },
@@ -79,7 +79,7 @@ function doSubmit() {
       and note that suggestions do not guarantee additions.
     </span>
     <NForm
-      v-if="user.value?.id"
+      v-if="session.value?.user.id"
       ref="formRef"
       :model="formValue"
       :rules="rules">

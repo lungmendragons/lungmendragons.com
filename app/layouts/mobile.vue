@@ -2,12 +2,14 @@
 import { useMediaQuery, useWindowSize, useElementVisibility } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
+const { client } = useAuth();
+const { data: session } = await client.useSession(useFetch);
+
 // useMediaQuery is only called once
 const isXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const collapse = ref<boolean>(isXL.value);
 const { width } = useWindowSize();
 
-const { session } = useAuth();
 const loadingBar = useLoadingBar();
 const notification = useNotification();
 const notifStore = useNotifStore();

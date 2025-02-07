@@ -17,7 +17,9 @@ const { toggleMenu, hideScrolling } = defineProps<{
 const moreThanXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const themeVars = useThemeVars();
 const showUserDrawer = ref(false);
-const { user, signOut, loggedIn } = useAuth();
+const { client, signOut } = useAuth();
+const { data: session } = await client.useSession(useFetch);
+const loggedIn = computed(() => !!session.value);
 </script>
 
 <template>
@@ -64,7 +66,7 @@ const { user, signOut, loggedIn } = useAuth();
           round
           class="ease"
           :size="hideScrolling ? 20 : 'medium'"
-          :src="user?.image"
+          :src="session?.user.image ?? undefined"
           :style="{ cursor: 'pointer' }"
           @click="showUserDrawer = true"
         />
@@ -92,9 +94,9 @@ const { user, signOut, loggedIn } = useAuth();
             <template v-if="loggedIn">
               <NAvatar
                 round
-                :src="user?.image"
+                :src="session?.user.image ?? undefined"
               />
-              {{ user?.name }}
+              {{ session?.user.name }}
             </template>
             <template v-else>
               <NAvatar round @click="showUserDrawer = true">

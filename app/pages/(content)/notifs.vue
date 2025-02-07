@@ -10,7 +10,7 @@ useSeoMeta({
 });
 
 const { client } = useAuth();
-const { data: session } = await client.getSession();
+const { data: session } = await client.useSession(useFetch);
 
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const loading = ref(false);

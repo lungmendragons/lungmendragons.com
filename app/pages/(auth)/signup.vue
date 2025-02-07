@@ -50,7 +50,7 @@ const rules = {
 const loading = ref(false);
 
 const notification = useNotification();
-const auth = useAuth();
+const { client } = useAuth();
 
 async function isUsernameAvailable(username: string): Promise<boolean> {
   const result = await $fetch(`/api/users/profile/${username}`);
@@ -91,7 +91,7 @@ async function handleSignUp(event: MouseEvent) {
     return;
   }
 
-  const { error } = await auth.signUp.email({
+  const { error } = await client.signUp.email({
     email: signUpForm.value?.email,
     password: signUpForm.value?.password,
     // "name" is a required field regardless, so just make it identical to the username

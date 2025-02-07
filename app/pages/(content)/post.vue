@@ -13,7 +13,7 @@ useSeoMeta({
 });
 
 const { client } = useAuth();
-const { data: session } = await client.getSession();
+const { data: session } = await client.useSession(useFetch);
 
 const message = useMessage();
 const notification = useNotification();
@@ -183,7 +183,7 @@ async function handlePost(event: Event) {
       body: {
         title: title.value,
         description: description.value,
-        author: session.user.id,
+        author: session.value?.user.id,
         time: Date.now(),
         content: content.value,
       },
@@ -200,7 +200,8 @@ async function handlePost(event: Event) {
       ),
       meta: new Date(Date.now()).toLocaleString(),
     });
-  }).catch((err) => {
+  })
+  .catch((err) => {
     message.error(err.data.message);
   });
 
