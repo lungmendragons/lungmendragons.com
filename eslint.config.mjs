@@ -20,6 +20,8 @@ export default withNuxt(
       "no-console": [ "off" ],
       "unused-imports/no-unused-vars": [ "off" ], // ts rule covers this
 
+      "import/consistent-type-specifier-style": [ "off" ],
+
       "node/prefer-global/process": [ "off" ],
 
       // https://perfectionist.dev/rules

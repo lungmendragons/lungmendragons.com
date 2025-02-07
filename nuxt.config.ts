@@ -25,9 +25,7 @@ export default defineNuxtConfig({
   ],
   devtools: {
     enabled: true,
-    timeline: {
-      enabled: true,
-    },
+    componentInspector: false,
   },
   hub: {
     database: true,
@@ -64,6 +62,7 @@ export default defineNuxtConfig({
         // defaults: https://nuxt-security.vercel.app/documentation/headers/csp#default-value
         "font-src": [
           "'self'",
+          "data:",
         ],
         "img-src": [
           "'self'",

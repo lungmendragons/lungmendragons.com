@@ -9,7 +9,7 @@ const { slug, authorId, requested, isEndfield = false } = defineProps<{
     author: any;
     time: string;
   };
-  isEndfield: boolean;
+  isEndfield?: boolean;
 }>();
 
 const { session } = useAuth();
