@@ -148,7 +148,7 @@ function getEndingNames(run: RunData) {
         class="text-2xl font-bold"
         :size="2">
         <span :style="{ color: data.rank < 5 ? '' : '#888' }">
-          = {{ data.total }}
+          = {{ String(data.total).includes(".") ? (data.total).toFixed(1) : data.total }}
         </span>
         <NTag
           v-if="data.rank < 5"
