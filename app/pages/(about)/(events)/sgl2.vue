@@ -19,7 +19,7 @@ function regSort(): RegData[] {
 
 function qfSort(): RowDataSorted[] {
   return qf
-    .filter((entry) => entry.total > 0) // "" > 0 evaluates to false
+    .filter((entry) => entry.run1.score > 0 || entry.run2.score > 0) // "" > 0 evaluates to false
     .sort((a, b) => b.total - a.total)
     .map((entry, index) => {
       return {

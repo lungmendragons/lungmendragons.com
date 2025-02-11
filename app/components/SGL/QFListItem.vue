@@ -55,7 +55,9 @@ function getEndingNames(run: RunData) {
   if (run.endings.includes("ed3alt")) e.push("3a");
   if (run.endings.includes("ed4")) e.push("4");
   if (run.endings.includes("ed4alt")) e.push("4a");
-  return `ED ${e.join("/")}`;
+  return e.length > 0
+    ? `ED ${e.join("/")}`
+    : "ED ?";
 }
 </script>
 
@@ -69,7 +71,9 @@ function getEndingNames(run: RunData) {
         <span :style="{
           fontWeight: 'bold',
           fontSize: '1.25rem',
-          color: data.rank < 5 ? '#138732' : '#888'
+          color: data.rank < 5 && data.run1.score && data.run2.score
+            ? '#138732'
+            : '#888'
         }">
           {{ data.rank }}
         </span>
@@ -78,26 +82,26 @@ function getEndingNames(run: RunData) {
         </span>
       </NFlex>
       <NFlex align="center" size="small">
-        <Link :to="data.run1.video">
+        <Link v-if="data.run1.video" :to="data.run1.video">
           <NButton text>
             <NIcon :size="20" style="top:4px">
               <Fa6BrandsYoutube />
             </NIcon>
           </NButton>
         </Link>
-        <div class="text-xs leading-3 mr-2">
+        <div v-if="data.run1.score" class="text-xs leading-3 mr-2">
           RUN 1
           <br>
           <span class="text-[0.6rem]">{{ data.run1.time }}</span>
         </div>
-        <Link :to="data.run2.video">
+        <Link v-if="data.run2.video" :to="data.run2.video">
           <NButton text>
             <NIcon :size="20" style="top:4px">
               <Fa6BrandsYoutube />
             </NIcon>
           </NButton>
         </Link>
-        <div class="text-xs leading-3">
+        <div v-if="data.run2.score" class="text-xs leading-3">
           RUN 2
           <br>
           <span class="text-[0.6rem]">{{ data.run2.time }}</span>
@@ -122,6 +126,7 @@ function getEndingNames(run: RunData) {
         />
       </NFlex>
       <NFlex
+        v-if="data.run1.score && data.run2.score"
         vertical
         align="center"
         :size="0"
@@ -138,6 +143,7 @@ function getEndingNames(run: RunData) {
         />
       </NFlex>
       <NFlex
+        v-if="data.run1.score && data.run2.score"
         vertical
         class="text-2xl font-bold"
         :size="2">
