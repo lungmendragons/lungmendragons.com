@@ -4,7 +4,10 @@ export default defineTask({
     description: "Fetch SGL2 data from Google Sheets",
   },
   run({ payload }) {
-    $fetch("/api/pages/sgl2/gsheet", { body: { payload } });
+    $fetch("/api/pages/sgl2/gsheet", {
+      method: "PUT",
+      body: { payload },
+    });
     return { result: "gsheet task executed" };
   },
 });
