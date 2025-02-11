@@ -57,7 +57,7 @@ function getEndingNames(run: RunData) {
   if (run.endings.includes("ed4alt")) e.push("4a");
   return e.length > 0
     ? `ED ${e.join("/")}`
-    : "ED ?";
+    : "DNF";
 }
 </script>
 
