@@ -7,6 +7,9 @@ export default eventHandler(async (event) => {
   const gsheetRegistration: any = await $fetch(gscriptRegistration, { method: "GET" });
   const gsheetQualifiers: any = await $fetch(gscriptQualifiers, { method: "GET" });
 
+  const { payload } = await readBody(event);
+  const kv = await hubKV().get<any[]>("sgl2-update-log");
+
   if (gsheetRegistration.status !== "success") {
     throw createError({
       statusCode: 500,
@@ -23,6 +26,7 @@ export default eventHandler(async (event) => {
 
   const gdataRegistration = [];
   for (let i = 0; i < gsheetRegistration.data.IGN.length; i++) {
+    if (gsheetRegistration.data.IGN[i] === "") continue;
     const m = {
       key: nanoid(8),
       player: gsheetRegistration.data.IGN[i],
@@ -35,6 +39,7 @@ export default eventHandler(async (event) => {
 
   const gdataQualifiers = [];
   for (let i = 0; i < gsheetQualifiers.data.IGN.length; i++) {
+    if (gsheetQualifiers.data.IGN[i] === "") continue;
     const m = {
       key: nanoid(8),
       player: gsheetQualifiers.data.IGN[i],
@@ -54,6 +59,21 @@ export default eventHandler(async (event) => {
     };
     gdataQualifiers.push(m);
   };
+
+  const update = {
+    time: new Date(Date.now()),
+    scheduledTime: payload.scheduledTime ? new Date(payload.scheduledTime) : "N/A",
+    regLength: gdataRegistration.length,
+    qfLength: gdataQualifiers.length,
+  };
+
+  if (kv && kv.length > 500)
+    kv.shift();
+
+  if (!kv)
+    await hubKV().set("sgl2-update-log", [ update ]);
+  else
+    await hubKV().set("sgl2-update-log", [ ...kv, update ]);
 
   await hubKV().set("sgl2-registration", gdataRegistration);
   await hubKV().set("sgl2-live-qualifiers", gdataQualifiers);

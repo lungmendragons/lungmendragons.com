@@ -75,8 +75,7 @@
     "vite": "^6.1.0",
     "vite-plugin-cjs-interop": "^2.1.6",
     "vue-tsc": "^2.2.0",
-    "wrangler": "^3.107.3",
-    "yoctocolors": "^2.1.1"
+    "wrangler": "^3.107.3"
   },
   "pnpm": {
     "overrides": {
