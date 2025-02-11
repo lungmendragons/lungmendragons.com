@@ -6,7 +6,7 @@ import IconsResolver from "unplugin-icons/resolver";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: "2024-11-06",
+  compatibilityDate: "2025-01-29",
   future: {
     /* Nuxt 4 pre-release opt-in. Doing this now saves the bullshit of migrating to v4 later.
        Most significant change is the new directory structure, which is already implemented.
@@ -15,6 +15,7 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
   modules: [
+    "nitro-cloudflare-dev",
     "@nuxthub/core",
     "@nuxt/eslint",
     "@nuxtjs/tailwindcss",
@@ -180,8 +181,8 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    ytApiToken: process.env.YOUTUBE_API_TOKEN,
-    gsheetReg: process.env.GSHEET_REG,
-    gsheetQf: process.env.GSHEET_QF,
+    ytApiToken: process.env.NUXT_YOUTUBE_API_TOKEN,
+    gsheetReg: process.env.NUXT_GSHEET_REG,
+    gsheetQf: process.env.NUXT_GSHEET_QF,
   },
 });
