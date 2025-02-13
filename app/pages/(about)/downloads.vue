@@ -5,7 +5,7 @@
     </div>
     <NDivider />
     <NFlex justify="center">
-      <NCard class="max-w-[250px] h-[250px]" content-style="padding:8px">
+      <NCard class="max-w-[300px] h-[250px]" content-style="padding:8px">
         <template #cover>
           <a download href="/images/ld/lb/LB_CNY.png">
             <NuxtImg src="https://lungmendragons.com/images/ld/lb/LB_CNY.png" :height="200" />
@@ -16,7 +16,7 @@
         </div>
       </NCard>
       <!-- <NDivider /> -->
-      <NCard class="max-w-[250px] h-[250px]" content-style="padding:8px">
+      <NCard class="max-w-[300px] h-[250px]" content-style="padding:8px">
         <template #cover>
           <a download href="/images/ld/lb/LB_IS4_4thEND_SGL2.png">
             <NuxtImg src="https://lungmendragons.com/images/ld/lb/LB_IS4_4thEND_SGL2.png" :height="200" />
