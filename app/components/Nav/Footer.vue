@@ -3,6 +3,7 @@ import Socials from "./Socials.vue";
 import Link from "~/components/Link.global.vue";
 import { useMediaQuery } from "@vueuse/core";
 import IcOutlineEmail from "~icons/ic/outline-email";
+import TablerDownload from '~icons/tabler/download';
 
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 </script>
@@ -31,6 +32,13 @@ const isMD = useMediaQuery(mediaQuery.minWidth.md);
             </NIcon>
             <Link to="mailto:lungmendragons@gmail.com">
               lungmendragons@gmail.com
+            </Link>
+            <NDivider vertical />
+            <NIcon size="medium">
+              <TablerDownload />
+            </NIcon>
+            <Link target="" to="/downloads">
+              Downloads
             </Link>
           </NFlex>
         </NFlex>

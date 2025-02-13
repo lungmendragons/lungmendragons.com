@@ -18,6 +18,7 @@ export default defineNuxtConfig({
     "nitro-cloudflare-dev",
     "@nuxthub/core",
     "@nuxt/eslint",
+    "@nuxt/image",
     "@nuxtjs/tailwindcss",
     "nuxtjs-naive-ui",
     "nuxt-gtag",
@@ -178,6 +179,12 @@ export default defineNuxtConfig({
           },
         },
       },
+    },
+  },
+  image: {
+    screens: {
+      "xs": 432,
+      "sm": 576,
     },
   },
   runtimeConfig: {
