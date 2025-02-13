@@ -62,7 +62,7 @@ export default eventHandler(async (event) => {
 
   const update = {
     time: new Date(Date.now()),
-    scheduledTime: payload.scheduledTime ? new Date(payload.scheduledTime) : "N/A",
+    scheduledTime: Object.keys(payload).length > 0 ? new Date(payload.scheduledTime) : "N/A",
     regLength: gdataRegistration.length,
     qfLength: gdataQualifiers.length,
   };
