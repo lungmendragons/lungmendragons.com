@@ -111,31 +111,6 @@ onBeforeMount(() => qfSort());
         justify-content="space-evenly"
         class="mx-auto pb-8 w-full md:w-4/5 px-2 md:px-4"
         tab-style="filter:drop-shadow(0 1px 3px black)">
-        <NTabPane name="registered" tab="Registered Players">
-          <NFlex vertical class="mx-auto w-full md:w-2/3">
-            <NList bordered>
-              <NListItem v-if="regSort().length === 0">
-                <NEmpty description="No data yet.">
-                  <template #icon>
-                    <n-icon>
-                      <PhEmptyBold />
-                    </n-icon>
-                  </template>
-                </NEmpty>
-              </NListItem>
-              <NListItem
-                v-else
-                v-for="(entry, i) in regSort()"
-                :key="entry.key"
-                :style="{
-                  backgroundColor: i % 2 === 0 ? '#5552' : '',
-                  padding: '0.625rem 0.875rem 0.75rem 0.875rem',
-                }">
-                <SGLRegListItem :data="entry" />
-              </NListItem>
-            </NList>
-          </NFlex>
-        </NTabPane>
         <NTabPane name="qualifiers" tab="Live Qualifiers">
           <NFlex vertical class="mx-auto">
             <NList bordered>
@@ -157,6 +132,31 @@ onBeforeMount(() => qfSort());
                   padding: '0.625rem 0.875rem 0.75rem 0.875rem',
                 }">
                 <SGLQFListItem :data="entry" />
+              </NListItem>
+            </NList>
+          </NFlex>
+        </NTabPane>
+        <NTabPane name="registered" tab="Registered Players">
+          <NFlex vertical class="mx-auto w-full md:w-2/3">
+            <NList bordered>
+              <NListItem v-if="regSort().length === 0">
+                <NEmpty description="No data yet.">
+                  <template #icon>
+                    <n-icon>
+                      <PhEmptyBold />
+                    </n-icon>
+                  </template>
+                </NEmpty>
+              </NListItem>
+              <NListItem
+                v-else
+                v-for="(entry, i) in regSort()"
+                :key="entry.key"
+                :style="{
+                  backgroundColor: i % 2 === 0 ? '#5552' : '',
+                  padding: '0.625rem 0.875rem 0.75rem 0.875rem',
+                }">
+                <SGLRegListItem :data="entry" />
               </NListItem>
             </NList>
           </NFlex>
