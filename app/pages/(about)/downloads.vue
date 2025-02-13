@@ -8,7 +8,7 @@
       <NCard class="w-fit h-[250px]" content-style="padding:8px">
         <template #cover>
           <a download href="/images/ld/lb/LB_CNY.png">
-            <NuxtImg src="/images/ld/lb/LB_CNY.png" :height="200" />
+            <NuxtImg src="https://lungmendragons.com/images/ld/lb/LB_CNY.png" :height="200" />
           </a>
         </template>
         <div class="text-xs text-center">
@@ -19,7 +19,7 @@
       <NCard class="w-fit h-[250px]" content-style="padding:8px">
         <template #cover>
           <a download href="/images/ld/lb/LB_IS4_4thEND_SGL2.png">
-            <NuxtImg src="/images/ld/lb/LB_IS4_4thEND_SGL2.png" :height="200" />
+            <NuxtImg src="https://lungmendragons.com/images/ld/lb/LB_IS4_4thEND_SGL2.png" :height="200" />
           </a>
         </template>
         <div class="text-xs text-center">
