@@ -7,7 +7,7 @@ export default eventHandler(async (event) => {
   const gsheetRegistration: any = await $fetch(gscriptRegistration, { method: "GET" });
   const gsheetQualifiers: any = await $fetch(gscriptQualifiers, { method: "GET" });
 
-  const { payload } = await readBody(event);
+  // const { payload } = await readBody(event);
   const kv = await hubKV().get<any[]>("sgl2-update-log");
 
   if (gsheetRegistration.status !== "success") {
@@ -62,7 +62,8 @@ export default eventHandler(async (event) => {
 
   const update = {
     time: new Date(Date.now()),
-    scheduledTime: payload && Object.keys(payload).length > 0 ? new Date(payload.scheduledTime) : "N/A",
+    // scheduledTime: payload && Object.keys(payload).length > 0 ? new Date(payload.scheduledTime) : "N/A",
+    scheduledTime: "N/A",
     regLength: gdataRegistration.length,
     qfLength: gdataQualifiers.length,
   };

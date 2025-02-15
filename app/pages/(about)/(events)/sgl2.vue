@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { NScrollbar } from "naive-ui";
 import { useMediaQuery } from "@vueuse/core";
 import SGLRegListItem from "~/components/SGL/RegListItem.vue";
 import SGLQFListItem from "~/components/SGL/QFListItem.vue";
 import type { RowData, RowDataSorted, RegData } from "~/utils/events-archive/sgl2";
 import PhEmptyBold from '~icons/ph/empty-bold?width=256px&height=256px';
 
+const { client } = useAuth();
+const { data: session } = await client.useSession(useFetch);
+const message = useMessage();
+
 const isMD = useMediaQuery(mediaQuery.minWidth.md as string);
 const data = await $fetch("/api/pages/sgl2/all", { method: "GET" });
+const isLoading = ref(false);
 const qf = data.qf as RowData[];
 const reg = data.reg as RegData[];
 
@@ -25,6 +29,20 @@ function qfSort(): RowDataSorted[] {
       return {
         rank: index + 1,
         ...entry,
+      }
+    });
+}
+
+function doGsheetUpdate() {
+  isLoading.value = true;
+  $fetch("/api/pages/sgl2/gsheet", { method: "PUT" })
+    .then(res => {
+      if (res === "success") {
+        isLoading.value = false;
+        message.success("Data updated successfully");
+      } else {
+        isLoading.value = false;
+        message.error("Failed to update data");
       }
     });
 }
@@ -105,6 +123,24 @@ onBeforeMount(() => qfSort());
           </NButton>
         </NuxtLink>
       </NFlex>
+      <NCard
+        v-if="session && (session.user.permissions & 255)"
+        class="w-fit mx-auto my-4"
+        size="small">
+        <div class="text-center w-full">
+          Admin view
+        </div>
+        <NButton
+          type="primary"
+          size="small"
+          :loading="isLoading"
+          @click="doGsheetUpdate">
+          Update data from Google Sheets
+        </NButton>
+        <div class="text-xs text-center w-full">
+          Data is cached, allow a few mins <br> for changes to appear
+        </div>
+      </NCard>
       <NTabs
         type="segment"
         animated
