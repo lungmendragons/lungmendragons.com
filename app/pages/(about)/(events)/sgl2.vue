@@ -124,11 +124,11 @@ onBeforeMount(() => qfSort());
         </NuxtLink>
       </NFlex>
       <NCard
-        v-if="session && (session.user.permissions & 255)"
+        v-if="session && (session.user.permissions & 4)"
         class="w-fit mx-auto my-4"
         size="small">
         <div class="text-center w-full">
-          Admin view
+          LD view
         </div>
         <NButton
           type="primary"
