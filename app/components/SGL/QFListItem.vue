@@ -45,6 +45,10 @@ const endingsHighlightStyle = {
   background: "transparent",
 }
 
+const endingsDQStyle = {
+  color: "#b37a76",
+}
+
 function getEndingNames(run: RunData) {
   const e = [];
   if (run.endings.includes("ed1")) e.push("1");
@@ -89,7 +93,7 @@ function getEndingNames(run: RunData) {
             </NIcon>
           </NButton>
         </Link>
-        <div v-if="data.run1.score" class="text-xs leading-3 mr-2">
+        <div v-if="data.run1.time" class="text-xs leading-3 mr-2">
           RUN 1
           <br>
           <span class="text-[0.6rem]">{{ data.run1.time }}</span>
@@ -101,7 +105,7 @@ function getEndingNames(run: RunData) {
             </NIcon>
           </NButton>
         </Link>
-        <div v-if="data.run2.score" class="text-xs leading-3">
+        <div v-if="data.run2.time" class="text-xs leading-3">
           RUN 2
           <br>
           <span class="text-[0.6rem]">{{ data.run2.time }}</span>
@@ -119,14 +123,18 @@ function getEndingNames(run: RunData) {
         </span>
         {{ data.run1.score }}
         <NHighlight
+          v-if="data.run1.score > 0"
           :text="getEndingNames(data.run1)"
           :patterns="altPattern"
           :style="endingsStyle"
           :highlight-style="endingsHighlightStyle"
         />
+        <div v-else :style="[ endingsStyle, endingsDQStyle ]">
+          DQ
+        </div>
       </NFlex>
       <NFlex
-        v-if="data.run1.score && data.run2.score"
+        v-if="data.run1.time && data.run2.time"
         vertical
         align="center"
         :size="0"
@@ -136,14 +144,18 @@ function getEndingNames(run: RunData) {
         </span>
         {{ data.run2.score }}
         <NHighlight
+          v-if="data.run2.score > 0"
           :text="getEndingNames(data.run2)"
           :patterns="altPattern"
           :style="endingsStyle"
           :highlight-style="endingsHighlightStyle"
         />
+        <div v-else :style="[ endingsStyle, endingsDQStyle ]">
+          DQ
+        </div>
       </NFlex>
       <NFlex
-        v-if="data.run1.score && data.run2.score"
+        v-if="data.run1.time && data.run2.time"
         vertical
         class="text-2xl font-bold"
         :size="2">
