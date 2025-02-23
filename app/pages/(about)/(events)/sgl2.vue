@@ -70,7 +70,7 @@ onBeforeMount(() => qfSort());
           and
           <span class="italic">Projekt&nbsp;Fuji&nbsp;</span><span class="font-medium">[JP]</span>.
         </div>
-        <div class="mx-4 mt-2 text-xs lg:text-sm text-center text-white drop-shadow-[0_0_1px_black]">
+        <!-- <div class="mx-4 mt-2 text-xs lg:text-sm text-center text-white drop-shadow-[0_0_1px_black]">
           Registration ends:
           <NTime
             :time="1740034740000"
@@ -80,8 +80,8 @@ onBeforeMount(() => qfSort());
           <span class="italic">
             (<NTime :time="1740034740000" type="relative" />)
           </span>
-        </div>
-        <div class="mx-4 text-xs lg:text-sm text-center text-white drop-shadow-[0_0_1px_black]">
+        </div> -->
+        <div class="mx-4 mt-2 text-xs lg:text-sm text-center text-white drop-shadow-[0_0_1px_black]">
           Live qualifiers end:
           <NTime
             :time="1740639540000"
