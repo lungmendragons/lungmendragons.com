@@ -1,3 +1,8 @@
+<script setup lang="ts">
+// import Link from "~/components/Link.global.vue";
+// import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
+</script>
+
 <template>
   <NScrollbar x-scrollable>
     <NTable
@@ -36,6 +41,14 @@
           <td>TC</td>
           <td>Liriyin</td>
           <td>–</td>
+          <!-- <td>
+            <span class="font-bold">1234</span>
+            <Link to="https://www.youtube.com/">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td> -->
           <td>CN</td>
           <td>D</td>
         </tr>
