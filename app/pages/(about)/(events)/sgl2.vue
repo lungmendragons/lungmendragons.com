@@ -43,14 +43,40 @@ onBeforeMount(() => qfSort());
           <span class="italic">Projekt&nbsp;Fuji&nbsp;</span><span class="font-medium">[JP]</span>.
         </div>
         <NCard class="w-fit mx-auto mt-4" size="small">
-          <template #action>
-            Click to zoom.
+          <template #header>
+            <div class="text-center text-xs font-normal">
+              TOURNAMENT INFORMATION
+            </div>
           </template>
-          <NCollapse class="w-64 mx-auto">
-            <NCollapseItem title="Event Information" name="1">
+          <template #action>
+            <div class="text-center text-xs">
+              Click to zoom.
+            </div>
+          </template>
+          <NCollapse class="w-64 my-1.5">
+            <NCollapseItem name="1">
+              <template #header>
+                <div class="text-center w-full pr-5">
+                  Schedule
+                </div>
+              </template>
               <div class="max-h-96 overflow-hidden w-full text-center">
                 <NImage
                   src="/ld-events/sgl2/information_temp.png"
+                  width="240"
+                  class="mx-auto"
+                />
+              </div>
+            </NCollapseItem>
+            <NCollapseItem name="2">
+              <template #header>
+                <div class="text-center w-full pr-5">
+                  Format and Rules
+                </div>
+              </template>
+              <div class="max-h-96 overflow-hidden w-full text-center">
+                <NImage
+                  src="/ld-events/sgl2/rules.png"
                   width="240"
                   class="mx-auto"
                 />
