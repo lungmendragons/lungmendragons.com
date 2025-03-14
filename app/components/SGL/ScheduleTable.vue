@@ -10,6 +10,7 @@
           <th>Time</th>
           <th>Server</th>
           <th>Player</th>
+          <th>Score</th>
           <th>Broadcast</th>
           <th>Group</th>
         </tr>
@@ -34,6 +35,7 @@
           </td>
           <td>TC</td>
           <td>Liriyin</td>
+          <td>–</td>
           <td>CN</td>
           <td>D</td>
         </tr>
@@ -48,6 +50,7 @@
           </td>
           <td>KR</td>
           <td>Artuosa</td>
+          <td>–</td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -62,6 +65,7 @@
           </td>
           <td>KR</td>
           <td>Hays</td>
+          <td>–</td>
           <td>CN</td>
           <td>C</td>
         </tr>
@@ -84,6 +88,7 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Aoao</td>
+          <td style="background-color: #13873255;">–</td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">A</td>
         </tr>
@@ -98,6 +103,7 @@
           </td>
           <td>SC</td>
           <td>Cola</td>
+          <td>–</td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -112,6 +118,7 @@
           </td>
           <td>JP</td>
           <td>Sena</td>
+          <td>–</td>
           <td>CN</td>
           <td>D</td>
         </tr>
@@ -134,6 +141,7 @@
           </td>
           <td>TC</td>
           <td>Winsok</td>
+          <td>–</td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -148,6 +156,7 @@
           </td>
           <td>KR</td>
           <td>Hijkstuv</td>
+          <td>–</td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -162,6 +171,7 @@
           </td>
           <td>JP</td>
           <td>YS</td>
+          <td>–</td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -184,6 +194,7 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Mei of May</td>
+          <td style="background-color: #13873255;">–</td>
           <td>CN</td>
           <td style="background-color: #13873255;">B</td>
         </tr>
@@ -198,6 +209,7 @@
           </td>
           <td>TC</td>
           <td>Wxy</td>
+          <td>–</td>
           <td>CN</td>
           <td>C</td>
         </tr>
@@ -212,6 +224,7 @@
           </td>
           <td>SC</td>
           <td>Kaisei</td>
+          <td>–</td>
           <td>CN</td>
           <td>D</td>
         </tr>
@@ -234,6 +247,7 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Polymer</td>
+          <td style="background-color: #13873255;">–</td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">C</td>
         </tr>
@@ -248,6 +262,7 @@
           </td>
           <td>TC</td>
           <td>Toby</td>
+          <td>–</td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -262,6 +277,7 @@
           </td>
           <td>JP</td>
           <td>Caron</td>
+          <td>–</td>
           <td>CN</td>
           <td>C</td>
         </tr>
@@ -284,6 +300,7 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Bait</td>
+          <td style="background-color: #13873255;">–</td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">D</td>
         </tr>
@@ -298,6 +315,7 @@
           </td>
           <td>KR</td>
           <td>LemuenWheelchairThief</td>
+          <td>–</td>
           <td>CN</td>
           <td>D</td>
         </tr>
@@ -312,6 +330,7 @@
           </td>
           <td>SC</td>
           <td>Eyanx</td>
+          <td>–</td>
           <td>CN</td>
           <td>C</td>
         </tr>
@@ -334,6 +353,7 @@
           </td>
           <td>SC</td>
           <td>Soup</td>
+          <td>–</td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -348,6 +368,7 @@
           </td>
           <td>JP</td>
           <td>Miguel_San</td>
+          <td>–</td>
           <td>CN</td>
           <td>B</td>
         </tr>
