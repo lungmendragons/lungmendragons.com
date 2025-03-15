@@ -82,6 +82,20 @@ onBeforeMount(() => qfSort());
                 />
               </div>
             </NCollapseItem>
+            <NCollapseItem name="3">
+              <template #header>
+                <div class="text-center w-full pr-5">
+                  Casters
+                </div>
+              </template>
+              <div class="max-h-96 overflow-hidden w-full text-center">
+                <NImage
+                  src="/ld-events/sgl2/casters.png"
+                  width="240"
+                  class="mx-auto"
+                />
+              </div>
+            </NCollapseItem>
           </NCollapse>
         </NCard>
         <NFlex vertical class="mx-auto md:pb-8 w-full md:w-3/5 p-2 md:p-4">
