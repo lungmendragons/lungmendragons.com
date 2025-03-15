@@ -40,15 +40,14 @@
           </td>
           <td>TC</td>
           <td>Liriyin</td>
-          <td>–</td>
-          <!-- <td>
-            <span class="font-bold">1234</span>
-            <Link to="https://www.youtube.com/">
+          <td>
+            <span class="font-bold">1349</span>
+            <Link to="https://www.youtube.com/live/W1ndnVdS75E?t=877s">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
               </NIcon>
             </Link>
-          </td> -->
+          </td>
           <td>CN</td>
           <td>D</td>
         </tr>
@@ -63,7 +62,14 @@
           </td>
           <td>KR</td>
           <td>Artuosa</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2656</span>
+            <Link to="https://www.youtube.com/live/W1ndnVdS75E?t=7651s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -78,7 +84,14 @@
           </td>
           <td>KR</td>
           <td>Hays</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2525</span>
+            <Link to="https://www.youtube.com/live/W1ndnVdS75E?t=16952s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>C</td>
         </tr>
