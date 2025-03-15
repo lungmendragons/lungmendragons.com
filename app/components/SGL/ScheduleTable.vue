@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// import Link from "~/components/Link.global.vue";
-// import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
+  import Link from "~/components/Link.global.vue";
+  import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
 </script>
 
 <template>
