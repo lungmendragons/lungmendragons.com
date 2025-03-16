@@ -114,6 +114,21 @@ onBeforeMount(() => qfSort());
               <span class="font-bold">Watch live on YouTube</span>
             </NButton>
           </NuxtLink>
+          <NuxtLink
+            class="mx-auto"
+            to="https://www.twitch.tv/lungmendragons"
+            target="_blank">
+            <NButton
+              :size="isMD ? 'large' : 'medium'"
+              type="primary"
+              icon-placement="right"
+              color="#b9a3e3">
+              <template #icon>
+                <ExternalLinkIcon :size="isMD ? 'large' : 'medium'" />
+              </template>
+              <span class="font-bold">Watch live on Twitch</span>
+            </NButton>
+          </NuxtLink>
         </NFlex>
       </div>
       <NTabs
