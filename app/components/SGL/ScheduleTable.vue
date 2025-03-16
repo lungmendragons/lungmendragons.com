@@ -114,7 +114,14 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Aoao</td>
-          <td style="background-color: #13873255;">–</td>
+          <td>
+            <span class="font-bold">1748</span>
+            <Link to="https://www.youtube.com/live/dstn4x5Bif4?t=1303s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">A</td>
         </tr>
@@ -129,7 +136,14 @@
           </td>
           <td>SC</td>
           <td>Cola</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2946</span>
+            <Link to="https://www.youtube.com/live/dstn4x5Bif4?t=7780s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -144,7 +158,14 @@
           </td>
           <td>JP</td>
           <td>Sena</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2681</span>
+            <Link to="https://www.youtube.com/live/dstn4x5Bif4?t=18961s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>D</td>
         </tr>
