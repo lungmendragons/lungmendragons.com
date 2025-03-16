@@ -98,7 +98,7 @@ onBeforeMount(() => qfSort());
             </NCollapseItem>
           </NCollapse>
         </NCard>
-        <NFlex inline class="mx-auto md:pb-8 w-full md:w-3/5 p-2 md:p-4">
+        <NFlex vertical class="mx-auto md:pb-8 w-full md:w-3/5 p-2 md:p-4">
           <NuxtLink
             class="mx-auto"
             to="https://www.youtube.com/@LungmenDragons/streams"
