@@ -114,7 +114,7 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Aoao</td>
-          <td>
+          <td style="background-color: #13873255;">
             <span class="font-bold">1748</span>
             <Link to="https://www.youtube.com/live/dstn4x5Bif4?t=1303s">
               <NIcon class="ml-2 top-0.5" size="14">
