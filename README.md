@@ -10,14 +10,26 @@
 
 </div>
 
-Lungmen Dragons are Arknights EN's most recognized competitive strategy group and community event organizer. This repository contains the source code for our website, a community resource for Arknights players. Built on Nuxt 3 (Vue + Vite + TypeScript), Naive UI, BetterAuth, and deployed to Cloudflare via NuxtHub.
+# Lungmen Dragons Official Website
+
+Lungmen Dragons are Arknights EN's most recognized competitive strategy group and community event organizer. This repository contains the source code for our website, a community resource for Arknights players. Built on Nuxt 3 (Vue + Vite + TypeScript), Naive UI, BetterAuth, and deployed to Cloudflare via NuxtHub. Secrets are managed with Infisical.
 
 ```sh
-git clone https://github.com/toboruo/lungmendragons.git
+git clone https://github.com/lungmendragons/lungmendragons.com
 cd lungmendragons
 pnpm install
-pnpm run dev
+infisical login
+infisical run --env=dev --path=/env -- pnpm run dev
 ```
+
+## Infisical Secrets Management
+
+Secrets can be exported as well.
+```sh
+infisical export --env=dev --path=/env --format=dotenv > .env
+```
+
+Cloudflare Workers & Pages secrets are managed and synced from the Infiscal Cloudflare Pages native integration.
 
 ---
 
