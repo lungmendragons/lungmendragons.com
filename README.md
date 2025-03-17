@@ -29,7 +29,7 @@ Secrets can be exported as well.
 infisical export --env=dev --path=/env --format=dotenv > .env
 ```
 
-Cloudflare Workers & Pages secrets are managed and synced from the Infiscal Cloudflare Pages native integration.
+Cloudflare Workers & Pages secrets are managed and synced from the Infisical Cloudflare Pages native integration.
 
 ---
 
