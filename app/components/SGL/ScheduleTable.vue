@@ -188,7 +188,14 @@
           </td>
           <td>TC</td>
           <td>Winsok</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2192</span>
+            <Link to="https://www.youtube.com/watch?v=ilKUYpUSlu8&t=864s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -203,7 +210,14 @@
           </td>
           <td>KR</td>
           <td>Hijkstuv</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2660</span>
+            <Link to="https://www.youtube.com/watch?v=ilKUYpUSlu8&t=12616s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -218,7 +232,14 @@
           </td>
           <td>JP</td>
           <td>YS</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">1501</span>
+            <Link to="https://www.youtube.com/watch?v=ilKUYpUSlu8&t=25200s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>A</td>
         </tr>
