@@ -129,7 +129,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742083200000"
+              :time="1742072400000"
               format="HH:mm"
               class="font-bold"
             />
@@ -151,7 +151,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742092200000"
+              :time="1742085000000"
               format="HH:mm"
               class="font-bold"
             />
@@ -188,7 +188,14 @@
           </td>
           <td>TC</td>
           <td>Winsok</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2192</span>
+            <Link to="https://www.youtube.com/watch?v=ilKUYpUSlu8&t=864s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -196,14 +203,21 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742169600000"
+              :time="1742158800000"
               format="HH:mm"
               class="font-bold"
             />
           </td>
           <td>KR</td>
           <td>Hijkstuv</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2660</span>
+            <Link to="https://www.youtube.com/watch?v=ilKUYpUSlu8&t=12616s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -211,14 +225,21 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742178600000"
+              :time="1742171400000"
               format="HH:mm"
               class="font-bold"
             />
           </td>
           <td>JP</td>
           <td>YS</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">1501</span>
+            <Link to="https://www.youtube.com/watch?v=ilKUYpUSlu8&t=25200s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -249,7 +270,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742256000000"
+              :time="1742245200000"
               format="HH:mm"
               class="font-bold"
             />
@@ -264,7 +285,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742265000000"
+              :time="1742257800000"
               format="HH:mm"
               class="font-bold"
             />
@@ -302,7 +323,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742342400000"
+              :time="1742331600000"
               format="HH:mm"
               class="font-bold"
             />
@@ -317,7 +338,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742351400000"
+              :time="1742344200000"
               format="HH:mm"
               class="font-bold"
             />
@@ -355,7 +376,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742428800000"
+              :time="1742418000000"
               format="HH:mm"
               class="font-bold"
             />
@@ -370,7 +391,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742437800000"
+              :time="1742430600000"
               format="HH:mm"
               class="font-bold"
             />
@@ -408,7 +429,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742515200000"
+              :time="1742504400000"
               format="HH:mm"
               class="font-bold"
             />
