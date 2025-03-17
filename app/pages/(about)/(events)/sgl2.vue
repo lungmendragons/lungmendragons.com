@@ -62,7 +62,7 @@ onBeforeMount(() => qfSort());
               </template>
               <div class="max-h-96 overflow-hidden w-full text-center">
                 <NImage
-                  src="/ld-events/sgl2/information_temp.png"
+                  src="/ld-events/sgl2/event-information.png"
                   width="240"
                   class="mx-auto"
                 />
