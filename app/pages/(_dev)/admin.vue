@@ -3,32 +3,30 @@ definePageMeta({
   auth: { only: "admin" },
 });
 
-const updates = ref();
-const status = ref("");
+const message = useMessage();
+const loading = ref(false);
 
-onMounted(() => {
-  status.value = "Fetching data...";
-  $fetch<any[]>("/api/pages/sgl2/updates", { method: "GET" })
-    .then((data) => {
-      status.value = "Data fetched";
-      updates.value = data.map((item) => {
-        return {
-          ...item,
-          time: typeof item.time === "number"
-            ? new Date(item.time).toLocaleString("en-GB")
-            : item.time,
-          payload: item.payload.scheduledTime
-            ? { scheduledTime: new Date(item.payload.scheduledTime).toLocaleString("en-GB") }
-            : item.payload,
-        };
-      });
+function fetchYT() {
+  loading.value = true;
+  $fetch("/api/pages/home/yt", { method: "PUT" })
+    .then((res) => {
+      if (res === "success") {
+        message.success("Homepage YouTube video updated.");
+        loading.value = false;
+      }
+    })
+    .catch((err) => {
+      message.error("Failed to update homepage YouTube video.");
+      console.error(err);
+      loading.value = false;
     });
-})
+}
 </script>
 
 <template>
   <div>
-    <pre>{{ status }}</pre>
-    <pre>{{ JSON.stringify(updates, null, 2) }}</pre>
+    <NButton @click="fetchYT" :loading="loading">
+      /api/pages/home/yt
+    </NButton>
   </div>
 </template>
