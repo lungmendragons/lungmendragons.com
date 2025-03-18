@@ -335,7 +335,7 @@
             />
           </td>
           <td style="background-color: #13873255;">EN</td>
-          <td style="background-color: #13873255;">Polymer1281</td>
+          <td style="background-color: #13873255;">Polymer</td>
           <td style="background-color: #13873255;">–</td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">C</td>

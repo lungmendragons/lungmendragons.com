@@ -92,7 +92,7 @@
           <td width="50px">0</td>
 
           <td style="background-color: #13873255;" >EN</td>
-          <td style="background-color: #13873255;" >Polymer1281</td>
+          <td style="background-color: #13873255;" >Polymer</td>
           <td style="background-color: #13873255;" width="50px">0</td>
 
           <td>KR</td>
