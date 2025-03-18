@@ -23,13 +23,13 @@
           <td width="120px">Cola</td>
           <td width="50px">2946</td>
 
-          <td>KR</td>
-          <td>Hays</td>
-          <td width="50px">2525</td>
+          <td>TC</td>
+          <td>Wxy</td>
+          <td width="50px">2910</td>
 
-          <td>JP</td>
-          <td>Sena</td>
-          <td width="50px">2681</td>
+          <td>SC</td>
+          <td>Kaisei</td>
+          <td width="50px">2753</td>
         </tr>
         <tr>
           <td>TC</td>
@@ -40,13 +40,13 @@
           <td>Hijkstiv</td>
           <td width="50px">2660</td>
 
-          <td width="50px">JP</td>
-          <td width="120px">Caron</td>
-          <td width="50px">0</td>
+          <td>KR</td>
+          <td>Hays</td>
+          <td width="50px">2525</td>
 
-          <td>TC</td>
-          <td>Liriyin</td>
-          <td width="50px">1349</td>
+          <td>JP</td>
+          <td>Sena</td>
+          <td width="50px">2681</td>
         </tr>
         <tr>
           <td style="background-color: #13873255;" width="50px">EN</td>
@@ -55,15 +55,15 @@
           
           <td style="background-color: #13873255;" >EN</td>
           <td style="background-color: #13873255;" >Mei of May</td>
-          <td style="background-color: #13873255;" width="50px">0</td>
+          <td style="background-color: #13873255;" width="50px">2556</td>
 
-          <td>SC</td>
-          <td>Eyanx</td>
+          <td width="50px">JP</td>
+          <td width="120px">Caron</td>
           <td width="50px">0</td>
 
-          <td style="background-color: #13873255;" width="50px">EN</td>
-          <td style="background-color: #13873255;" width="120px">Bait</td>
-          <td style="background-color: #13873255;" width="50px">0</td>
+          <td>TC</td>
+          <td>Liriyin</td>
+          <td width="50px">1349</td>
         </tr>
         <tr>
           <td>JP</td>
@@ -74,13 +74,13 @@
           <td>Miguel_San</td>
           <td width="50px">0</td>
 
-          <td style="background-color: #13873255;" >EN</td>
-          <td style="background-color: #13873255;" >Polymer</td>
-          <td style="background-color: #13873255;" width="50px">0</td>
-
           <td>SC</td>
-          <td>Kaisei</td>
+          <td>Eyanx</td>
           <td width="50px">0</td>
+
+          <td style="background-color: #13873255;" width="50px">EN</td>
+          <td style="background-color: #13873255;" width="120px">Bait</td>
+          <td style="background-color: #13873255;" width="50px">0</td>
         </tr>
         <tr>
           <td>SC</td>
@@ -91,9 +91,9 @@
           <td>Toby</td>
           <td width="50px">0</td>
 
-          <td>TC</td>
-          <td>Wxy</td>
-          <td width="50px">0</td>
+          <td style="background-color: #13873255;" >EN</td>
+          <td style="background-color: #13873255;" >Polymer</td>
+          <td style="background-color: #13873255;" width="50px">0</td>
 
           <td>KR</td>
           <td>LemuenWheelchairThief</td>

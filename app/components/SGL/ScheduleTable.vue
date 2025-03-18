@@ -262,7 +262,14 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Mei of May</td>
-          <td style="background-color: #13873255;">–</td>
+          <td style="background-color: #13873255;">
+            <span class="font-bold">2556</span>
+            <Link to="https://www.youtube.com/watch?v=rm40tm3PovE&t=626s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td style="background-color: #13873255;">B</td>
         </tr>
@@ -277,7 +284,14 @@
           </td>
           <td>TC</td>
           <td>Wxy</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2910</span>
+            <Link to="https://www.youtube.com/watch?v=rm40tm3PovE&t=11850s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>C</td>
         </tr>
@@ -292,7 +306,14 @@
           </td>
           <td>SC</td>
           <td>Kaisei</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2753</span>
+            <Link to="https://www.youtube.com/watch?v=rm40tm3PovE&t=24378s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>D</td>
         </tr>
