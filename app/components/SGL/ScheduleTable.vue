@@ -336,7 +336,14 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Polymer</td>
-          <td style="background-color: #13873255;">–</td>
+          <td style="background-color: #13873255;">
+            <span class="font-bold">3027</span>
+            <Link to="https://www.youtube.com/live/NnJG9cVvwuU?t=778s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">C</td>
         </tr>
@@ -351,7 +358,14 @@
           </td>
           <td>TC</td>
           <td>Toby</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2214</span>
+            <Link to="https://www.youtube.com/live/NnJG9cVvwuU?t=12849s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>B</td>
         </tr>
@@ -366,7 +380,14 @@
           </td>
           <td>JP</td>
           <td>Caron</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">1529</span>
+            <Link to="https://www.youtube.com/live/NnJG9cVvwuU?t=24982s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>C</td>
         </tr>
