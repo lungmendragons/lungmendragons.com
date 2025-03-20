@@ -410,7 +410,14 @@
           </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">Bait</td>
-          <td style="background-color: #13873255;">–</td>
+          <td style="background-color: #13873255;">
+            <span class="font-bold">2547</span>
+            <Link to="https://www.youtube.com/live/yPBroP5s9TA?t=1225s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td style="background-color: #13873255;">EN</td>
           <td style="background-color: #13873255;">D</td>
         </tr>
@@ -425,7 +432,14 @@
           </td>
           <td>KR</td>
           <td>LemuenWheelchairThief</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">75</span>
+            <Link to="https://www.youtube.com/live/yPBroP5s9TA?t=12516s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>D</td>
         </tr>
@@ -440,7 +454,14 @@
           </td>
           <td>SC</td>
           <td>Eyanx</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2829</span>
+            <Link to="https://www.youtube.com/live/yPBroP5s9TA?t=25022s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>C</td>
         </tr>

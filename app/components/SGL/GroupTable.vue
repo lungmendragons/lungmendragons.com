@@ -57,13 +57,13 @@
           <td style="background-color: #13873255;" >Mei of May</td>
           <td style="background-color: #13873255;" width="50px">2556</td>
 
-          <td>KR</td>
-          <td>Hays</td>
-          <td width="50px">2525</td>
-
-          <td>TC</td>
-          <td>Liriyin</td>
-          <td width="50px">1349</td>
+          <td>SC</td>
+          <td>Eyanx</td>
+          <td width="50px">2829</td>
+          
+          <td style="background-color: #13873255;" width="50px">EN</td>
+          <td style="background-color: #13873255;" width="120px">Bait</td>
+          <td style="background-color: #13873255;" width="50px">2547</td>
         </tr>
         <tr>
           <td>JP</td>
@@ -74,13 +74,13 @@
           <td>Toby</td>
           <td width="50px">2214</td>
 
-          <td width="50px">JP</td>
-          <td width="120px">Caron</td>
-          <td width="50px">1529</td>
+          <td>KR</td>
+          <td>Hays</td>
+          <td width="50px">2525</td>
 
-          <td style="background-color: #13873255;" width="50px">EN</td>
-          <td style="background-color: #13873255;" width="120px">Bait</td>
-          <td style="background-color: #13873255;" width="50px">0</td>
+          <td>TC</td>
+          <td>Liriyin</td>
+          <td width="50px">1349</td>
         </tr>
         <tr>
           <td>SC</td>
@@ -91,13 +91,13 @@
           <td>Miguel_San</td>
           <td width="50px">0</td>
           
-          <td>SC</td>
-          <td>Eyanx</td>
-          <td width="50px">0</td>
-
+          <td width="50px">JP</td>
+          <td width="120px">Caron</td>
+          <td width="50px">1529</td>
+          
           <td>KR</td>
           <td>LemuenWheelchairThief</td>
-          <td width="50px">0</td>
+          <td width="50px">75</td>
         </tr>
       </tbody>
     </NTable>
