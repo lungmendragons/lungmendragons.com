@@ -137,14 +137,19 @@ onBeforeMount(() => qfSort());
         justify-content="space-evenly"
         class="mx-auto pb-8 w-full md:w-4/5 px-2 md:px-4"
         tab-style="filter:drop-shadow(0 1px 3px black)">
-        <NTabPane name="schedule" tab="Schedule">
+        <NTabPane name="scheduleAndBracket" tab="Schedule & Bracket">
           <NCard size="small" class="mb-2">
+            Times are displayed in UTC-4. All matches are live.
+          </NCard>
+          <SGLScheduleTablePlayoffs class="mb-2" />
+          <SGLBracket />
+        </NTabPane>
+        <NTabPane name="groups" tab="Groups Results">
+          <SGLGroupTable />
+          <NCard size="small" class="mb-2 mt-2">
             Times are displayed in UTC-4.
           </NCard>
           <SGLScheduleTable />
-        </NTabPane>
-        <NTabPane name="groups" tab="Groups">
-          <SGLGroupTable />
         </NTabPane>
         <NTabPane name="qualifiers" tab="QF Results">
           <NFlex
