@@ -484,7 +484,14 @@
           </td>
           <td>SC</td>
           <td>Soup</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2901</span>
+            <Link to="https://www.youtube.com/watch?v=U28NhQn8usY&t=775s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>A</td>
         </tr>
@@ -499,7 +506,14 @@
           </td>
           <td>JP</td>
           <td>Miguel_San</td>
-          <td>–</td>
+          <td>
+            <span class="font-bold">2950</span>
+            <Link to="https://www.youtube.com/watch?v=U28NhQn8usY&t=12615s">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>CN</td>
           <td>B</td>
         </tr>
