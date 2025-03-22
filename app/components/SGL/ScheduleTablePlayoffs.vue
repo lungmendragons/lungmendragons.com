@@ -35,7 +35,7 @@
               class="font-bold"
             />
           </td>
-          <td>Polymer (EN) vs Sena (JP)</td>
+          <td><span style="white-space: nowrap;">Polymer (EN) vs Sena (JP)</span></td>
           <td>EN</td>
         </tr>
         <tr>
@@ -55,7 +55,7 @@
               class="font-bold"
             />
           </td>
-          <td>Kaisei (SC) vs Artuosa (KR)</td>
+          <td><span style="white-space: nowrap;">Kaisei (SC) vs Artuosa (KR)</span></td>
           <td>EN</td>
         </tr>
         <tr>
@@ -75,7 +75,7 @@
               class="font-bold"
             />
           </td>
-          <td>Miguel_San (JP) vs WXY (TC)</td>
+          <td><span style="white-space: nowrap;">Miguel_San (JP) vs WXY (TC)</span></td>
           <td>EN</td>
         </tr>
         <tr>
@@ -95,7 +95,7 @@
               class="font-bold"
             />
           </td>
-          <td>Soup (SC) vs Cola (SC)</td>
+          <td><span style="white-space: nowrap;">Soup (SC) vs Cola (SC)</span></td>
           <td>EN</td>
         </tr>
       </tbody>
