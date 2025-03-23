@@ -69,7 +69,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742731200000"
+              :time="1742904000000"
               format="MM/dd"
               class="font-bold"
             />
@@ -77,7 +77,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742731200000"
+              :time="1742904000000"
               format="HH:mm"
               class="font-bold"
             />
@@ -89,7 +89,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742904000000"
+              :time="1742731200000"
               format="MM/dd"
               class="font-bold"
             />
@@ -97,7 +97,7 @@
           <td>
             <NTime
               time-zone="America/New_York"
-              :time="1742904000000"
+              :time="1742731200000"
               format="HH:mm"
               class="font-bold"
             />
