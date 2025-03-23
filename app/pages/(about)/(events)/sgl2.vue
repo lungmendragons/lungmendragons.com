@@ -2,6 +2,7 @@
 import { useMediaQuery } from "@vueuse/core";
 import type { RowData, RowDataSorted, /* RegData */ } from "~/utils/events-archive/sgl2";
 import PhEmptyBold from '~icons/ph/empty-bold?width=256px&height=256px';
+import Fa6BrandsDiscord from "~icons/fa6-brands/discord";
 
 const isMD = useMediaQuery(mediaQuery.minWidth.md as string);
 const data = await $fetch("/api/pages/sgl2/all", { method: "GET" });
@@ -129,6 +130,23 @@ onBeforeMount(() => qfSort());
               <span class="font-bold">Watch live on Twitch</span>
             </NButton>
           </NuxtLink>
+          <NButton
+            round
+            tag="a"
+            href="https://discord.gg/92rs62Vx4W"
+            target="_blank"
+            rel="noopener noreferrer"
+            color="#5662f6"
+            size="small"
+            class="hover:bg-[#7c84f5]"
+            :style="{ color: 'white', margin: '0 auto' }">
+            <template #icon>
+              <NIcon>
+                <Fa6BrandsDiscord />
+              </NIcon>
+            </template>
+            IS Central
+          </NButton>
         </NFlex>
       </div>
       <NTabs
