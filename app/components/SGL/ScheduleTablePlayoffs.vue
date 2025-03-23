@@ -35,7 +35,14 @@
               class="font-bold"
             />
           </td>
-          <td><span style="white-space: nowrap;">Polymer (EN) vs Sena (JP)</span></td>
+          <td>
+            <span style="white-space: nowrap;">Polymer (EN) vs Sena (JP)</span>
+            <Link to="https://youtu.be/jwmhkFCqpgw">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>EN</td>
         </tr>
         <tr>
