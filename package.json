@@ -13,7 +13,8 @@
     "preview": "npx nuxthub preview",
     "deploy": "npx nuxthub deploy",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "build:wasm": "wasm-pack build rs-app --release --no-pack --out-name \"rs_app_impl\""
   },
   "dependencies": {
     "@mdit-vue/plugin-headers": "^2.1.3",
@@ -75,6 +76,7 @@
     "unplugin-vue-components": "^28.0.0",
     "vite": "^6.1.0",
     "vite-plugin-cjs-interop": "^2.1.6",
+    "vite-plugin-wasm": "^3.4.1",
     "vue-tsc": "^2.2.0",
     "wrangler": "^3.107.3"
   },
