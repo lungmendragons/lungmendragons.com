@@ -27,3 +27,11 @@ export function createGachaSession(banner: BannerInfo): impl.GachaSession {
 export function singleRoll(session: impl.GachaSession): RollResult {
   return impl.singleRoll(session);
 };
+
+export function tenRoll(session: impl.GachaSession): RollResult[] {
+  let out = [];
+  for(let i = 0; i < 10; i++) {
+    out.push(singleRoll(session));
+  }
+  return out;
+}
