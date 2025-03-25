@@ -49,6 +49,33 @@
           <td>
             <NTime
               time-zone="America/New_York"
+              :time="1742731200000"
+              format="MM/dd"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1742731200000"
+              format="HH:mm"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <span style="white-space: nowrap;">Miguel_San (JP) vs WXY (TC)</span>
+            <Link to="https://youtube.com/live/pTxwCqCFZLo">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
+          <td>EN</td>
+        </tr>
+        <tr>
+          <td>
+            <NTime
+              time-zone="America/New_York"
               :time="1742817600000"
               format="MM/dd"
               class="font-bold"
@@ -62,7 +89,14 @@
               class="font-bold"
             />
           </td>
-          <td><span style="white-space: nowrap;">Miguel_San (JP) vs WXY (TC)</span></td>
+          <td>
+            <span style="white-space: nowrap;">Kaisei (SC) vs Artuosa (KR)</span>
+            <Link to="https://youtube.com/live/xshqHl2B0l0">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
           <td>EN</td>
         </tr>
         <tr>
@@ -78,26 +112,6 @@
             <NTime
               time-zone="America/New_York"
               :time="1742904000000"
-              format="HH:mm"
-              class="font-bold"
-            />
-          </td>
-          <td><span style="white-space: nowrap;">Kaisei (SC) vs Artuosa (KR)</span></td>
-          <td>EN</td>
-        </tr>
-        <tr>
-          <td>
-            <NTime
-              time-zone="America/New_York"
-              :time="1742731200000"
-              format="MM/dd"
-              class="font-bold"
-            />
-          </td>
-          <td>
-            <NTime
-              time-zone="America/New_York"
-              :time="1742731200000"
               format="HH:mm"
               class="font-bold"
             />
