@@ -116,7 +116,58 @@
               class="font-bold"
             />
           </td>
-          <td><span style="white-space: nowrap;">Soup (SC) vs Cola (SC)</span></td>
+          <td>
+            <span style="white-space: nowrap;">Soup (SC) vs Cola (SC)</span>
+            <Link to="https://youtube.com/live/ki3K1gJDgLw">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
+          <td>EN</td>
+        </tr>
+        <tr>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1742990400000"
+              format="MM/dd"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1742990400000"
+              format="HH:mm"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <span style="white-space: nowrap;">Kaisei (SC) vs Miguel_San (JP)</span>
+          </td>
+          <td>EN</td>
+        </tr>
+        <tr>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1743076800000"
+              format="MM/dd"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1743076800000"
+              format="HH:mm"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <span style="white-space: nowrap;">Polymer (EN) vs Soup (SC)</span>
+          </td>
           <td>EN</td>
         </tr>
       </tbody>
