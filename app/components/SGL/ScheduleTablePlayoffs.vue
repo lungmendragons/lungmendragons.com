@@ -145,6 +145,11 @@
           </td>
           <td>
             <span style="white-space: nowrap;">Kaisei (SC) vs Miguel_San (JP)</span>
+            <Link to="https://youtube.com/live/Z_H-NORuMs4">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
           </td>
           <td>EN</td>
         </tr>
@@ -167,6 +172,33 @@
           </td>
           <td>
             <span style="white-space: nowrap;">Polymer (EN) vs Soup (SC)</span>
+            <Link to="https://youtube.com/live/Z_H-NORuMs4">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
+          </td>
+          <td>EN</td>
+        </tr>
+        <tr>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1743249600000"
+              format="MM/dd"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <NTime
+              time-zone="America/New_York"
+              :time="1743249600000"
+              format="HH:mm"
+              class="font-bold"
+            />
+          </td>
+          <td>
+            <span style="white-space: nowrap;">Miguel_San (JP) vs Soup (SC)</span>
           </td>
           <td>EN</td>
         </tr>
