@@ -102,7 +102,7 @@ onBeforeMount(() => qfSort());
         <NFlex vertical class="mx-auto md:pb-8 w-full md:w-3/5 p-2 md:p-4">
           <NuxtLink
             class="mx-auto"
-            to="https://www.youtube.com/@LungmenDragons/streams"
+            to="https://www.youtube.com/playlist?list=PLLTLZagR1VUuf4IwsD2LkuWRcdU8crNCQ"
             target="_blank">
             <NButton
               :size="isMD ? 'large' : 'medium'"
@@ -112,22 +112,22 @@ onBeforeMount(() => qfSort());
               <template #icon>
                 <ExternalLinkIcon :size="isMD ? 'large' : 'medium'" />
               </template>
-              <span class="font-bold">Watch live on YouTube</span>
+              <span class="font-bold">Watch on YouTube</span>
             </NButton>
           </NuxtLink>
           <NuxtLink
             class="mx-auto"
-            to="https://www.twitch.tv/lungmendragons"
+            to="https://arknightspvp.miraheze.org/wiki/Skywalking_Global_League_2"
             target="_blank">
             <NButton
               :size="isMD ? 'large' : 'medium'"
               type="primary"
               icon-placement="right"
-              color="#b9a3e3">
+              color="#84b9ec">
               <template #icon>
                 <ExternalLinkIcon :size="isMD ? 'large' : 'medium'" />
               </template>
-              <span class="font-bold">Watch live on Twitch</span>
+              <span class="font-bold">Read the SGL#2 wiki</span>
             </NButton>
           </NuxtLink>
           <NButton
@@ -155,7 +155,7 @@ onBeforeMount(() => qfSort());
         justify-content="space-evenly"
         class="mx-auto pb-8 w-full md:w-4/5 px-2 md:px-4"
         tab-style="filter:drop-shadow(0 1px 3px black)">
-        <NTabPane name="scheduleAndBracket" tab="Schedule">
+        <NTabPane name="scheduleAndBracket" tab="Finals Results">
           <NCard size="small" class="mb-2">
             Times are displayed in UTC-4. All matches are live.
           </NCard>

@@ -35,8 +35,8 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Polymer (EN) vs Sena (JP)</span>
+          <td style="white-space: nowrap;">
+            <span>Polymer (EN) vs Sena (JP)</span>
             <Link to="https://youtu.be/jwmhkFCqpgw">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
@@ -62,8 +62,8 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Miguel_San (JP) vs WXY (TC)</span>
+          <td style="white-space: nowrap;">
+            <span>Miguel_San (JP) vs WXY (TC)</span>
             <Link to="https://youtube.com/live/pTxwCqCFZLo">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
@@ -89,8 +89,8 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Kaisei (SC) vs Artuosa (KR)</span>
+          <td style="white-space: nowrap;">
+            <span>Kaisei (SC) vs Artuosa (KR)</span>
             <Link to="https://youtube.com/live/xshqHl2B0l0">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
@@ -116,8 +116,8 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Soup (SC) vs Cola (SC)</span>
+          <td style="white-space: nowrap;">
+            <span>Soup (SC) vs Cola (SC)</span>
             <Link to="https://youtube.com/live/ki3K1gJDgLw">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
@@ -143,8 +143,8 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Kaisei (SC) vs Miguel_San (JP)</span>
+          <td style="white-space: nowrap;">
+            <span>Kaisei (SC) vs Miguel_San (JP)</span>
             <Link to="https://youtube.com/live/Z_H-NORuMs4">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
@@ -170,8 +170,8 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Polymer (EN) vs Soup (SC)</span>
+          <td style="white-space: nowrap;">
+            <span>Polymer (EN) vs Soup (SC)</span>
             <Link to="https://youtube.com/live/Z_H-NORuMs4">
               <NIcon class="ml-2 top-0.5" size="14">
                 <Fa6BrandsYoutube />
@@ -197,8 +197,13 @@
               class="font-bold"
             />
           </td>
-          <td>
-            <span style="white-space: nowrap;">Miguel_San (JP) vs Soup (SC)</span>
+          <td style="white-space: nowrap;">
+            <span>Miguel_San (JP) vs Soup (SC)</span>
+            <Link to="https://youtube.com/live/wMqJgW2wYnI">
+              <NIcon class="ml-2 top-0.5" size="14">
+                <Fa6BrandsYoutube />
+              </NIcon>
+            </Link>
           </td>
           <td>EN</td>
         </tr>
