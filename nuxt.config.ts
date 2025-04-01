@@ -3,6 +3,8 @@ import Icons from "unplugin-icons/vite";
 import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 import Components from "unplugin-vue-components/vite";
 import IconsResolver from "unplugin-icons/resolver";
+import wasm from "vite-plugin-wasm";
+import { fileURLToPath } from "node:url";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -69,9 +71,11 @@ export default defineNuxtConfig({
         "img-src": [
           "'self'",
           "data:",
+          "blob:",
           "https:",
         ],
         "script-src": [
+          "'wasm-unsafe-eval'", // required to be able to run wasm code
           "'strict-dynamic'",
           "'nonce-{{nonce}}'", // generated automatically
         ],
@@ -139,6 +143,7 @@ export default defineNuxtConfig({
           IconsResolver(),
         ],
       }),
+      wasm(),
       // Note: At least on my machine, I need this enabled during development to avoid errors, but
       // it causes an error at build time, so I have to comment it out before deploying. No idea why.
       // cjsInterop({
@@ -157,6 +162,9 @@ export default defineNuxtConfig({
         ],
       },
     },
+  },
+  alias: {
+    "rs-app": fileURLToPath(new URL("./rs-app/src/lib.ts", import.meta.url)),
   },
   eslint: {
     config: {
