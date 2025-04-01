@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { createGachaSession, tenRoll, type BannerInfo, type RollResult } from "rs-app";
 
+definePageMeta({
+  auth: { only: "member" },
+});
+
 const totalPulls = ref(0);
 const pity = ref(0);
 const imageUrl = ref();
