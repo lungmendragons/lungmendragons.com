@@ -4,6 +4,7 @@ import { NaiveUiResolver } from "unplugin-vue-components/resolvers";
 import Components from "unplugin-vue-components/vite";
 import IconsResolver from "unplugin-icons/resolver";
 import wasm from "vite-plugin-wasm";
+import { fileURLToPath } from "node:url";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -162,7 +163,7 @@ export default defineNuxtConfig({
     },
   },
   alias: {
-    "rs-app": "./rs-app/src/lib.ts",
+    "rs-app": fileURLToPath(new URL("./rs-app/src/lib.ts", import.meta.url)),
   },
   eslint: {
     config: {

@@ -7,6 +7,8 @@
 //     { [_ in name]: T[name] };
 // }[keyof T];
 import * as impl from "../pkg/rs_app_impl";
+import { GachaSession } from "../pkg/rs_app_impl";
+export { GachaSession } from "../pkg/rs_app_impl";
 
 type ByRarity<T> = { six: T, five: T, four: T, three: T };
 
@@ -20,15 +22,15 @@ export type RollResult = {
   character: string,
 };
 
-export function createGachaSession(banner: BannerInfo): impl.GachaSession {
+export function createGachaSession(banner: BannerInfo): GachaSession {
   return impl.createGachaSession(banner);
 }
 
-export function singleRoll(session: impl.GachaSession): RollResult {
+export function singleRoll(session: GachaSession): RollResult {
   return impl.singleRoll(session);
 };
 
-export function tenRoll(session: impl.GachaSession): RollResult[] {
+export function tenRoll(session: GachaSession): RollResult[] {
   let out = [];
   for(let i = 0; i < 10; i++) {
     out.push(singleRoll(session));
