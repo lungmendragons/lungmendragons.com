@@ -98,10 +98,10 @@ pub fn single_roll(session: &mut GachaSession) -> Result<JsValue, JsValue> {
                     }
                 }
                 29..49 => {
-                    let pool = &session.banner_data.off_banner.four;
+                    let pool = &session.banner_data.off_banner.three;
 
                     RollResult {
-                        rarity: 4,
+                        rarity: 3,
                         character: pool[rng.random_range(0..pool.len())].clone(),
                     }
                 }

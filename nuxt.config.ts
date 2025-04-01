@@ -71,6 +71,7 @@ export default defineNuxtConfig({
         "img-src": [
           "'self'",
           "data:",
+          "blob:",
           "https:",
         ],
         "script-src": [
