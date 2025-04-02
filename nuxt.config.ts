@@ -49,6 +49,7 @@ export default defineNuxtConfig({
     experimental: {
       tasks: true,
       openAPI: true,
+      wasm: true,
     },
   },
   security: {
@@ -125,6 +126,11 @@ export default defineNuxtConfig({
         "top-level-await": true,
       },
     },
+    optimizeDeps: {
+      esbuildOptions: {
+        target: "esnext",
+      }
+    },
     build: {
       target: "esnext",
     },
@@ -160,14 +166,6 @@ export default defineNuxtConfig({
       //   ],
       // }),
     ],
-    optimizeDeps: {
-      esbuildOptions: {
-        target: "esnext",
-      }
-    },
-    build: {
-      target: "esnext",
-    },
   },
   typescript: {
     shim: true,
