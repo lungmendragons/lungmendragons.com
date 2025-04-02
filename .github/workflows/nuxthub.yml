@@ -23,6 +23,11 @@ jobs:
         with:
           node-version: 22
           cache: 'pnpm'
+      
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+          rustup install stable
 
       - name: Install dependencies
         run: pnpm install
