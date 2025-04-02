@@ -160,6 +160,14 @@ export default defineNuxtConfig({
       //   ],
       // }),
     ],
+    optimizeDeps: {
+      esbuildOptions: {
+        target: "esnext",
+      }
+    },
+    build: {
+      target: "esnext",
+    },
   },
   typescript: {
     shim: true,
