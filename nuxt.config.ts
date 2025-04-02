@@ -120,6 +120,14 @@ export default defineNuxtConfig({
     storesDirs: [ "./app/stores/**" ],
   },
   vite: {
+    esbuild: {
+      supported: {
+        "top-level-await": true,
+      },
+    },
+    build: {
+      target: "esnext",
+    },
     plugins: [
       Icons({
         compiler: "vue3",
