@@ -49,10 +49,6 @@ export default defineNuxtConfig({
     experimental: {
       tasks: true,
       openAPI: true,
-      wasm: true,
-    },
-    rollupConfig: {
-      external: [ "sharp" ],
     },
   },
   security: {
