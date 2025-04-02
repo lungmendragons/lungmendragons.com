@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { createGachaSession, tenRoll, type BannerInfo, type RollResult } from "rs-app";
+import type { CSSProperties } from "vue";
+import { useMediaQuery } from "@vueuse/core";
 
 definePageMeta({
   auth: { only: "member" },
@@ -7,9 +9,33 @@ definePageMeta({
 
 const totalPulls = ref(0);
 const pity = ref(0);
-const imageUrl = ref();
+const result = ref<RollResult[]>([]);
+const count6 = ref(0);
+const count5 = ref(0);
+const count4 = ref(0);
+const count3 = ref(0);
+const isMD = useMediaQuery(mediaQuery.minWidth.md);
 
-function doGacha() {
+function bg(r: number | undefined) {
+  switch (r) {
+    case 3: return "#3495eb";
+    case 4: return "#dfbdf2";
+    case 5: return "#fff0b8";
+    case 6: return "#ed7b18";
+    default: return "#000000";
+  }
+}
+
+function tenStyle(r: number | undefined): CSSProperties {
+  return {
+    backgroundColor: bg(r),
+    width: isMD.value ? "80px" : "30px",
+    height: isMD.value ? "220px" : "78px",
+    objectFit: "cover",
+  }
+}
+
+async function doGacha() {
   const bannerInfo: BannerInfo = {
     rate_up: {
       six: [
@@ -72,26 +98,33 @@ function doGacha() {
   };
 
   const session = createGachaSession(bannerInfo);
-  const result: RollResult[] = tenRoll(session);
-  console.log(result);
-
-  $fetch("/api/pages/gachasim/image", {
-    method: "PUT",
-    body: result,
-  })
-    .then((res) => {
-      imageUrl.value = URL.createObjectURL(res);
-      totalPulls.value += result.length;
-      if (result.filter((c) => c.rarity === 6).length > 0) {
-        const i = result.findLastIndex((c) => c.rarity === 6);
-        pity.value = 9 - i;
-      } else {
-        pity.value += 10;
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-    });
+  const res = tenRoll(session);
+  result.value = res;
+  res.forEach((c) => {
+    switch (c.rarity) {
+      case 6:
+        count6.value++;
+        break;
+      case 5:
+        count5.value++;
+        break;
+      case 4:
+        count4.value++;
+        break;
+      case 3:
+        count3.value++;
+        break;
+      default:
+        break;
+    }
+  });
+  totalPulls.value += 10;
+  if (result.value.filter((c) => c.rarity === 6).length > 0) {
+    const i = result.value.findLastIndex((c) => c.rarity === 6);
+    pity.value = 9 - i;
+  } else {
+    pity.value += 10;
+  }
 }
 </script>
 
@@ -101,11 +134,32 @@ function doGacha() {
     <br>
     Pulls: {{ totalPulls }}<br>
     Pity: {{ pity }}<br>
-    <div v-if="imageUrl">
-      <img :src="imageUrl" alt="Rotated">
+    isMD: {{ isMD }}<br>
+    <div v-if="result.length === 10">
+      <NFlex
+        :size="isMD ? [4,4] : [2,2]"
+        justify="center"
+        class="my-8">
+        <img :src="`images/akresource/charpor/${result[0]?.character}_1.png`" :style="tenStyle(result[0]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[1]?.character}_1.png`" :style="tenStyle(result[1]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[2]?.character}_1.png`" :style="tenStyle(result[2]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[3]?.character}_1.png`" :style="tenStyle(result[3]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[4]?.character}_1.png`" :style="tenStyle(result[4]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[5]?.character}_1.png`" :style="tenStyle(result[5]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[6]?.character}_1.png`" :style="tenStyle(result[6]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[7]?.character}_1.png`" :style="tenStyle(result[7]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[8]?.character}_1.png`" :style="tenStyle(result[8]?.rarity)">
+        <img :src="`images/akresource/charpor/${result[9]?.character}_1.png`" :style="tenStyle(result[9]?.rarity)">
+      </NFlex>
     </div>
     <div v-else>
       waiting...
+    </div>
+    <div>
+      6: {{ count6 }}<br>
+      5: {{ count5 }}<br>
+      4: {{ count4 }}<br>
+      3: {{ count3 }}<br>
     </div>
   </div>
 </template>
