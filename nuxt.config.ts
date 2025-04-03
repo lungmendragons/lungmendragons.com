@@ -31,6 +31,9 @@ export default defineNuxtConfig({
     enabled: true,
     componentInspector: false,
   },
+  build: {
+    transpile: [ "vueuc", "naive-ui" ],
+  },
   hub: {
     database: true,
     kv: true,
