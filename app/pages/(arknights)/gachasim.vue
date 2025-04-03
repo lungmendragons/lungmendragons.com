@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createGachaSession, tenRoll, type BannerInfo, type RollResult } from "rs-app";
-import type { CSSProperties } from "vue";
 import { useMediaQuery } from "@vueuse/core";
+import { renderImgComponent, charImg } from "~/utils/gachasim";
 
 definePageMeta({
   auth: { only: "member" },
@@ -15,25 +15,6 @@ const count5 = ref(0);
 const count4 = ref(0);
 const count3 = ref(0);
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
-
-function bg(r: number | undefined) {
-  switch (r) {
-    case 3: return "#3495eb";
-    case 4: return "#dfbdf2";
-    case 5: return "#fff0b8";
-    case 6: return "#ed7b18";
-    default: return "#000000";
-  }
-}
-
-function tenStyle(r: number | undefined): CSSProperties {
-  return {
-    backgroundColor: bg(r),
-    width: isMD.value ? "80px" : "30px",
-    height: isMD.value ? "220px" : "78px",
-    objectFit: "cover",
-  }
-}
 
 async function doGacha() {
   const bannerInfo: BannerInfo = {
@@ -140,16 +121,16 @@ async function doGacha() {
         :size="isMD ? [4,4] : [2,2]"
         justify="center"
         class="my-8">
-        <img :src="`images/akresource/charpor/${result[0]?.character}_1.png`" :style="tenStyle(result[0]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[1]?.character}_1.png`" :style="tenStyle(result[1]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[2]?.character}_1.png`" :style="tenStyle(result[2]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[3]?.character}_1.png`" :style="tenStyle(result[3]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[4]?.character}_1.png`" :style="tenStyle(result[4]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[5]?.character}_1.png`" :style="tenStyle(result[5]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[6]?.character}_1.png`" :style="tenStyle(result[6]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[7]?.character}_1.png`" :style="tenStyle(result[7]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[8]?.character}_1.png`" :style="tenStyle(result[8]?.rarity)">
-        <img :src="`images/akresource/charpor/${result[9]?.character}_1.png`" :style="tenStyle(result[9]?.rarity)">
+        <component :is="renderImgComponent(result[0]!.character, result[0]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[1]!.character, result[1]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[2]!.character, result[2]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[3]!.character, result[3]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[4]!.character, result[4]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[5]!.character, result[5]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[6]!.character, result[6]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[7]!.character, result[7]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[8]!.character, result[8]!.rarity, isMD)" />
+        <component :is="renderImgComponent(result[9]!.character, result[9]!.rarity, isMD)" />
       </NFlex>
     </div>
     <div v-else>
@@ -161,5 +142,15 @@ async function doGacha() {
       4: {{ count4 }}<br>
       3: {{ count3 }}<br>
     </div>
+    <Teleport to="#teleports">
+      <div>
+        <component
+          v-for="c in charImg"
+          :key="c.character"
+          v-show="false"
+          :is="renderImgComponent(c.character, c.rarity, isMD)"
+        />
+      </div>
+    </Teleport>
   </div>
 </template>
