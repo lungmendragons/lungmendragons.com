@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  compatibilityDate: "2025-01-29",
+  compatibilityDate: "2025-04-07",
   future: {
     /* Nuxt 4 pre-release opt-in. Doing this now saves the bullshit of migrating to v4 later.
        Most significant change is the new directory structure, which is already implemented.
@@ -129,14 +129,14 @@ export default defineNuxtConfig({
         "top-level-await": true,
       },
     },
-    optimizeDeps: {
-      esbuildOptions: {
-        target: "esnext",
-      }
-    },
-    build: {
-      target: "esnext",
-    },
+    // optimizeDeps: {
+    //   esbuildOptions: {
+    //     target: "esnext",
+    //   }
+    // },
+    // build: {
+    //   target: "esnext",
+    // },
     plugins: [
       Icons({
         compiler: "vue3",
