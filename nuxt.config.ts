@@ -212,9 +212,4 @@ export default defineNuxtConfig({
       "sm": 576,
     },
   },
-  runtimeConfig: {
-    ytApiToken: process.env.YT_API_TOKEN,
-    // gsheetReg: process.env.NUXT_GSHEET_REG,
-    // gsheetQf: process.env.NUXT_GSHEET_QF,
-  },
 });
