@@ -46,11 +46,12 @@ export default defineNuxtConfig({
         target: "esnext",
       },
     },
-    scheduledTasks: {
-      "*/5 * * * *": [ "gsheet", "yt-recent" ],
-    },
+    // These straight up do not work but will be useful if they ever do.
+    // scheduledTasks: {
+    //   "*/5 * * * *": [ "gsheet", "yt-recent" ],
+    // },
     experimental: {
-      tasks: true,
+      // tasks: true,
       openAPI: true,
     },
   },
