@@ -2,11 +2,13 @@
 import { createGachaSession, singleRoll, tenRoll, type BannerInfo, type RollResult } from "rs-app";
 import { useMediaQuery } from "@vueuse/core";
 import { renderImgComponent, bg } from "~/utils/gachasim";
+import { defineAsyncComponent } from "vue";
 
 definePageMeta({
   auth: { only: "member" },
 });
 
+const GachaSimPreload = defineAsyncComponent(() => import("~/components/GachaSim/Preload.vue"));
 const mounted = ref(false);
 onMounted(() => mounted.value = true);
 
@@ -150,7 +152,9 @@ function reset() {
 
 <template>
   <div>
-    <LazyGachaSimPreload :hydrate-when="mounted" />
+    <!-- Nuxt 3.16 feature - re-enable when bug fixes allow upgrading -->
+    <!-- <LazyGachaSimPreload :hydrate-when="mounted" /> -->
+    <GachaSimPreload />
     <div v-if="history.length > 0">
       <NFlex
         v-if="rollType === '10'"
