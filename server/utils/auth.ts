@@ -8,7 +8,6 @@ export function serverAuth() {
     _auth = betterAuth({
       database: {
         dialect: new D1Dialect({
-          // @ts-expect-error dump() missing from import
           database: hubDatabase(),
         }),
         type: "sqlite",
@@ -82,6 +81,7 @@ export function serverAuth() {
         admin(),
         username(),
       ],
+      secret: process.env.BETTER_AUTH_SECRET,
     });
   }
   return _auth;
