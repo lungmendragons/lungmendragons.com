@@ -5,18 +5,25 @@ definePageMeta({
 
 const message = useMessage();
 const loading = ref(false);
+const id = ref("");
 
-function fetchYT() {
+function updateYT() {
   loading.value = true;
-  $fetch("/api/pages/home/yt", { method: "PUT" })
+  $fetch("/api/pages/home/yt", {
+    method: "PUT",
+    body: id.value,
+  })
     .then((res) => {
       if (res === "success") {
         message.success("Homepage YouTube video updated.");
         loading.value = false;
+      } else if (res === "error") {
+        message.error("Failed to update homepage YouTube video - returned error.");
+        loading.value = false;
       }
     })
     .catch((err) => {
-      message.error("Failed to update homepage YouTube video.");
+      message.error("Failed to update homepage YouTube video - error caught.");
       console.error(err);
       loading.value = false;
     });
@@ -25,8 +32,10 @@ function fetchYT() {
 
 <template>
   <div>
-    <NButton @click="fetchYT" :loading="loading">
-      /api/pages/home/yt
+    youtube id for homepage (ID ONLY - NOT THE FULL URL)
+    <NInput v-model:value="id" />
+    <NButton @click="updateYT" :loading="loading">
+      update
     </NButton>
   </div>
 </template>
