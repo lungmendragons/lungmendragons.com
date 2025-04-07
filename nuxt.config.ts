@@ -212,8 +212,8 @@ export default defineNuxtConfig({
     },
   },
   runtimeConfig: {
-    ytApiToken: process.env.NUXT_YOUTUBE_API_TOKEN,
-    gsheetReg: process.env.NUXT_GSHEET_REG,
-    gsheetQf: process.env.NUXT_GSHEET_QF,
+    ytApiToken: process.env.YT_API_TOKEN,
+    // gsheetReg: process.env.NUXT_GSHEET_REG,
+    // gsheetQf: process.env.NUXT_GSHEET_QF,
   },
 });
