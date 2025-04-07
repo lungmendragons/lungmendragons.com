@@ -17,6 +17,9 @@ function updateYT() {
       if (res === "success") {
         message.success("Homepage YouTube video updated.");
         loading.value = false;
+      } else if (res === "empty") {
+        message.error("Failed to update homepage YouTube video - item list empty.");
+        loading.value = false;
       } else if (res === "error") {
         message.error("Failed to update homepage YouTube video - returned error.");
         loading.value = false;

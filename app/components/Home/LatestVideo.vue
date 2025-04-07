@@ -10,7 +10,7 @@ async function getLatestVideo() {
   const recent = await $fetch("/api/pages/home/yt", { method: "GET" }) as any;
   if (recent.items && recent.items.length > 0) {
     const v = recent.items[0];
-    ytEmbed.value = `https://www.youtube.com/embed/${v.snippet.resourceId.videoId}`;
+    ytEmbed.value = `https://www.youtube.com/embed/${v.id}`;
     ytTitle.value = v.snippet.title;
     ytDesc.value = v.snippet.description;
     ytDate.value = v.snippet.publishedAt;
