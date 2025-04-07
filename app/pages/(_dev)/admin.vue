@@ -5,16 +5,16 @@ definePageMeta({
 
 const message = useMessage();
 const loading = ref(false);
-
-const recent = await $fetch("/api/pages/home/yt", { method: "GET" }) as any;
-const updated = ref();
+const id = ref("");
 
 function updateYT() {
   loading.value = true;
-  $fetch("/api/pages/home/yt", { method: "PUT" })
+  $fetch("/api/pages/home/yt", {
+    method: "PUT",
+    body: id.value,
+  })
     .then((res) => {
-      if (res.kind === "youtube#playlistItemListResponse") {
-        updated.value = res;
+      if (res === "success") {
         message.success("Homepage YouTube video updated.");
         loading.value = false;
       } else if (res === "error") {
@@ -31,22 +31,13 @@ function updateYT() {
 </script>
 
 <template>
-  <div>
+  <NFlex vertical class="w-[300px]">
+    youtube id for homepage
+    <br>
+    (ID ONLY - NOT THE FULL URL)
+    <NInput v-model:value="id" />
     <NButton @click="updateYT" :loading="loading">
       update
     </NButton>
-    <div class="my-4">
-      Current homepage video:
-      <br>
-      <span class="font-bold">
-        {{ recent.items[0].snippet.title }}
-      </span>
-      <br>
-      Newly updated homepage video:
-      <br>
-      <span class="font-bold">
-        {{ updated ? updated.items[0].snippet.title : "--" }}
-      </span>
-    </div>
-  </div>
+  </NFlex>
 </template>
