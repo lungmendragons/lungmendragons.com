@@ -49,42 +49,6 @@ function sidebarMenuMain(linkComponent: Component): MenuOption[] {
       icon: renderIcon(TablerHome),
     },
     {
-      label: () => h(
-        linkComponent,
-        { to: "/sgl2" },
-        () => h(
-          NMarquee,
-          null,
-          {
-            default: () => h(
-              "div",
-              {
-                style: {
-                  marginRight: "1rem",
-                  background: "linear-gradient(0deg, #7c99ec 40%, grey 70%)",
-                  "-webkit-background-clip": "text",
-                  "-webkit-text-fill-color": "transparent",
-                },
-              },
-              { default: () => "Skywalking Global League #2" },
-            )
-          },
-        ),
-      ),
-      key: "sgl2",
-      icon: () => h(
-        "img",
-        {
-          src: "/ld-events/sgl2/icon2.png",
-          style: {
-            width: "1.125rem",
-            marginTop: "1px",
-            filter: "drop-shadow(0 0 1px black)",
-          },
-        },
-      ),
-    },
-    {
       label: "Lungmen Dragons",
       key: "about",
       icon: () => h(
@@ -115,6 +79,42 @@ function sidebarMenuMain(linkComponent: Component): MenuOption[] {
           key: "events-archive",
           icon: renderIcon(HeroiconsOutlineLibrary),
           children: [
+            {
+              label: () => h(
+                linkComponent,
+                { to: "/sgl2" },
+                () => h(
+                  NMarquee,
+                  null,
+                  {
+                    default: () => h(
+                      "div",
+                      {
+                        style: {
+                          marginRight: "1rem",
+                          // background: "linear-gradient(0deg, #7c99ec 40%, grey 70%)",
+                          // "-webkit-background-clip": "text",
+                          // "-webkit-text-fill-color": "transparent",
+                        },
+                      },
+                      { default: () => "Skywalking Global League #2" },
+                    )
+                  },
+                ),
+              ),
+              key: "sgl2",
+              icon: () => h(
+                "img",
+                {
+                  src: "/ld-events/sgl2/icon2.png",
+                  style: {
+                    width: "1.125rem",
+                    marginTop: "1px",
+                    filter: "drop-shadow(0 0 1px black)",
+                  },
+                },
+              ),
+            },
             {
               label: () => h(
                 linkComponent,
@@ -156,6 +156,52 @@ function sidebarMenuGameResources(linkComponent: Component): MenuOption[] {
       children: [
         {
           label: () => h(
+            "div",
+            {
+              style: {
+                display: "flex",
+                flexDirection: "column",
+              }
+            },
+            [
+              h("span", null, "Lungmen Toolbox"),
+              h(
+                "span",
+                {
+                  style: {
+                    fontSize: "0.5rem",
+                    backgroundColor: "#fd03",
+                    width: "fit-content",
+                    padding: "0 0.2rem",
+                    marginBottom: "0.25rem",
+                  }
+                },
+                "NEW",
+              ),
+            ]
+          ),
+          key: "lungmen-toolbox",
+          icon: renderIcon(HeroiconsWrenchScrewdriver),
+          children: [
+            {
+              label: () => h(
+                linkComponent,
+                { to: "/gachasim" },
+                () => "Gacha Simulator",
+              ),
+              key: "gachasim",
+              icon: () => h(
+                "img",
+                {
+                  src: "/official/orundum.png",
+                  style: { width: "1.375rem", marginTop: "2px" },
+                },
+              ),
+            },
+          ]
+        },
+        {
+          label: () => h(
             linkComponent,
             { to: "/guides" },
             () => "Guides",
@@ -180,13 +226,6 @@ function sidebarMenuGameResources(linkComponent: Component): MenuOption[] {
           ),
           key: "guesser",
           icon: renderIcon(HeroiconsPuzzlePiece),
-        },
-        {
-          label: "Lungmen Toolbox",
-          key: "lungmen-toolbox",
-          icon: renderIcon(HeroiconsWrenchScrewdriver),
-          disabled: true,
-          // extra: "[WIP]",
         },
       ],
     },
