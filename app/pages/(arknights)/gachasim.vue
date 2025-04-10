@@ -19,7 +19,7 @@ interface GachaResult extends RollResult {
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const message = useMessage();
 
-const gachaSession = createGachaSession(bannerInfo);
+const gacha = { session: createGachaSession(bannerInfo) };
 const rollType = ref<"1" | "10">("10");
 const totalPulls = ref(0);
 const pity = ref(0);
@@ -30,13 +30,13 @@ const count6 = computed(() => history.value.filter((x) => x.rarity === 6).length
 const count5 = computed(() => history.value.filter((x) => x.rarity === 5).length);
 const count4 = computed(() => history.value.filter((x) => x.rarity === 4).length);
 const count3 = computed(() => history.value.filter((x) => x.rarity === 3).length);
-const wallet = ref<number | null>(0);
-const walletTemp = ref<number | null>();
+const wallet = ref(0);
 const paused = ref(false);
 
 const options = ref({
   showStar: 0b1111,
-  infiniteMoney: true,
+  // infiniteMoney: true,
+  kazdelKasino: true,
   pauseAt6: false,
   pauseValue: 1,
 });
@@ -48,7 +48,7 @@ const pauseValue = [
 ];
 
 async function gacha10() {
-  if (!options.value.infiniteMoney && wallet.value !== null) {
+  if (options.value.kazdelKasino && wallet.value !== null) {
     if (wallet.value < 100) {
       message.error("Not enough money!");
       return;
@@ -58,7 +58,7 @@ async function gacha10() {
   }
 
   rollType.value = "10";
-  const res = tenRoll(gachaSession);
+  const res = tenRoll(gacha.session);
   result10.value = res;
   res.forEach((c) => processRoll(c));
 
@@ -69,7 +69,7 @@ async function gacha10() {
 }
 
 async function gacha1() {
-  if (!options.value.infiniteMoney && wallet.value !== null) {
+  if (options.value.kazdelKasino && wallet.value !== null) {
     if (wallet.value < 10) {
       message.error("Not enough money!");
       return;
@@ -79,7 +79,7 @@ async function gacha1() {
   }
 
   rollType.value = "1";
-  const res = singleRoll(gachaSession);
+  const res = singleRoll(gacha.session);
   result1.value = res;
   processRoll(res);
 }
@@ -128,20 +128,8 @@ function reset() {
   result1.value = undefined;
   result10.value = [];
   history.value = [];
+  gacha.session = createGachaSession(bannerInfo);
 }
-
-watch(() => options.value.infiniteMoney, (bool) => {
-  if (bool) {
-    walletTemp.value = wallet.value;
-    wallet.value = null;
-  } else if (walletTemp.value) {
-    wallet.value = walletTemp.value;
-    walletTemp.value = null;
-  } else {
-    wallet.value = 0;
-    walletTemp.value = null;
-  }
-}, { immediate: true });
 </script>
 
 <template>
@@ -201,7 +189,7 @@ watch(() => options.value.infiniteMoney, (bool) => {
             class="w-28"
             :disabled="!mounted || paused"
             @click="gacha1">
-            x1
+            {{ options.kazdelKasino ? "x1 ($10)" : "x1" }}
           </NButton>
           <NButton
             type="primary"
@@ -209,10 +197,10 @@ watch(() => options.value.infiniteMoney, (bool) => {
             class="w-36"
             :disabled="!mounted || paused"
             @click="gacha10">
-            x10
+            {{ options.kazdelKasino ? "x10 ($100)" : "x10" }}
           </NButton>
           <NInputNumber
-            :disabled="options.infiniteMoney"
+            v-show="options.kazdelKasino"
             :show-button="false"
             :max="1000000"
             placeholder="∞"
@@ -349,10 +337,16 @@ watch(() => options.value.infiniteMoney, (bool) => {
             </NTag>
           </NSpace>
           <NCheckbox
-            v-model:checked="options.infiniteMoney"
+            v-model:checked="options.kazdelKasino"
             :size="isMD ? 'medium' : 'small'"
             class="text-xs md:text-sm">
-            Infinite money
+            <!-- Infinite money -->
+            <div :style="{
+              filter: options.kazdelKasino ? 'drop-shadow(0 0 3px crimson)' : 'none',
+              fontWeight: options.kazdelKasino ? 'bold' : 'normal',
+            }">
+              Kazdel Kasino
+            </div>
           </NCheckbox>
           <NCheckbox
             v-model:checked="options.pauseAt6"
