@@ -78,7 +78,7 @@ async function handleSignIn(event: MouseEvent) {
     });
   } else {
     await navigateTo("/profile");
-    notification.success({ content: "Signed in." });
+    notification.success({ content: "Signed in.", duration: 5000 });
   };
 
   loading.value = false;

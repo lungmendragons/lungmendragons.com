@@ -119,7 +119,7 @@ async function handleSignUp(event: MouseEvent) {
     }
   } else {
     await navigateTo("/profile");
-    notification.success({ content: "Signed up." });
+    notification.success({ content: "Signed up.", duration: 5000 });
   }
 
   loading.value = false;
