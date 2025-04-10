@@ -37,6 +37,11 @@ useSeoMeta({
   twitterCard: "summary",
 });
 
+definePageMeta({
+  title: () => `${requested.value.title} | Lungmen Dragons`,
+  description: () => requested.value.description,
+})
+
 onMounted(() => {
   // todo: improve this fetch, ugly as hell, feels inefficient
   $fetch(`/api/pages/guides/endfield/${slug}`)
