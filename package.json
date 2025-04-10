@@ -14,7 +14,8 @@
     "deploy": "npx nuxthub deploy",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "build:wasm": "wasm-pack build rs-app --release --no-pack --out-name \"rs_app_impl\""
+    "build:wasm": "wasm-pack build rs-app --release --no-pack --out-name \"rs_app_impl\"",
+    "dev:inf": "infisical run --env=dev --path=/env -- pnpm run dev"
   },
   "dependencies": {
     "@mdit-vue/plugin-headers": "^2.1.3",
