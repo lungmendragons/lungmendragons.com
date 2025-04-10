@@ -1,25 +1,50 @@
 <script setup lang="ts">
-import { createGachaSession, singleRoll, tenRoll, type RollResult } from "rs-app";
+import { createGachaSession, singleRoll, tenRoll, type RollResult, type GachaSession, type BannerInfo } from "rs-app";
 import { useMediaQuery, promiseTimeout } from "@vueuse/core";
-import { bannerInfo, renderImgComponent, bg, show } from "~/utils/gachasim";
-import MaterialSymbolsPause from '~icons/material-symbols/pause';
+import { getCNBannerData, renderImgComponent, bg, show } from "~/utils/gachasim";
+import { NBadge, NPopover, type TreeSelectOption, type TreeSelectOverrideNodeClickBehaviorReturn } from "naive-ui";
+import MaterialSymbolsPause from "~icons/material-symbols/pause";
+import type { VNodeChild } from "vue";
 
-definePageMeta({
-  auth: { only: "member" },
+useSeoMeta({
+  title: "Gacha Simulator | Lungmen Dragons",
 });
 
-const mounted = ref(false);
-onMounted(() => mounted.value = true);
-
 interface GachaResult extends RollResult {
+  name: string;
   pull: number;
   pity: number;
 };
 
+const mounted = ref(false);
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const message = useMessage();
 
-const gacha = { session: createGachaSession(bannerInfo) };
+const activeBanner = ref<{
+  id: string;
+  data: BannerInfo;
+}>({
+  id: "SINGLE_55_0_1",
+  data: {
+    rate_up: {
+      six: [],
+      five: [],
+      four: [],
+      three: [],
+    },
+    off_banner: {
+      six: [],
+      five: [],
+      four: [],
+      three: [],
+    },
+  },
+});
+
+const gacha: { session: GachaSession } = {
+  session: createGachaSession(activeBanner.value.data),
+};
+
 const rollType = ref<"1" | "10">("10");
 const totalPulls = ref(0);
 const pity = ref(0);
@@ -35,7 +60,6 @@ const paused = ref(false);
 
 const options = ref({
   showStar: 0b1111,
-  // infiniteMoney: true,
   kazdelKasino: true,
   pauseAt6: false,
   pauseValue: 1,
@@ -46,6 +70,91 @@ const pauseValue = [
   { label: "2", value: 2 },
   { label: "3+", value: 3 },
 ];
+
+let banners: Array<{
+  id: string;
+  offBanners: any[];
+  rateUp: any[];
+}>;
+
+let characters: {
+  [key: string]: string;
+};
+
+let bannerTree: Array<{
+  label: string;
+  key: string;
+  children: Array<{ label: string; key: string }>;
+}>;
+
+let bannerPreload: RollResult[];
+
+onMounted(() => {
+  getCNBannerData().then((res) => {
+    banners = res.banners;
+    characters = res.characters;
+    // const bannerTypes = [...new Set(banners.map((b) => b.id.split("_")[0]))];
+    const bannerTypes = [ "NORM", "SINGLE", "DOUBLE", "LIMITED", "LINKAGE" ];
+    bannerTree = Array.from(bannerTypes as string[], (type: string) => {
+      return {
+        label: type,
+        key: type,
+        children: banners.filter((b) => b.id.startsWith(type)).map((b) => {
+          return {
+            label: b.id,
+            key: b.id,
+          };
+        }),
+      };
+    });
+    loadBanner(activeBanner.value.id);
+    mounted.value = true;
+  })
+});
+
+function loadBanner(id: string) {
+  if (!bannerTree) return;
+
+  paused.value = true;
+  const banner = banners.find((b) => b.id === id);
+
+  if (banner) {
+    const findRankUp = (r: number) => banner.rateUp.find((c) => c.rarityRank === r);
+    const findRankOff = (r: number) => banner.offBanners.find((c) => c.rarityRank === r);
+
+    activeBanner.value.id = banner.id;
+    const data = activeBanner.value.data;
+    data.rate_up.six = findRankUp(5) ? findRankUp(5).charIdList : [];
+    data.rate_up.five = findRankUp(4) ? findRankUp(4).charIdList : [];
+    data.rate_up.four = findRankUp(3) ? findRankUp(3).charIdList : [];
+    data.rate_up.three = findRankUp(2) ? findRankUp(2).charIdList : [];
+    data.off_banner.six = findRankOff(5) ? findRankOff(5).charIdList : [];
+    data.off_banner.five = findRankOff(4) ? findRankOff(4).charIdList : [];
+    data.off_banner.four = findRankOff(3) ? findRankOff(3).charIdList : [];
+    data.off_banner.three = findRankOff(2) ? findRankOff(2).charIdList : [];
+
+    bannerPreload = [
+      data.off_banner.six.map(x => {
+        return { character: x, rarity: 6 };
+      }),
+      data.off_banner.five.map(x => {
+        return { character: x, rarity: 5 };
+      }),
+      data.off_banner.four.map(x => {
+        return { character: x, rarity: 4 };
+      }),
+      data.off_banner.three.map(x => {
+        return { character: x, rarity: 3 };
+      }),
+    ].flat();
+
+    gacha.session = createGachaSession(activeBanner.value.data);
+    message.success(`Loaded: ${banner.id}`);
+    paused.value = false;
+  } else {
+    message.error("Failed to load banner.");
+  }
+}
 
 async function gacha10() {
   if (options.value.kazdelKasino && wallet.value !== null) {
@@ -89,6 +198,7 @@ function processRoll(c: RollResult) {
 
   const pull: GachaResult = {
     ...c,
+    name: characters[c.character] ?? c.character,
     pull: totalPulls.value,
     pity: -1,
   };
@@ -128,13 +238,59 @@ function reset() {
   result1.value = undefined;
   result10.value = [];
   history.value = [];
-  gacha.session = createGachaSession(bannerInfo);
+  gacha.session = createGachaSession(activeBanner.value.data);
+}
+
+function override(info: { option: TreeSelectOption }): TreeSelectOverrideNodeClickBehaviorReturn {
+  return info.option.children ? "toggleExpand" : "default";
+}
+
+function treePop(info: {
+  option: TreeSelectOption;
+  checked: boolean;
+  selected: boolean;
+}): VNodeChild {
+  const banner = banners.find((b) => b.id === info.option.key);
+  const up6 = banner?.rateUp.find((c) => c.rarityRank === 5)?.charIdList.map((c: string) => characters[c]) ?? [];
+  const up5 = banner?.rateUp.find((c) => c.rarityRank === 4)?.charIdList.map((c: string) => characters[c]) ?? [];
+  const up4 = banner?.rateUp.find((c) => c.rarityRank === 3)?.charIdList.map((c: string) => characters[c]) ?? [];
+  return h(
+    NPopover,
+    {
+      trigger: "hover",
+      placement: "left",
+      showArrow: true,
+      style: {
+        backgroundColor: "#9993",
+        fontSize: "0.75rem",
+        padding: "0.25rem 0.5rem",
+      },
+    },
+    {
+      default: () => info.option.children
+        ? null
+        : info.option.label,
+      trigger: () => info.option.children
+        ? info.option.label
+        : h(
+            "div",
+            { class: "text-xs" },
+            [
+              h("div", null, [ h(NBadge, { value: "6★", color: `${bg(6)}66`, style: { paddingRight: "0.25rem" } }), up6.join(", ") ]),
+              h("div", null, [ h(NBadge, { value: "5★", color: `${bg(5)}66`, style: { paddingRight: "0.25rem" } }), up5.join(", ") ]),
+              up4.length
+                ? h("div", null, [ h(NBadge, { value: "4★", color: `${bg(4)}66`, style: { paddingRight: "0.25rem" } }), up4.join(", ") ])
+                : null,
+            ],
+          ),
+    },
+  )
 }
 </script>
 
 <template>
   <div>
-    <LazyGachaSimPreload :hydrate-when="mounted" />
+    <LazyGachaSimPreload :preload="bannerPreload" :hydrate-when="mounted" />
     <div v-if="history.length > 0">
       <NFlex
         v-if="rollType === '10'"
@@ -230,14 +386,14 @@ function reset() {
             <NVirtualList
               :items="historyFiltered()"
               :item-size="32"
-              class="max-h-64 md:max-h-96">
+              class="max-h-96">
               <template #default="{ item }">
                 <NFlex
                   justify="space-between"
                   class="p-0.5 md:p-1 m-0.5 mr-[0.7rem]"
                   :style="{ backgroundColor: `${bg(item.rarity)}44` }">
                   <div class="min-w-8 md:min-w-12 text-center text-xs md:text-sm">{{ item.pull }}</div>
-                  <div class="min-w-8 md:min-w-12 text-center text-xs md:text-sm">{{ item.character }}</div>
+                  <div class="min-w-8 md:min-w-12 text-center text-xs md:text-sm">{{ item.name }}</div>
                   <div class="min-w-8 md:min-w-12 text-center text-xs md:text-sm">{{ item.rarity === 6 ? item.pity : "" }}</div>
                 </NFlex>
               </template>
@@ -248,6 +404,13 @@ function reset() {
           vertical
           size="small"
           class="w-32 md:w-64 p-1">
+          <NTreeSelect
+            :options="bannerTree"
+            :override-default-node-click-behavior="override"
+            :render-label="treePop"
+            default-value="SINGLE_55_0_1"
+            @update:value="loadBanner"
+          />
           <NFlex
             justify="space-between"
             class="w-full md:w-fit px-1 md:px-2 py-0.5 rounded"
@@ -281,7 +444,7 @@ function reset() {
             <div class="text-xs md:text-sm text-center w-12 md:w-16">{{ totalPulls ? (100 * count3 / totalPulls).toFixed(2) : "0.00" }}%</div>
           </NFlex>
           <NFlex class="my-2">
-            <div class="w-16">
+            <div class="w-12">
               <div class="pb-1.5">
                 Pulls:
               </div>
@@ -340,7 +503,6 @@ function reset() {
             v-model:checked="options.kazdelKasino"
             :size="isMD ? 'medium' : 'small'"
             class="text-xs md:text-sm">
-            <!-- Infinite money -->
             <div :style="{
               filter: options.kazdelKasino ? 'drop-shadow(0 0 3px crimson)' : 'none',
               fontWeight: options.kazdelKasino ? 'bold' : 'normal',

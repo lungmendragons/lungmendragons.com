@@ -1,6 +1,6 @@
 import { NuxtImg } from "#components";
 import type { CSSProperties, VNode } from "vue";
-import type { RollResult, BannerInfo } from "rs-app";
+import type { RollResult } from "rs-app";
 
 export function bg(r: number): string {
   switch (r) {
@@ -33,111 +33,48 @@ function tenStyle(r: number, md: boolean): CSSProperties {
 
 export function renderImgComponent(c: RollResult, md: boolean): VNode {
   return h(NuxtImg, {
-    src: `https://lungmendragons.com/images/akresource/charpor/${c.character}_1.png`,
+    src: `https://raw.githubusercontent.com/fexli/ArknightsResource/refs/heads/main/charpor/${c.character}_1.png`,
     style: tenStyle(c.rarity, md),
   });
 }
 
-export const charImg = [
-  { name: "Hibiscus", character: "char_120_hibisc", rarity: 3 },
-  { name: "Lava", character: "char_121_lava", rarity: 3 },
-  { name: "Beagle", character: "char_122_beagle", rarity: 3 },
-  { name: "Fang", character: "char_123_fang", rarity: 3 },
-  { name: "Kroos", character: "char_124_kroos", rarity: 3 },
-  { name: "Gitano", character: "char_109_fmout", rarity: 4 },
-  { name: "Deepcolor", character: "char_110_deepcl", rarity: 4 },
-  { name: "Myrrh", character: "char_117_myrrh", rarity: 4 },
-  { name: "Shirayuki", character: "char_118_yuki", rarity: 4 },
-  { name: "Meteor", character: "char_126_shotst", rarity: 4 },
-  { name: "Dobermann", character: "char_130_doberm", rarity: 4 },
-  { name: "May", character: "char_133_mm", rarity: 4 },
-  { name: "Beehunter", character: "char_137_brownb", rarity: 4 },
-  { name: "(141_nights)", character: "char_141_nights", rarity: 4 },
-  { name: "Scavenger", character: "char_149_scave", rarity: 4 },
-  { name: "Cuora", character: "char_150_snakek", rarity: 4 },
-  { name: "Sora", character: "char_101_sora", rarity: 5 },
-  { name: "Texas", character: "char_102_texas", rarity: 5 },
-  { name: "Franka", character: "char_106_franka", rarity: 5 },
-  { name: "Liskarm", character: "char_107_liskam", rarity: 5 },
-  { name: "Silence", character: "char_108_silent", rarity: 5 },
-  { name: "(115_headbr)", character: "char_115_headbr", rarity: 5 },
-  { name: "Ptilopsis", character: "char_128_plosis", rarity: 5 },
-  { name: "Blue Poison", character: "char_129_bluep", rarity: 5 },
-  { name: "Astgenne", character: "char_135_halo", rarity: 5 },
-  { name: "Lappland", character: "char_140_whitew", rarity: 5 },
-  { name: "Specter", character: "char_143_ghost", rarity: 5 },
-  { name: "Projekt Red", character: "char_144_red", rarity: 5 },
-  { name: "Provence", character: "char_145_prove", rarity: 5 },
-  { name: "Nearl", character: "char_148_nearl", rarity: 5 },
-  { name: "Kal'tsit", character: "char_003_kalts", rarity: 6 },
-  { name: "Ch'en", character: "char_010_chen", rarity: 6 },
-  { name: "Blaze", character: "char_017_huang", rarity: 6 },
-  { name: "Exusiai", character: "char_103_angel", rarity: 6 },
-  { name: "Siege", character: "char_112_siege", rarity: 6 },
-  { name: "(113_cqbw)", character: "char_113_cqbw", rarity: 6 },
-  { name: "Ifrit", character: "char_134_ifrit", rarity: 6 },
-  { name: "Hoshiguma", character: "char_136_hsguma", rarity: 6 },
-  { name: "Shining", character: "char_147_shining", rarity: 6 },
-  { name: "Muelsyse", character: "char_249_mlyss", rarity: 6 },
-];
+export async function getCNBannerData(): Promise<{
+  banners: Array<{ id: string; offBanners: any[]; rateUp: any[] }>;
+  characters: { [key: string]: string };
+}> {
+  const weedy: { gachaPoolClient: any[] } = await $fetch("https://weedy.prts.wiki/gacha_table.json");
+  const banners = weedy.gachaPoolClient.map((b: any) => {
+    return {
+      id: b.gachaPoolId,
+      offBanners: b.gachaPoolDetail.detailInfo.availCharInfo.perAvailList,
+      rateUp: b.gachaPoolDetail.detailInfo.upCharInfo
+        ? b.gachaPoolDetail.detailInfo.upCharInfo.perCharList
+        : [],
+      // objList: b.gachaPoolDetail.detailInfo.gachaObjList,
+    };
+  });
 
-export const bannerInfo: BannerInfo = {
-  rate_up: {
-    six: [
-      "char_249_mlyss",
-      ],
-    five: [
-      "char_135_halo",
-      "char_108_silent",
-    ],
-    four: [],
-    three: [],
-  },
-  off_banner: {
-    six: [
-      "char_003_kalts",
-      "char_010_chen",
-      "char_017_huang",
-      "char_103_angel",
-      "char_112_siege",
-      "char_113_cqbw",
-      "char_134_ifrit",
-      "char_136_hsguma",
-      "char_147_shining",
-    ],
-    five: [
-      "char_101_sora",
-      "char_102_texas",
-      "char_106_franka",
-      "char_107_liskam",
-      "char_115_headbr",
-      "char_128_plosis",
-      "char_129_bluep",
-      "char_140_whitew",
-      "char_143_ghost",
-      "char_144_red",
-      "char_145_prove",
-      "char_148_nearl",
-    ],
-    four: [
-      "char_109_fmout",
-      "char_110_deepcl",
-      "char_117_myrrh",
-      "char_118_yuki",
-      "char_126_shotst",
-      "char_130_doberm",
-      "char_133_mm",
-      "char_137_brownb",
-      "char_141_nights",
-      "char_149_scave",
-      "char_150_snakek",
-    ],
-    three: [
-      "char_120_hibisc",
-      "char_121_lava",
-      "char_122_beagle",
-      "char_123_fang",
-      "char_124_kroos",
-    ],
-  },
-};
+  const characterTableCNRaw: any = await $fetch("https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/refs/heads/master/zh_CN/gamedata/excel/character_table.json")
+  const characterTableCN: { [key: string]: any } = JSON.parse(characterTableCNRaw);
+  const characterIDs: string[] = Object.keys(characterTableCN);
+  const appellations: { [key: string]: string } = {
+    "ShiraYuki": "Shirayuki",
+    "Гум": "Gummy",
+    "Зима": "Zima",
+    "Истина": "Istina",
+    "Роса": "Rosa",
+    "Позёмка": "Pozëmka",
+    "Лето": "Leto",
+  };
+
+  const chars: Array<[string, string]> = characterIDs.map((c: string) => {
+    const a = characterTableCN[c].appellation;
+    return a in appellations
+      ? [ c, appellations[a] ]
+      : [ c, a ];
+  });
+
+  const characters: { [key: string]: string } = Object.fromEntries(chars);
+
+  return { banners, characters };
+}
