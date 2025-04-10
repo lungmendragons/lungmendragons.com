@@ -2,13 +2,23 @@ import { NuxtImg } from "#components";
 import type { CSSProperties, VNode } from "vue";
 import type { RollResult } from "rs-app";
 
-export function bg(r: number) {
+export function bg(r: number): string {
   switch (r) {
     case 3: return "#3495eb";
     case 4: return "#dfbdf2";
     case 5: return "#fff0b8";
     case 6: return "#ed7b18";
     default: return "#000000";
+  }
+}
+
+export function show(r: number, show: number): boolean {
+  switch (r) {
+    case 3: return (show & 0b0001) > 0;
+    case 4: return (show & 0b0010) > 0;
+    case 5: return (show & 0b0100) > 0;
+    case 6: return (show & 0b1000) > 0;
+    default: return false;
   }
 }
 
