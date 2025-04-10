@@ -19,6 +19,7 @@ interface GachaResult extends RollResult {
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const message = useMessage();
 
+const gachaSession = createGachaSession(bannerInfo);
 const rollType = ref<"1" | "10">("10");
 const totalPulls = ref(0);
 const pity = ref(0);
@@ -57,8 +58,7 @@ async function gacha10() {
   }
 
   rollType.value = "10";
-  const session = createGachaSession(bannerInfo);
-  const res = tenRoll(session);
+  const res = tenRoll(gachaSession);
   result10.value = res;
   res.forEach((c) => processRoll(c));
 
@@ -79,8 +79,7 @@ async function gacha1() {
   }
 
   rollType.value = "1";
-  const session = createGachaSession(bannerInfo);
-  const res = singleRoll(session);
+  const res = singleRoll(gachaSession);
   result1.value = res;
   processRoll(res);
 }
