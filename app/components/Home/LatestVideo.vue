@@ -1,4 +1,6 @@
 <script setup lang="ts">
+/* 2024-04-10 - Disabled temporarily due to broken API call
+
 import { NMarquee } from "naive-ui";
 
 const ytEmbed = ref("");
@@ -17,26 +19,26 @@ async function getLatestVideo() {
   }
 }
 
-onMounted(() => getLatestVideo());
+onMounted(() => getLatestVideo()); */
 </script>
 
 <template>
   <NCard size="small" class="mx-auto w-min">
-    <div class="text-lg leading-6 text-center font-black">
+    <!-- <div class="text-lg leading-6 text-center font-black">
       {{ ytTitle }}
     </div>
     <template #header>
       <div class="text-xs text-center">
         LATEST VIDEO | {{ new Date(Date.parse(ytDate)).toLocaleDateString() }}
       </div>
-    </template>
+    </template> -->
     <template #cover>
       <iframe
         credentialless
         class="mx-auto"
         width="800"
         height="450"
-        :src="ytEmbed"
+        src="https://www.youtube.com/embed/isfgBZHydS8"
         title="YouTube video player"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -44,13 +46,13 @@ onMounted(() => getLatestVideo());
         allowfullscreen
       />
     </template>
-    <template #footer>
+    <!-- <template #footer>
       <NMarquee>
         <div class="text-xs mr-12">
           {{ ytDesc }}
         </div>
       </NMarquee>
-    </template>
+    </template> -->
   </NCard>
 </template>
 
