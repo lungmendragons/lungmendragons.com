@@ -28,6 +28,13 @@ function getDateString(time: string): string {
 
 useSeoMeta({
   title: () => `${requested.value.title} | Lungmen Dragons`,
+  ogTitle: () => `${requested.value.title} | Lungmen Dragons`,
+  twitterTitle: () => `${requested.value.title} | Lungmen Dragons`,
+  description: () => requested.value.description,
+  ogDescription: () => requested.value.description,
+  twitterDescription: () => requested.value.description,
+  ogUrl: () => `https://lungmendragons.com/guides/${slug}`,
+  twitterCard: "summary",
 });
 
 onMounted(() => {
