@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { createGachaSession, singleRoll, tenRoll, type BannerInfo, type RollResult } from "rs-app";
+import { createGachaSession, singleRoll, tenRoll, type RollResult } from "rs-app";
 import { useMediaQuery, promiseTimeout } from "@vueuse/core";
-import { renderImgComponent, bg, show } from "~/utils/gachasim";
+import { bannerInfo, renderImgComponent, bg, show } from "~/utils/gachasim";
 import MaterialSymbolsPause from '~icons/material-symbols/pause';
 
 definePageMeta({
@@ -45,67 +45,6 @@ const pauseValue = [
   { label: "2", value: 2 },
   { label: "3+", value: 3 },
 ];
-
-const bannerInfo: BannerInfo = {
-  rate_up: {
-    six: [
-      "char_249_mlyss",
-      ],
-    five: [
-      "char_135_halo",
-      "char_108_silent",
-    ],
-    four: [],
-    three: [],
-  },
-  off_banner: {
-    six: [
-      "char_003_kalts",
-      "char_010_chen",
-      "char_017_huang",
-      "char_103_angel",
-      "char_112_siege",
-      "char_113_cqbw",
-      "char_134_ifrit",
-      "char_136_hsguma",
-      "char_147_shining",
-    ],
-    five: [
-      "char_101_sora",
-      "char_102_texas",
-      "char_106_franka",
-      "char_107_liskam",
-      "char_115_headbr",
-      "char_128_plosis",
-      "char_129_bluep",
-      "char_140_whitew",
-      "char_143_ghost",
-      "char_144_red",
-      "char_145_prove",
-      "char_148_nearl",
-    ],
-    four: [
-      "char_109_fmout",
-      "char_110_deepcl",
-      "char_117_myrrh",
-      "char_118_yuki",
-      "char_126_shotst",
-      "char_130_doberm",
-      "char_133_mm",
-      "char_137_brownb",
-      "char_141_nights",
-      "char_149_scave",
-      "char_150_snakek",
-    ],
-    three: [
-      "char_120_hibisc",
-      "char_121_lava",
-      "char_122_beagle",
-      "char_123_fang",
-      "char_124_kroos",
-    ],
-  },
-};
 
 async function gacha10() {
   if (!options.value.infiniteMoney && wallet.value !== null) {
