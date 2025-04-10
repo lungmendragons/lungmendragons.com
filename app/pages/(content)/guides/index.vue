@@ -32,9 +32,7 @@ onMounted(() => {
         const name = ref<string>("");
         const image = ref<string>("");
         $fetch(`/api/users/${guide.metadata.author}`).then((user) => {
-          // @ts-expect-error possibly null/not assignable/property does not exist
           name.value = user.name;
-          // @ts-expect-error as above
           image.value = user.image;
         });
 
