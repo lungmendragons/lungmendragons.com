@@ -12,9 +12,7 @@ const { slug, authorId, requested, isEndfield = false } = defineProps<{
   isEndfield?: boolean;
 }>();
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-
+const { user } = useAuth();
 const notification = useNotification();
 const showEdit = ref(false);
 const loadingEdit = ref(false);
@@ -27,7 +25,7 @@ const editPage = ref({
 async function handleConfirmEdit(event: Event) {
   event.preventDefault();
 
-  if (!session || loadingEdit.value)
+  if (!user.value || loadingEdit.value)
     return;
 
   loadingEdit.value = true;

@@ -2,9 +2,7 @@
 import { useMediaQuery } from "@vueuse/core";
 import { useNotifStore } from "~/stores/notifs";
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-
+const { user } = useAuth();
 // useMediaQuery is only called once
 const menuCollapse = useMediaQuery(
   mediaQuery.maxWidth.xl as string,
@@ -51,7 +49,7 @@ useRuntimeHook("page:loading:end", () => {
 });
 
 onMounted(() => {
-  if (session) {
+  if (user.value) {
     const dismissed = notifStore.getDismissed();
     $fetch("/api/notifs")
       .then((kvArray) => {

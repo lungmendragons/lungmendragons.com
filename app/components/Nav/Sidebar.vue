@@ -9,9 +9,7 @@ import MdiHeart from "~icons/mdi/heart";
 
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-
+const { user } = useAuth();
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const isLG = useMediaQuery(mediaQuery.minWidth.lg);
 const showSocials = useMediaQuery(mediaQuery.minHeight.md);
@@ -44,7 +42,7 @@ onBeforeMount(() => {
       <NMenu
         ref="menuInst"
         v-model:value="selectedKey"
-        :options="getSidebarMenu(drawer, session?.user.permissions)"
+        :options="getSidebarMenu(drawer, user?.permissions)"
         :root-indent="18"
         :indent="12"
         responsive

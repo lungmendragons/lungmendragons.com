@@ -24,7 +24,7 @@ declare module "vue-router" {
   }
 };
 
-const perms = {
+const perms: { [key: string]: number } = {
   user: 1,
   writer: 2,
   member: 4,
@@ -38,10 +38,8 @@ const perms = {
 // privilege hierarchy
 // todo: more intuitive perms, this works for now
 function hasPerm(value: number, perm: string) {
-  // @ts-expect-error implicit any
   if (!perms[perm])
     return false;
-  // @ts-expect-error implicit any
   return value & perms[perm];
 }
 
@@ -49,9 +47,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.meta?.auth === false)
     return;
 
-  const { client, options } = useAuth();
-  const { data: session } = await client.useSession(useFetch);
-  const loggedIn = computed(() => !!session.value);
+  const { options, fetchSession, user, loggedIn } = useAuth();
   const { only, redirectUserTo, redirectGuestTo, redirectUnauthorizedTo } = defu(to.meta?.auth, options);
 
   if (only && only === "guest" && loggedIn.value) {
@@ -62,7 +58,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // If client-side, fetch session between each navigation
   if (import.meta.client)
-    await client.useSession(useFetch);
+    await fetchSession();
 
   if (only && only !== "guest" && !loggedIn.value) {
     if (to.path === redirectGuestTo)
@@ -70,7 +66,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo(redirectGuestTo);
   }
 
-  if (only && only !== "guest" && session.value && !hasPerm(session.value.user.permissions, only)) {
+  if (only && only !== "guest" && user.value && !hasPerm(user.value?.permissions, only)) {
     if (to.path === redirectUnauthorizedTo)
       return; // Avoid infinite redirect
     return navigateTo(redirectUnauthorizedTo ?? "/401");

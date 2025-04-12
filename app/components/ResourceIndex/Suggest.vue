@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { FormInst } from "naive-ui";
 
+// eslint-disable-next-line ts/no-unused-vars
+const { client } = useAuth();
+type User = typeof client.$Infer.Session.user;
+
 const {
   modal,
-  session,
+  user,
 } = defineProps<{
   modal: any;
-  session: any;
+  user: Ref<User | undefined>;
 }>();
 
 const formRef = ref<FormInst | null>(null);
@@ -56,8 +60,8 @@ function doSubmit() {
     body: {
       data: formValue.value,
       user: {
-        id: session.value?.user.id,
-        name: session.value?.user.name,
+        id: user.value?.id,
+        name: user.value?.name,
       },
       time: Date.now(),
     },
@@ -79,7 +83,7 @@ function doSubmit() {
       and note that suggestions do not guarantee additions.
     </span>
     <NForm
-      v-if="session.value?.user.id"
+      v-if="user.value?.id"
       ref="formRef"
       :model="formValue"
       :rules="rules">

@@ -16,9 +16,8 @@ const moreThanXL = useMediaQuery(mediaQuery.minWidth.xl as string);
 const themeVars = useThemeVars();
 const showUserDrawer = ref(false);
 
-const { client, signOut } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-const loggedIn = computed(() => !!session.value);
+const { user, loggedIn } = useAuth();
+const { signOut } = useAuth();
 </script>
 
 <template>
@@ -54,11 +53,11 @@ const loggedIn = computed(() => !!session.value);
     <NFlex align="center" :style="{ margin: '0.5rem 1rem 0.5rem 0' }">
       <template v-if="loggedIn">
         <template v-if="moreThanLG">
-          {{ session?.user.name }}
+          {{ user?.name }}
         </template>
         <NAvatar
           round
-          :src="session?.user.image ?? undefined"
+          :src="user?.image ?? undefined"
           :style="{ cursor: 'pointer' }"
           @click="showUserDrawer = true"
         />
@@ -98,9 +97,9 @@ const loggedIn = computed(() => !!session.value);
             <template v-if="loggedIn">
               <NAvatar
                 round
-                :src="session?.user.image ?? undefined"
+                :src="user?.image ?? undefined"
               />
-              {{ session?.user.name }}
+              {{ user?.name }}
             </template>
             <template v-else>
               <NAvatar round @click="showUserDrawer = true">

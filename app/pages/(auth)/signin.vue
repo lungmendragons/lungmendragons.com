@@ -28,7 +28,6 @@ const rules = {
 };
 
 const loading = ref(false);
-
 const notification = useNotification();
 const { client } = useAuth();
 
@@ -57,24 +56,26 @@ async function handleSignIn(event: MouseEvent) {
     return;
   };
 
-  let data: any;
+  let _error: any;
 
   if (signInForm.value?.emailOrUsername.includes("@")) {
-    data = await client.signIn.email({
+    const { error } = await client.signIn.email({
       email: signInForm.value?.emailOrUsername,
       password: signInForm.value?.password,
     });
+    _error = error;
   } else {
-    data = await client.signIn.username({
+    const { error } = await client.signIn.username({
       username: signInForm.value?.emailOrUsername,
       password: signInForm.value?.password,
     });
+    _error = error;
   };
 
-  if (data.error) {
+  if (_error) {
     notification.error({
       title: "Sign in failed",
-      content: JSON.stringify(data.error),
+      content: JSON.stringify(_error),
     });
   } else {
     await navigateTo("/profile");

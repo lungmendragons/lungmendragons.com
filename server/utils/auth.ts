@@ -1,6 +1,85 @@
-import { betterAuth } from "better-auth";
+import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { D1Dialect } from "kysely-d1";
 import { admin, username } from "better-auth/plugins";
+
+const options = {
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 300,
+    }
+  },
+  user: {
+    additionalFields: {
+      permissions: {
+        type: "number",
+        required: true,
+        defaultValue: 1,
+        input: false,
+      },
+      flair: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+      youtube: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+      bilibili: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+      discord: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+      bluesky: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+      twitter: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+      reddit: {
+        type: "string",
+        defaultValue: "none",
+        input: false,
+      },
+    },
+  },
+  secondaryStorage: {
+    get: async key => await hubKV().getItemRaw(`_auth:${key}`),
+    set: async (key, value, ttl) => {
+      return await hubKV().set(`_auth:${key}`, value, { ttl });
+    },
+    delete: async key => await hubKV().del(`_auth:${key}`),
+  },
+  baseURL: getBaseURL(),
+  emailAndPassword: {
+    enabled: true,
+  },
+  // maybe todo: google, apple, discord
+  // socialProviders: {
+  //   //
+  // },
+  account: {
+    accountLinking: {
+      enabled: true,
+    },
+  },
+  plugins: [
+    admin(),
+    username(),
+  ],
+  secret: process.env.BETTER_AUTH_SECRET,
+} satisfies BetterAuthOptions;
 
 let _auth: ReturnType<typeof betterAuth>;
 export function serverAuth() {
@@ -12,76 +91,7 @@ export function serverAuth() {
         }),
         type: "sqlite",
       },
-      user: {
-        additionalFields: {
-          permissions: {
-            type: "number",
-            required: true,
-            defaultValue: 1,
-            input: false,
-          },
-          flair: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          youtube: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          bilibili: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          discord: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          bluesky: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          twitter: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          reddit: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-        },
-      },
-      secondaryStorage: {
-        get: key => hubKV().getItemRaw(`_auth:${key}`),
-        set: (key, value, ttl) => {
-          return hubKV().set(`_auth:${key}`, value, { ttl });
-        },
-        delete: key => hubKV().del(`_auth:${key}`),
-      },
-      baseURL: getBaseURL(),
-      emailAndPassword: {
-        enabled: true,
-      },
-      // maybe todo: google, apple, discord
-      // socialProviders: {
-      //   //
-      // },
-      account: {
-        accountLinking: {
-          enabled: true,
-        },
-      },
-      plugins: [
-        admin(),
-        username(),
-      ],
-      secret: process.env.BETTER_AUTH_SECRET,
+      ...options,
     });
   }
   return _auth;

@@ -1,16 +1,15 @@
 <script setup lang="ts">
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
+const { user } = useAuth();
 const message = useMessage();
 
 const socials = ref({
-  youtube: removeNone(session.value?.user.youtube),
-  bilibili: removeNone(session.value?.user.bilibili),
-  discord: removeNone(session.value?.user.discord),
-  bluesky: removeNone(session.value?.user.bluesky),
-  twitter: removeNone(session.value?.user.twitter),
-  reddit: removeNone(session.value?.user.reddit),
-  flair: removeNone(session.value?.user.flair),
+  youtube: removeNone(user.value?.youtube),
+  bilibili: removeNone(user.value?.bilibili),
+  discord: removeNone(user.value?.discord),
+  bluesky: removeNone(user.value?.bluesky),
+  twitter: removeNone(user.value?.twitter),
+  reddit: removeNone(user.value?.reddit),
+  flair: removeNone(user.value?.flair),
 });
 
 function removeNone(x: string | undefined) {
@@ -23,18 +22,18 @@ function handleConfirmClick(e: MouseEvent) {
 };
 
 async function setSocials() {
-  $fetch(`/api/users/socials/${session.value?.user.id}`, {
+  $fetch(`/api/users/socials/${user.value?.id}`, {
     method: "PUT",
     body: socials.value,
   })
     .then(async () => {
-      session.value!.user.youtube = socials.value.youtube ?? "";
-      session.value!.user.bilibili = socials.value.bilibili ?? "";
-      session.value!.user.discord = socials.value.discord ?? "";
-      session.value!.user.bluesky = socials.value.bluesky ?? "";
-      session.value!.user.twitter = socials.value.twitter ?? "";
-      session.value!.user.reddit = socials.value.reddit ?? "";
-      session.value!.user.flair = socials.value.flair ?? "";
+      user.value!.youtube = socials.value.youtube ?? "";
+      user.value!.bilibili = socials.value.bilibili ?? "";
+      user.value!.discord = socials.value.discord ?? "";
+      user.value!.bluesky = socials.value.bluesky ?? "";
+      user.value!.twitter = socials.value.twitter ?? "";
+      user.value!.reddit = socials.value.reddit ?? "";
+      user.value!.flair = socials.value.flair ?? "";
       message.success("Socials updated.");
     })
     .catch((err) => {

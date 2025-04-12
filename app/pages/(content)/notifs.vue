@@ -9,9 +9,7 @@ useSeoMeta({
   title: "Manage Notifications | Lungmen Dragons",
 });
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-
+const { user } = useAuth();
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const loading = ref(false);
 
@@ -56,7 +54,7 @@ function testNotif() {
 async function sendNotif(event: Event) {
   event.preventDefault();
 
-  if (!session || loading.value)
+  if (!user.value || loading.value)
     return;
 
   loading.value = true;

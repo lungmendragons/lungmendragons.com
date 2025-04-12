@@ -5,8 +5,7 @@
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
+const { user } = useAuth();
 const notFound = ref(false);
 const slug = useRoute().params.slug as string || "index";
 
@@ -97,9 +96,9 @@ onMounted(() => {
         <div class="text-xs md:text-sm">
           {{ getDateString(requested.time) }}
         </div>
-        <NDivider v-if="authorId === session?.user.id" vertical />
+        <NDivider v-if="authorId === user?.id" vertical />
         <MarkdownEditDrawer
-          v-if="authorId === session?.user.id"
+          v-if="authorId === user?.id"
           :slug="slug"
           :author-id="authorId"
           :requested="requested"

@@ -12,9 +12,7 @@ useSeoMeta({
   title: "Post Content | Lungmen Dragons",
 });
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-
+const { user } = useAuth();
 const message = useMessage();
 const notification = useNotification();
 const markdownStore = useMarkdownStore();
@@ -143,7 +141,7 @@ function getSlugLabel(): string {
 async function handlePost(event: Event) {
   event.preventDefault();
 
-  if (!session || loading.value)
+  if (!user.value || loading.value)
     return;
 
   loading.value = true;
@@ -183,7 +181,7 @@ async function handlePost(event: Event) {
       body: {
         title: title.value,
         description: description.value,
-        author: session.value?.user.id,
+        author: user.value?.id,
         time: Date.now(),
         content: content.value,
       },

@@ -22,8 +22,7 @@ const {
   editFn: (id: string, data: Tool) => void;
 }>();
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
+const { user } = useAuth();
 
 function getCategoryIcon(category: string): Component {
   if (data.dead)
@@ -92,7 +91,7 @@ function getCategoryIcon(category: string): Component {
           </NSpace>
         </template>
 
-        <template v-if="session && (session.user.permissions & 4)" #action>
+        <template v-if="user && (user.permissions & 4)" #action>
           <NButton
             type="primary"
             size="small"

@@ -15,9 +15,7 @@ onBeforeMount(() => {
 
 type ResourceIndexKVReturn = Array<{ key: string; data: Tool }>;
 
-const { client } = useAuth();
-const { data: session } = await client.useSession(useFetch);
-
+const { user } = useAuth();
 const modal = useModal();
 const showAddResource = ref(false);
 const itemToEdit = ref<{ id: string; data: Tool } | undefined>();
@@ -45,7 +43,7 @@ function userSuggestion(): void {
     title: "Suggest an addition",
     preset: "card",
     class: "w-[340px]",
-    content: () => h(ResourceIndexSuggest, { modal: m, session }),
+    content: () => h(ResourceIndexSuggest, { modal: m, user }),
   });
 };
 
@@ -226,7 +224,7 @@ function deadSwitchStyle({
           </NTooltip>
         </NFlex>
       </NFlex>
-      <NCard v-if="session && (session.user.permissions & 4)">
+      <NCard v-if="user && (user.permissions & 4)">
         <span class="mr-2">
           Member view:
         </span>
