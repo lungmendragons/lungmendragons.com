@@ -33,13 +33,13 @@ function tenStyle(r: number, md: boolean): CSSProperties {
 
 export function renderImgComponent(c: RollResult, md: boolean): VNode {
   return h(NuxtImg, {
-    src: `https://raw.githubusercontent.com/fexli/ArknightsResource/refs/heads/main/charpor/${c.character}_1.png`,
+    src: `https://lungmendragons.com/images/akresource/charpor/${c.character}_1.png`, // TEMPORARY
     style: tenStyle(c.rarity, md),
   });
 }
 
 export async function getCNBannerData(): Promise<{
-  banners: Array<{ id: string; offBanners: any[]; rateUp: any[] }>;
+  banners: Array<{ id: string; offBanners: any[]; rateUp: any[]; minorRateUp: any[] }>;
   characters: { [key: string]: string };
 }> {
   const weedy: { gachaPoolClient: any[] } = await $fetch("https://weedy.prts.wiki/gacha_table.json");
@@ -50,6 +50,7 @@ export async function getCNBannerData(): Promise<{
       rateUp: b.gachaPoolDetail.detailInfo.upCharInfo
         ? b.gachaPoolDetail.detailInfo.upCharInfo.perCharList
         : [],
+      minorRateUp: b.gachaPoolDetail.detailInfo.weightUpCharInfoList ?? [],
       // objList: b.gachaPoolDetail.detailInfo.gachaObjList,
     };
   });

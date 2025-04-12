@@ -16,6 +16,16 @@ interface GachaResult extends RollResult {
   pity: number;
 };
 
+enum BannerType {
+  PERMANENT = "PERMANENT", // Standard banner (2 rate ups)
+  STD_OLD = "STANDARD_OLD", // Old event banner (1 rate up, no guarantee)
+  STD_NEW = "STANDARD_NEW", // New event banner (1 rate up, 150 guarantee)
+  // LTD_OLD = "LIMITED_OLD", // Limited banner (2 rate ups, no guarantee)
+  // LTD_NEW = "LIMITED_NEW", // Limited banner (2 rate ups, no guarantee, with secondary rate ups)
+  LIMITED = "LIMITED",
+  COLLAB = "COLLAB", // Collab banner (1 rate up, 120 guarantee)
+};
+
 const mounted = ref(false);
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const message = useMessage();
@@ -26,6 +36,7 @@ const activeBanner = ref<{
 }>({
   id: "SINGLE_55_0_1",
   data: {
+    banner_type: BannerType.STD_NEW,
     rate_up: {
       six: [],
       five: [],
@@ -75,6 +86,7 @@ let banners: Array<{
   id: string;
   offBanners: any[];
   rateUp: any[];
+  minorRateUp: any[];
 }>;
 
 let characters: {
@@ -133,6 +145,18 @@ function loadBanner(id: string) {
     data.off_banner.four = findRankOff(3) ? findRankOff(3).charIdList : [];
     data.off_banner.three = findRankOff(2) ? findRankOff(2).charIdList : [];
 
+    if (banner.minorRateUp.length > 0) {
+      banner.minorRateUp.forEach((x) => {
+        if (x.rarityRank === 5) {
+          // Add to off-banner pool 5 times to simplify the rs-app logic
+          for (let i = 0; i < 5; i++) {
+            data.off_banner.six.push(x.charId);
+          }
+        } 
+      });
+    }
+
+    // All units are in the off-banner pool
     bannerPreload = [
       data.off_banner.six.map(x => {
         return { character: x, rarity: 6 };
@@ -147,6 +171,32 @@ function loadBanner(id: string) {
         return { character: x, rarity: 3 };
       }),
     ].flat();
+
+    switch (banner.id.split("_")[0]) {
+      case "LIMITED":
+        // banner.minorRateUp.length > 0
+        //   ? data.banner_type = BannerType.LTD_NEW
+        //   : data.banner_type = BannerType.LTD_OLD;
+        data.banner_type = BannerType.LIMITED;
+        break;
+      case "LINKAGE":
+        data.banner_type = BannerType.COLLAB;
+        break;
+      case "SINGLE":
+        data.banner_type = BannerType.STD_NEW;
+        break;
+      case "DOUBLE":
+        data.banner_type = BannerType.PERMANENT;
+        break;
+      case "NORM":
+        findRankUp(5).length > 1
+          ? data.banner_type = BannerType.PERMANENT
+          : data.banner_type = BannerType.STD_OLD;
+        break;
+      default:
+        data.banner_type = BannerType.STD_OLD;
+        break;
+    }
 
     gacha.session = createGachaSession(activeBanner.value.data);
     message.success(`Loaded: ${banner.id}`);

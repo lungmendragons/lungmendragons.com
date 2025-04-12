@@ -20,6 +20,7 @@ pub struct ByRarity<T> {
 
 #[derive(Serialize, Deserialize)]
 pub struct BannerData {
+    banner_type: String,
     off_banner: ByRarity<Vec<String>>,
     rate_up: ByRarity<Vec<String>>,
 }
@@ -51,61 +52,89 @@ pub fn single_roll(session: &mut GachaSession) -> Result<JsValue, JsValue> {
             .as_mut()
             .map(|v| *v = v.saturating_sub(1));
         session.total_rolls += 1;
+        let banner_type = session.banner_data.banner_type.as_str();
 
-        let six_rate = session.since_last_six.saturating_sub(50) + 1;
-        if rng.random_range(0..50) < six_rate {
-            session.since_last_six = 0;
-            session.until_five_guarantee = None;
-
-            let pool = if rng.random_bool(0.5) {
-                &session.banner_data.rate_up.six
-            } else {
-                &session.banner_data.off_banner.six
-            };
-
+        if banner_type == "COLLAB" && session.total_rolls == 120 {
             RollResult {
                 rarity: 6,
-                character: pool[rng.random_range(0..pool.len())].clone(),
+                character: session.banner_data.rate_up.six[0].clone(),
             }
         } else {
-            let val = if session.until_five_guarantee == Some(0) {
-                0
-            } else {
-                rng.random_range(0..49)
-            };
+            let six_rate = session.since_last_six.saturating_sub(50) + 1;
+            if rng.random_range(0..50) < six_rate {
+                session.since_last_six = 0;
+                session.until_five_guarantee = None;
 
-            match val {
-                0..4 => {
-                    session.until_five_guarantee = None;
+                if banner_type == "STANDARD_NEW" && session.total_rolls >= 150 {
+                    RollResult {
+                        rarity: 6,
+                        character: session.banner_data.rate_up.six[0].clone(),
+                    }
+                } else {
+                    if banner_type == "LIMITED" {
+                        let pool = if rng.random_bool(0.7) {
+                            &session.banner_data.rate_up.six
+                        } else {
+                            &session.banner_data.off_banner.six
+                        };
 
-                    let pool = if rng.random_bool(0.5) {
-                        &session.banner_data.rate_up.five
+                        RollResult {
+                            rarity: 6,
+                            character: pool[rng.random_range(0..pool.len())].clone(),
+                        }
                     } else {
-                        &session.banner_data.off_banner.five
-                    };
+                        let pool = if rng.random_bool(0.5) {
+                            &session.banner_data.rate_up.six
+                        } else {
+                            &session.banner_data.off_banner.six
+                        };
 
-                    RollResult {
-                        rarity: 5,
-                        character: pool[rng.random_range(0..pool.len())].clone(),
+                        RollResult {
+                            rarity: 6,
+                            character: pool[rng.random_range(0..pool.len())].clone(),
+                        }
                     }
                 }
-                4..29 => {
-                    let pool = &session.banner_data.off_banner.four;
+            } else {
+                let val = if session.until_five_guarantee == Some(0) {
+                    0
+                } else {
+                    rng.random_range(0..49)
+                };
 
-                    RollResult {
-                        rarity: 4,
-                        character: pool[rng.random_range(0..pool.len())].clone(),
-                    }
-                }
-                29..49 => {
-                    let pool = &session.banner_data.off_banner.three;
+                match val {
+                    0..4 => {
+                        session.until_five_guarantee = None;
 
-                    RollResult {
-                        rarity: 3,
-                        character: pool[rng.random_range(0..pool.len())].clone(),
+                        let pool = if rng.random_bool(0.5) {
+                            &session.banner_data.rate_up.five
+                        } else {
+                            &session.banner_data.off_banner.five
+                        };
+
+                        RollResult {
+                            rarity: 5,
+                            character: pool[rng.random_range(0..pool.len())].clone(),
+                        }
                     }
+                    4..29 => {
+                        let pool = &session.banner_data.off_banner.four;
+
+                        RollResult {
+                            rarity: 4,
+                            character: pool[rng.random_range(0..pool.len())].clone(),
+                        }
+                    }
+                    29..49 => {
+                        let pool = &session.banner_data.off_banner.three;
+
+                        RollResult {
+                            rarity: 3,
+                            character: pool[rng.random_range(0..pool.len())].clone(),
+                        }
+                    }
+                    _ => unreachable!(),
                 }
-                _ => unreachable!(),
             }
         }
     };
