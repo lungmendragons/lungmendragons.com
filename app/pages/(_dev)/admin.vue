@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NTime } from "naive-ui";
+import { NTime, NButton } from "naive-ui";
 
 definePageMeta({
   auth: { only: "admin" },
@@ -36,10 +36,7 @@ function updateYT() {
 }
 
 const cols = [
-  {
-    title: "User",
-    key: "user.name",
-  },
+  { title: "User", key: "user.name" },
   {
     title: "Time",
     key: "time",
@@ -47,23 +44,39 @@ const cols = [
       return h(NTime, { time: new Date(row.time) });
     },
   },
+  { title: "Title", key: "data.title" },
+  { title: "Description", key: "data.description" },
+  { title: "Link", key: "data.link" },
+  { title: "Author", key: "data.author" },
   {
-    title: "Title",
-    key: "data.title",
-  },
-  {
-    title: "Description",
-    key: "data.description",
-  },
-  {
-    title: "Link",
-    key: "data.link",
-  },
-  
-  {
-    title: "Author",
-    key: "data.author",
-  },
+    title: "Delete",
+    key: "delete",
+    render(row: any) {
+      return h(
+        NButton,
+        {
+          type: "error",
+          size: "small",
+          onClick: () => {
+            $fetch("/api/pages/suggest", { method: "DELETE", body: { key: row.key } })
+              .then((res) => {
+                if (res === "success") {
+                  message.success("Suggestion deleted");
+                  suggestions.value = suggestions.value.filter((s) => s.key !== row.key);
+                } else if (res === "error") {
+                  message.error("Delete failed - returned error");
+                }
+              })
+              .catch((err) => {
+                message.error("Delete failed - error caught");
+                console.error(err);
+              });
+          },
+        },
+        { default: () => "Delete" }
+      );
+    },
+  }
 ];
 
 onMounted(() => {
@@ -89,7 +102,7 @@ onMounted(() => {
       </NButton>
     </NFlex>
     <hr class="my-4">
-    <div class="text-2xl font-bold">
+    <div class="text-lg font-bold">
       Resource Index suggestions
     </div>
     <NDataTable

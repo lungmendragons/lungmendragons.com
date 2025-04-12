@@ -11,7 +11,7 @@ export default eventHandler(async () => {
   const suggestions: any[] = [];
   for (const key of keys) {
     const s = await hubKV().get(key);
-    suggestions.push(s);
+    suggestions.push({ key, ...s });
   }
 
   return suggestions;
