@@ -1,5 +1,5 @@
 export default eventHandler(async (event) => {
-  const { key } = await readBody(event);
+  const { key } = event.context.params || {};
 
   try {
     await hubKV().del(key);

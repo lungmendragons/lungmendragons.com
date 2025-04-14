@@ -58,7 +58,7 @@ const cols = [
           type: "error",
           size: "small",
           onClick: () => {
-            $fetch("/api/pages/suggest", { method: "DELETE", body: { key: row.key } })
+            $fetch(`/api/pages/suggest/${row.key}`, { method: "DELETE" })
               .then((res) => {
                 if (res === "success") {
                   message.success("Suggestion deleted");
