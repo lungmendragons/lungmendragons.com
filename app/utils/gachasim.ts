@@ -42,6 +42,8 @@ export async function getCNBannerData(): Promise<{
   banners: Array<{ id: string; offBanners: any[]; rateUp: any[]; minorRateUp: any[] }>;
   characters: { [key: string]: string };
 }> {
+  // eslint-disable-next-line ts/ban-ts-comment
+  // @ts-ignore - excessive stack depth when comparing types
   const weedy: { gachaPoolClient: any[] } = await $fetch("https://weedy.prts.wiki/gacha_table.json");
   const banners = weedy.gachaPoolClient.map((b: any) => {
     return {

@@ -8,6 +8,7 @@ pub struct GachaSession {
     since_last_six: u32,
     until_five_guarantee: Option<u32>,
     total_rolls: u32,
+    six_guarantee_used: bool,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -38,6 +39,7 @@ pub fn create_gacha_session(banner: JsValue) -> Result<GachaSession, JsValue> {
         since_last_six: 0,
         until_five_guarantee: Some(10),
         total_rolls: 0,
+        six_guarantee_used: false,
     })
 }
 
@@ -54,7 +56,11 @@ pub fn single_roll(session: &mut GachaSession) -> Result<JsValue, JsValue> {
         session.total_rolls += 1;
         let banner_type = session.banner_data.banner_type.as_str();
 
-        if banner_type == "COLLAB" && session.total_rolls == 120 {
+        if banner_type == "COLLAB"
+            && session.total_rolls == 120
+            && !session.six_guarantee_used
+        {
+            session.six_guarantee_used = true;
             RollResult {
                 rarity: 6,
                 character: session.banner_data.rate_up.six[0].clone(),
@@ -65,7 +71,11 @@ pub fn single_roll(session: &mut GachaSession) -> Result<JsValue, JsValue> {
                 session.since_last_six = 0;
                 session.until_five_guarantee = None;
 
-                if banner_type == "STANDARD_NEW" && session.total_rolls >= 150 {
+                if banner_type == "STANDARD_NEW"
+                    && session.total_rolls >= 150
+                    && !session.six_guarantee_used
+                {
+                    session.six_guarantee_used = true;
                     RollResult {
                         rarity: 6,
                         character: session.banner_data.rate_up.six[0].clone(),
