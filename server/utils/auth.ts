@@ -2,6 +2,22 @@ import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { D1Dialect } from "kysely-d1";
 import { admin, username } from "better-auth/plugins";
 
+const skipRateLimitPaths = new Set([
+  "/get-session",
+  "/list-session",
+  "/ok",
+  "/error",
+]);
+
+const skipRateLimiting = (key: string) => {
+  const parts = key.split("/", 1);
+  if (parts.length < 2) {
+    return false;
+  } else {
+    return skipRateLimitPaths.has(parts[1]);
+  }
+};
+
 const options = {
   session: {
     cookieCache: {
@@ -55,11 +71,21 @@ const options = {
     },
   },
   secondaryStorage: {
-    get: async key => await hubKV().getItemRaw(`_auth:${key}`),
+    get: async key => await hubKV().getItemRaw(`auth:session:${key}`),
     set: async (key, value, ttl) => {
-      return await hubKV().set(`_auth:${key}`, value, { ttl });
+      return await hubKV().set(`auth:session:${key}`, value, { ttl });
     },
-    delete: async key => await hubKV().del(`_auth:${key}`),
+    delete: async key => await hubKV().del(`auth:session:${key}`),
+  },
+  rateLimit: {
+    // skip rate limiting certain auth endpoints. this is already done by `nuxt-security`
+    // using an LRU cache, which avoids hitting the KV store.
+    customStorage: {
+      get: async key => skipRateLimiting(key) ? undefined :
+        await hubKV().getItemRaw(`auth:rate-limit:${key}`),
+      set: async (key, value) => skipRateLimiting(key) ? undefined :
+        await hubKV().set(`auth:rate-limit:${key}`, value, { ttl: 3600 }),
+    },
   },
   baseURL: getBaseURL(),
   emailAndPassword: {
@@ -102,7 +128,7 @@ function getBaseURL() {
   if (!baseURL) {
     try {
       baseURL = getRequestURL(useEvent()).origin;
-    } catch {} // (e) {}
+    } catch { } // (e) {}
   }
   return baseURL;
 }
