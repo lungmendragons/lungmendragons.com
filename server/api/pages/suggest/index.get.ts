@@ -1,5 +1,5 @@
 export default eventHandler(async () => {
-  const keys = await hubKV().keys("residx-suggest");
+  const keys = await useKV().keys("residx-suggest");
 
   if (!keys) {
     throw createError({
@@ -10,7 +10,7 @@ export default eventHandler(async () => {
 
   const suggestions: any[] = [];
   for (const key of keys) {
-    const s = await hubKV().get(key);
+    const s = await useKV().get(key);
     suggestions.push({ key, ...s });
   }
 

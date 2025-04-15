@@ -1,5 +1,5 @@
 export default cachedEventHandler(async () => {
-  const recent = await hubKV().get("home-yt-recent");
+  const recent = await useKV().get("home-yt-recent");
 
   if (!recent) {
     throw createError({

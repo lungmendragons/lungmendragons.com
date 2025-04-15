@@ -1,6 +1,6 @@
 export default cachedEventHandler(async () => {
-  const reg = await hubKV().get("sgl2-registration");
-  const qf = await hubKV().get("sgl2-live-qualifiers");
+  const reg = await useKV().get("sgl2-registration");
+  const qf = await useKV().get("sgl2-live-qualifiers");
 
   if (!reg || !qf) {
     throw createError({

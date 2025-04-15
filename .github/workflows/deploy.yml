@@ -5,11 +5,10 @@ env:
 
 jobs:
   deploy:
-    name: "Deploy to NuxtHub"
+    name: "Deploy to Cloudflare"
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.ref == 'refs/heads/main' && 'production' || 'preview' }}
-      url: ${{ steps.deploy.outputs.deployment-url }}
     permissions:
       contents: read
       id-token: write
@@ -40,14 +39,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Ensure NuxtHub module is installed
-        run: pnpx nuxthub@latest ensure
-
       - name: Build application
-        run: pnpm build
-
-      - name: Deploy to NuxtHub
-        uses: nuxt-hub/action@v1
-        id: deploy
-        with:
-          project-key: lungmendragons--ugtz
+        run: pnpm run build
+      
+      # TODO
+      # - name: Deploy to Cloudflare
+      #   uses: cloudflare/wrangler-action@v3
+      #   # Only deploy on main
+      #   if: github.ref == 'refs/heads/main'
+      #   with:
+      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

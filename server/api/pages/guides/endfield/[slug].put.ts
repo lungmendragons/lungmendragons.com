@@ -7,7 +7,7 @@ export default eventHandler(async (event) => {
     });
   };
 
-  if (await hubKV().has(`guides-endfield:${slug}`)) {
+  if (await useKV().has(`guides-endfield:${slug}`)) {
     throw createError({
       statusCode: 409,
       message: "Slug already exists",
@@ -22,17 +22,17 @@ export default eventHandler(async (event) => {
     time: body.time,
   };
 
-  const index = await hubKV().get("guides-endfield-index") as Array<any>;
+  const index = await useKV().get("guides-endfield-index") as Array<any>;
 
   if (!index) {
-    await hubKV().set("guides-endfield-index", [{ key: slug, metadata }]);
+    await useKV().set("guides-endfield-index", [{ key: slug, metadata }]);
   } else {
     const x = index.findIndex(item => item.key === slug);
     x > -1 ? index[x].data = metadata : index.push({ key: slug, metadata });
   }
 
-  await hubKV().set(`guides-endfield:${slug}`, body);
-  await hubKV().set("guides-endfield-index", index);
+  await useKV().set(`guides-endfield:${slug}`, body);
+  await useKV().set("guides-endfield-index", index);
 
   return { slug, body };
 });

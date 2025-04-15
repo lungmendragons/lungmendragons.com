@@ -24,8 +24,8 @@ async function onFileSelect({ file }: UploadCustomRequestOptions): Promise<void>
     const currentAvatar = user.value?.image;
     await upload(file.file as File)
       .then((blob) => {
-        client.updateUser({ image: `/images/${blob.pathname}` });
-        user.value!.image = `/images/${blob.pathname}`;
+        client.updateUser({ image: `/images/${blob.key}` });
+        user.value!.image = `/images/${blob.key}`;
         if (currentAvatar) {
           deleteAvatar(currentAvatar.slice(8)); // remove "/images/" from pathname
           message.success("Avatar uploaded.");

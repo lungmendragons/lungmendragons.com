@@ -1,3 +1,5 @@
+import path from "node:path";
+
 export default eventHandler(async (event) => {
   const form = await readFormData(event);
   const files = form.getAll("files") as File[];
@@ -6,37 +8,33 @@ export default eventHandler(async (event) => {
   for (const file of files) {
     const { name } = file;
 
-    const exists = await hubBlob().get(`akresource/${name}`);
+    const exists = await useBlob().get(`akresource/${name}`);
     if (exists) {
       return `! skipped ${name} (already exists)`;
     }
 
-    try {
-      ensureBlob(file, {
-        maxSize: "16MB",
-      });
-    } catch (e: any) {
+    // 16MB (the good kind)
+    if (file.size > (16 << 20)) {
       throw createError({
         statusCode: 413,
-        statusMessage: `File rejected: ${e.message}`,
+        statusMessage: "File rejected: File size must be less than 16MB",
       });
     }
 
-    try {
-      ensureBlob(file, {
-        types: [ "image/png" ],
-      });
-    } catch (e: any) {
+    if (file.type != "image/png") {
       throw createError({
         statusCode: 415,
-        statusMessage: `File rejected: ${e.message}`,
+        statusMessage: "File rejected: File type must be `image/png`",
       });
     }
 
-    const path = name.split("/");
     try {
-      const object = await hubBlob().put(path.slice(-1)[0], file, { prefix: `akresource/${path.slice(0, -1).join("/")}/` });
-      uploaded.push(`+ ${object.pathname}`);
+      const object = await useBlob().put(
+        path.join("akresource", name),
+        file,
+        { httpMetadata: { contentType: file.type } },
+      );
+      uploaded.push(`+ ${object.key}`);
     } catch (e: any) {
       throw createError({
         statusCode: 500,

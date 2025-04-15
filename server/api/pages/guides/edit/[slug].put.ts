@@ -9,7 +9,7 @@ export default eventHandler(async (event) => {
 
   const { body } = await readBody(event);
 
-  await hubKV().set(`guides:${slug}`, body);
+  await useKV().set(`guides:${slug}`, body);
 
   return { slug, body };
 });

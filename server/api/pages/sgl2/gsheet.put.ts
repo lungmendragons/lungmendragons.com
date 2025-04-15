@@ -8,7 +8,7 @@ export default eventHandler(async (event) => {
   const gsheetQualifiers: any = await $fetch(gscriptQualifiers, { method: "GET" });
 
   // const { payload } = await readBody(event);
-  const kv = await hubKV().get<any[]>("sgl2-update-log");
+  const kv = await useKV().get<any[]>("sgl2-update-log");
 
   if (gsheetRegistration.status !== "success") {
     throw createError({
@@ -72,12 +72,12 @@ export default eventHandler(async (event) => {
     kv.shift();
 
   if (!kv)
-    await hubKV().set("sgl2-update-log", [ update ]);
+    await useKV().set("sgl2-update-log", [ update ]);
   else
-    await hubKV().set("sgl2-update-log", [ ...kv, update ]);
+    await useKV().set("sgl2-update-log", [ ...kv, update ]);
 
-  await hubKV().set("sgl2-registration", gdataRegistration);
-  await hubKV().set("sgl2-live-qualifiers", gdataQualifiers);
+  await useKV().set("sgl2-registration", gdataRegistration);
+  await useKV().set("sgl2-live-qualifiers", gdataQualifiers);
   return "success";
 });
 

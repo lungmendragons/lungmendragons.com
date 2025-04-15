@@ -1,5 +1,8 @@
 export default eventHandler(async () => {
-  const { blobs } = await hubBlob().list();
+  const { objects } = await useBlob().list({
+    limit: 1000,
+    include: ["httpMetadata"],
+  });
 
-  return blobs;
+  return objects;
 });

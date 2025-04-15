@@ -1,0 +1,19 @@
+compatibility_date = "2025-04-14"
+name = "lungmendragons-new"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "lungmendragons-com"
+database_id = "0738f5a1-9b91-4ac8-8edd-72959fe5b57d"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "e0adad096594455d9b9e46e53f31022d"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "87ccb37cafbd4f25b37c9f4bda4fe37f"
+
+[[r2_buckets]]
+binding = "BLOB"
+bucket_name = "lungmendragons-com"

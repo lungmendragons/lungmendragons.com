@@ -5,7 +5,7 @@ export default eventHandler(async (event) => {
   const id = nanoid(8);
 
   try {
-    await hubKV().set(`residx-suggest:${id}`, { user, time, data });
+    await useKV().set(`residx-suggest:${id}`, { user, time, data });
     return "success";
   } catch (error: any) {
     return error.message;

@@ -18,7 +18,6 @@ export default defineNuxtConfig({
   },
   modules: [
     "nitro-cloudflare-dev",
-    "@nuxthub/core",
     "@nuxt/eslint",
     "@nuxt/image",
     "@nuxtjs/tailwindcss",
@@ -34,13 +33,23 @@ export default defineNuxtConfig({
   build: {
     transpile: [ "vueuc", "naive-ui" ],
   },
-  hub: {
-    database: true,
-    kv: true,
-    blob: true,
-    cache: true,
-  },
   nitro: {
+    preset: "cloudflare-module",
+    cloudflare: {
+      deployConfig: true,
+      nodeCompat: true,
+    },
+    storage: {
+      cache: {
+        driver: "cloudflare-kv-binding",
+        binding: "CACHE",
+      },
+    },
+    devStorage: {
+      cache: {
+        driver: "memory",
+      },
+    },
     esbuild: {
       options: {
         target: "esnext",
@@ -160,7 +169,7 @@ export default defineNuxtConfig({
       wasm(),
       // Note: At least on my machine, I need this enabled during development to avoid errors, but
       // it causes an error at build time, so I have to comment it out before deploying. No idea why.
-      // cjsInterop({
+      // (await import("vite-plugin-cjs-interop")).cjsInterop({
       //   dependencies: [
       //     "vueuc", // dependency of naive-ui
       //   ],
