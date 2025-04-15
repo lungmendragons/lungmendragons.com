@@ -1,10 +1,11 @@
 export default cachedEventHandler(async () => {
-  // const { blobs } = await hubBlob().list();
-  const { blobs } = await hubBlob().list({
+  const { objects } = await useBlob().list({
+    limit: 1000,
+    include: [ "httpMetadata" ],
     prefix: "avatar/",
   });
 
-  return blobs;
+  return objects;
   // return { blobs, folders };
 }, {
   maxAge: 3600, // 1 hour

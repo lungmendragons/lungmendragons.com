@@ -8,7 +8,7 @@ export default eventHandler(async (event) => {
     ) as any;
     console.log(recent);
     if (!recent.items[0]) return "empty";
-    await hubKV().set("home-yt-recent", recent);
+    await useKV().set("home-yt-recent", recent);
     return "success";
   } catch (e) {
     console.error(e);

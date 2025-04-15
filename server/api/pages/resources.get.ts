@@ -1,5 +1,5 @@
 export default cachedEventHandler(async () => {
-  const index = await hubKV().get("resource-index");
+  const index = await useKV().get("resource-index");
 
   if (!index) {
     throw createError({

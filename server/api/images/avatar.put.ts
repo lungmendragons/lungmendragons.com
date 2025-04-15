@@ -1,9 +1,9 @@
-import type { BlobObject } from "@nuxthub/core";
 import { assertMethod } from "h3";
 import { nanoid } from "nanoid";
+import path from "node:path";
 
 export default eventHandler(async (event) => {
-  assertMethod(event, [ "POST", "PUT", "PATCH" ]);
+  assertMethod(event, ["POST", "PUT", "PATCH"]);
 
   const form = await readFormData(event);
   const file = form.get("files") as File; // "files" is the default
@@ -14,46 +14,43 @@ export default eventHandler(async (event) => {
     });
   };
 
-  try {
-    ensureBlob(file, {
-      maxSize: "2MB",
-    });
-  } catch (e: any) {
+  if (file.size > (2 << 20)) {
     throw createError({
       statusCode: 413,
-      statusMessage: `File rejected: ${e.message}`,
+      statusMessage: "File rejected: File size must be less than 2MB",
     });
   }
+  
+  let ext: string;
 
-  try {
-    ensureBlob(file, {
-      types: [ "image/png", "image/jpeg" ],
-    });
-  } catch (e: any) {
-    throw createError({
-      statusCode: 415,
-      statusMessage: `File rejected: ${e.message}`,
-    });
+  switch (file.type) {
+    case "image/png":
+      ext = "png";
+      break;
+    case "image/jpeg":
+      ext = "jpeg";
+      break;
+    default:
+      throw createError({
+        statusCode: 415,
+        statusMessage: "File rejected: File type must be `image/png` or `image/jpeg`",
+      });
   }
 
   // todo: simple image crop function
   // currently non-square images are going to be stretched and squished but it is what it is
 
-  const ext = file.name.split(".").pop();
   const id = nanoid(16);
   const unique = `${id}.${ext}`;
 
-  // i don't understand why it needs to be an array but it doesn't work otherwise
-  const objects: BlobObject[] = [];
   try {
-    const object = await hubBlob().put(unique, file, { prefix: "avatar/" });
-    objects.push(object);
+    const object = await useBlob().put(path.join("avatar", unique), file);
+    // i don't understand why it needs to be an array but it doesn't work otherwise
+    return [object];
   } catch (e: any) {
     throw createError({
       statusCode: 500,
       statusMessage: `Storage error: ${e.message}`,
     });
   }
-
-  return objects;
 });

@@ -144,3 +144,4 @@ components.d.ts
 _temp/
 
 .wrangler
+worker-configuration.d.ts

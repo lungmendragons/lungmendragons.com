@@ -2,21 +2,21 @@ import { betterAuth, type BetterAuthOptions } from "better-auth";
 import { D1Dialect } from "kysely-d1";
 import { admin, username } from "better-auth/plugins";
 
-// const skipRateLimitPaths = new Set([
-//   "/get-session",
-//   "/list-session",
-//   "/ok",
-//   "/error",
-// ]);
+const skipRateLimitPaths = new Set([
+  "/get-session",
+  "/list-session",
+  "/ok",
+  "/error",
+]);
 
-// const skipRateLimiting = (key: string) => {
-//   const parts = key.split("/", 1);
-//   if (parts.length < 2) {
-//     return false;
-//   } else {
-//     return skipRateLimitPaths.has(parts[1]);
-//   }
-// };
+const skipRateLimiting = (key: string) => {
+  const parts = key.split("/", 1);
+  if (parts.length < 2) {
+    return false;
+  } else {
+    return skipRateLimitPaths.has(parts[1]);
+  }
+};
 
 const options = {
   session: {
@@ -71,20 +71,28 @@ const options = {
     },
   },
   secondaryStorage: {
-    get: async key => await hubKV().getItemRaw(`auth:session:${key}`),
+    get: async key => await useKV().get<string>(`auth:session:${key}`),
     set: async (key, value, ttl) => {
-      return await hubKV().set(`auth:session:${key}`, value, { ttl });
+      return await useKV().set(`auth:session:${key}`, value, { ttl });
     },
-    delete: async key => await hubKV().del(`auth:session:${key}`),
+    delete: async key => await useKV().del(`auth:session:${key}`),
   },
   rateLimit: {
     // skip rate limiting certain auth endpoints. this is already done by `nuxt-security`
     // using an LRU cache, which avoids hitting the KV store.
     // customStorage: {
-    //   get: async key => skipRateLimiting(key) ? undefined :
-    //     await hubKV().getItemRaw(`auth:rate-limit:${key}`),
-    //   set: async (key, value) => skipRateLimiting(key) ? undefined :
-    //     await hubKV().set(`auth:rate-limit:${key}`, value, { ttl: 3600 }),
+    //   get: async key => {
+    //     if (!skipRateLimiting(key)) {
+    //       return (await useKV().get<any>(`auth:rate-limit:${key}`));
+    //     } else {
+    //       return undefined;
+    //     };
+    //   },
+    //   set: async (key, value) => {
+    //     if (!skipRateLimiting(key)) {
+    //       await useKV().set(`auth:rate-limit:${key}`, JSON.stringify(value), { ttl: 3600 });
+    //     }
+    //   }
     // },
     enabled: false,
   },
@@ -114,7 +122,7 @@ export function serverAuth() {
     _auth = betterAuth({
       database: {
         dialect: new D1Dialect({
-          database: hubDatabase(),
+          database: useDB(),
         }),
         type: "sqlite",
       },

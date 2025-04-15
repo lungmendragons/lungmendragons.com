@@ -7,7 +7,7 @@ export default eventHandler(async (event) => {
     });
   };
 
-  const db = hubDatabase();
+  const db = useDB();
   const result = await db
     .prepare("SELECT name, image, flair, youtube, bilibili, discord, bluesky, twitter, reddit FROM user WHERE id = ?1")
     .bind(id)

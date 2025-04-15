@@ -14,7 +14,7 @@ export default cachedEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Missing slug." });
   };
 
-  const post = await hubKV().get<Post>(`guides-endfield:${slug}`);
+  const post = await useKV().get<Post>(`guides-endfield:${slug}`);
 
   if (!post) {
     throw createError({ statusCode: 404, statusMessage: "Not found." });

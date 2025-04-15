@@ -1,5 +1,5 @@
 export default cachedEventHandler(async () => {
-  const guides = await hubKV().get("guides-index");
+  const guides = await useKV().get("guides-index");
 
   if (!guides) {
     throw createError({

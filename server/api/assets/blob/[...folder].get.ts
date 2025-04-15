@@ -4,9 +4,9 @@ export default eventHandler(async (event) => {
   let length = 0;
 
   do {
-    const res = await hubBlob().list({ prefix: `akresource/${folder}`, cursor });
-    length += res.blobs.length;
-    cursor = res.cursor;
+    const res = await useBlob().list({ prefix: `akresource/${folder}`, cursor });
+    length += res.objects.length;
+    cursor = res.truncated ? res.cursor : undefined;
   } while (cursor);
 
   return length;

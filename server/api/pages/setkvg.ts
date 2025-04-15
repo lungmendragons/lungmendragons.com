@@ -1,7 +1,7 @@
 import type { StorageValue } from "unstorage";
 
 export default eventHandler(async () => {
-  const keys = await hubKV().keys("guides");
+  const keys = await useKV().keys("guides");
 
   if (!keys.length) {
     throw createError({
@@ -12,7 +12,7 @@ export default eventHandler(async () => {
 
   const KVs: StorageValue[] = [];
   for (const key of keys) {
-    const data = await hubKV().get(key) as any;
+    const data = await useKV().get(key) as any;
     const metadata = {
       title: data.title,
       description: data.description,
@@ -22,7 +22,7 @@ export default eventHandler(async () => {
     KVs.push({ key: key.slice(7), metadata });
   };
 
-  await hubKV().set("guides-index", KVs);
+  await useKV().set("guides-index", KVs);
 
   return "KV set: guides-index";
 });

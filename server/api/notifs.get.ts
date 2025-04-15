@@ -1,7 +1,7 @@
 import type { StorageValue } from "unstorage";
 
 export default eventHandler(async () => {
-  const keys = await hubKV().keys("notifs");
+  const keys = await useKV().keys("notifs");
 
   if (!keys.length) {
     throw createError({
@@ -12,7 +12,7 @@ export default eventHandler(async () => {
 
   const KVs: StorageValue[] = [];
   for (const key of keys) {
-    const data = await hubKV().get(key);
+    const data = await useKV().get(key);
     KVs.push({ key, data });
   };
 
