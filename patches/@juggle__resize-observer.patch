@@ -1,0 +1,13 @@
+diff --git a/lib/algorithms/calculateBoxSize.js b/lib/algorithms/calculateBoxSize.js
+index 9a828e753ae34e250cec3b5592a471120214f353..df4edde68864f136d30e7878942e40e5a5e33c5f 100644
+--- a/lib/algorithms/calculateBoxSize.js
++++ b/lib/algorithms/calculateBoxSize.js
+@@ -7,7 +7,7 @@ import { global } from '../utils/global';
+ var cache = new WeakMap();
+ var scrollRegexp = /auto|scroll/;
+ var verticalRegexp = /^tb|vertical/;
+-var IE = (/msie|trident/i).test(global.navigator && global.navigator.userAgent);
++var IE = (/msie|trident/i).test(global.navigator?.userAgent);
+ var parseDimension = function (pixel) { return parseFloat(pixel || '0'); };
+ var size = function (inlineSize, blockSize, switchSizes) {
+     if (inlineSize === void 0) { inlineSize = 0; }

@@ -85,6 +85,9 @@
     "overrides": {
       "@css-render/vue3-ssr": "^0.15.14",
       "css-render": "^0.15.14"
+    },
+    "patchedDependencies": {
+      "@juggle/resize-observer": "patches/@juggle__resize-observer.patch"
     }
   }
 }
