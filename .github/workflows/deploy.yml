@@ -1,5 +1,5 @@
-name: Deploy to NuxtHub
-on: push
+name: Deploy to Cloudflare
+on: workflow_dispatch
 env:
   wasm-pack-version: '0.13.1'
 
@@ -42,10 +42,10 @@ jobs:
       - name: Build application
         run: pnpm run build
       
-      # TODO
-      # - name: Deploy to Cloudflare
-      #   uses: cloudflare/wrangler-action@v3
-      #   # Only deploy on main
-      #   if: github.ref == 'refs/heads/main'
-      #   with:
-      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Deploy to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        # Only deploy on main
+        if: github.ref == 'refs/heads/main'
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
