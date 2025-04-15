@@ -6963,7 +6963,7 @@ snapshots:
 
   '@jsdevtools/ono@7.1.3': {}
 
-  '@juggle/resize-observer@3.4.0': {}
+  '@juggle/resize-observer@3.4.0(patch_hash=vi5ab3vebp6f4v47aqx4e6ej7i)': {}
 
   '@koa/router@12.0.2':
     dependencies:
@@ -12702,7 +12702,7 @@ snapshots:
   vueuc@0.4.64(vue@3.5.13(typescript@5.8.2)):
     dependencies:
       '@css-render/vue3-ssr': 0.15.14(vue@3.5.13(typescript@5.8.2))
-      '@juggle/resize-observer': 3.4.0
+      '@juggle/resize-observer': 3.4.0(patch_hash=vi5ab3vebp6f4v47aqx4e6ej7i)
       css-render: 0.15.14
       evtd: 0.2.4
       seemly: 0.3.10
