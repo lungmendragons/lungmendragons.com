@@ -8,6 +8,11 @@ overrides:
   '@css-render/vue3-ssr': ^0.15.14
   css-render: ^0.15.14
 
+patchedDependencies:
+  '@juggle/resize-observer':
+    hash: vi5ab3vebp6f4v47aqx4e6ej7i
+    path: patches/@juggle__resize-observer.patch
+
 importers:
 
   .:
