@@ -71,9 +71,15 @@ const options = {
     },
   },
   secondaryStorage: {
-    get: async key => await useKV().get<string>(`auth:session:${key}`),
+    get: async key => useKV().getItemRaw(`auth:session:${key}`),
     set: async (key, value, ttl) => {
-      return await useKV().set(`auth:session:${key}`, value, { ttl });
+      return await useKV().setItemRaw(
+        `auth:session:${key}`,
+        // this test is done just in case. the type of `value` is string so it should
+        // be correct, but if its some other type of object it can cause serious problems.
+        typeof value === "string" ? value : JSON.stringify(value),
+        { ttl }
+      );
     },
     delete: async key => await useKV().del(`auth:session:${key}`),
   },
