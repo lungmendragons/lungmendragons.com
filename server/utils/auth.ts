@@ -1,6 +1,7 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-import { D1Dialect } from "kysely-d1";
+import { DatabaseIntrospector, Dialect, DialectAdapter, Driver, Kysely, QueryCompiler, SqliteAdapter, SqliteDialect } from "kysely";
 import { admin, username } from "better-auth/plugins";
+import { D1Dialect } from "./kysely-d1";
 
 const skipRateLimitPaths = new Set([
   "/get-session",
@@ -127,8 +128,10 @@ export function serverAuth() {
   if (!_auth) {
     _auth = betterAuth({
       database: {
-        dialect: new D1Dialect({
-          database: useDB(),
+        db: new Kysely({
+          dialect: new D1Dialect({
+            database: useDB(),
+          }),
         }),
         type: "sqlite",
       },

@@ -37,7 +37,7 @@
     "@vueuse/core": "^12.8.2",
     "better-auth": "^1.2.5",
     "dompurify": "^3.2.4",
-    "kysely-d1": "^0.3.0",
+    "kysely": "^0.28.0",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-external-link": "^1.1.0",
