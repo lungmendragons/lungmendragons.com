@@ -2,7 +2,7 @@
 import type { FormInst } from "naive-ui";
 
 definePageMeta({
-  auth: { only: "guest" },
+  auth: { only: AuthPermission.Guest },
 });
 
 useSeoMeta({

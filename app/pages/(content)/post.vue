@@ -5,7 +5,7 @@ import { useMarkdownStore } from "~/stores/markdown";
 import type { WIP } from "~/utils/markdown-editor";
 
 definePageMeta({
-  auth: { only: "writer" },
+  auth: { only: AuthPermission.Writer },
 });
 
 useSeoMeta({

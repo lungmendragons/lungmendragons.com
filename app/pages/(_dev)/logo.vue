@@ -9,7 +9,7 @@ import LogoWhiteIcon from "~/components/Logo/WhiteIcon.vue";
 import LogoWhiteText from "~/components/Logo/WhiteText.vue";
 
 definePageMeta({
-  auth: { only: "admin" },
+  auth: { only: AuthPermission.Admin },
 });
 </script>
 

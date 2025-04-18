@@ -22,7 +22,7 @@ function handleConfirmClick(e: MouseEvent) {
 };
 
 async function setSocials() {
-  $fetch(`/api/users/socials/${user.value?.id}`, {
+  $fetch(`/api/users/socials`, {
     method: "PUT",
     body: socials.value,
   })

@@ -2,7 +2,7 @@
 import { useMediaQuery } from "@vueuse/core";
 
 definePageMeta({
-  auth: { only: "admin" },
+  auth: { only: AuthPermission.Admin },
 });
 
 useSeoMeta({

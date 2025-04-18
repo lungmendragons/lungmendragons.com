@@ -2,7 +2,7 @@
 import { NTime, NButton } from "naive-ui";
 
 definePageMeta({
-  auth: { only: "admin" },
+  auth: { only: AuthPermission.Admin },
 });
 
 const message = useMessage();

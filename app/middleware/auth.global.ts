@@ -1,12 +1,8 @@
 import { defu } from "defu";
+import { AuthPermission, hasPermission } from "~~/shared/auth";
 
 type MiddlewareOptions = false | {
-  only?:
-    | "guest"
-    | "user"
-    | "writer"
-    | "member"
-    | "admin";
+  only?: AuthPermission;
   redirectUserTo?: string;
   redirectGuestTo?: string;
   redirectUnauthorizedTo?: string;
@@ -24,25 +20,6 @@ declare module "vue-router" {
   }
 };
 
-const perms: { [key: string]: number } = {
-  user: 1,
-  writer: 2,
-  member: 4,
-  // unused: 8,
-  // unused: 16,
-  // unused: 32,
-  // unused: 64,
-  admin: 128,
-};
-
-// privilege hierarchy
-// todo: more intuitive perms, this works for now
-function hasPerm(value: number, perm: string) {
-  if (!perms[perm])
-    return false;
-  return value & perms[perm];
-}
-
 export default defineNuxtRouteMiddleware(async (to) => {
   if (to.meta?.auth === false)
     return;
@@ -50,7 +27,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const { options, fetchSession, user, loggedIn } = useAuth();
   const { only, redirectUserTo, redirectGuestTo, redirectUnauthorizedTo } = defu(to.meta?.auth, options);
 
-  if (only && only === "guest" && loggedIn.value) {
+  if (only === AuthPermission.Guest && loggedIn.value) {
     if (to.path === redirectUserTo)
       return; // Avoid infinite redirect
     return navigateTo(redirectUserTo);
@@ -60,13 +37,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (import.meta.client)
     await fetchSession();
 
-  if (only && only !== "guest" && !loggedIn.value) {
+  if (only && !loggedIn.value) {
     if (to.path === redirectGuestTo)
       return; // Avoid infinite redirect
     return navigateTo(redirectGuestTo);
   }
 
-  if (only && only !== "guest" && user.value && !hasPerm(user.value?.permissions, only)) {
+  if (
+    only &&
+    user.value &&
+    !hasPermission(user.value.permissions, only)
+  ) {
     if (to.path === redirectUnauthorizedTo)
       return; // Avoid infinite redirect
     return navigateTo(redirectUnauthorizedTo ?? "/401");

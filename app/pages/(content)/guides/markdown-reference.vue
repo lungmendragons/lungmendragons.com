@@ -10,7 +10,7 @@ useSeoMeta({
 });
 
 definePageMeta({
-  auth: { only: "writer" },
+  auth: { only: AuthPermission.Writer },
 });
 
 const content = ref<string>("");

@@ -1,23 +1,10 @@
 import { betterAuth, type BetterAuthOptions } from "better-auth";
-import { DatabaseIntrospector, Dialect, DialectAdapter, Driver, Kysely, QueryCompiler, SqliteAdapter, SqliteDialect } from "kysely";
+import { Kysely } from "kysely";
 import { admin, username } from "better-auth/plugins";
 import { D1Dialect } from "./kysely-d1";
-
-const skipRateLimitPaths = new Set([
-  "/get-session",
-  "/list-session",
-  "/ok",
-  "/error",
-]);
-
-const skipRateLimiting = (key: string) => {
-  const parts = key.split("/", 1);
-  if (parts.length < 2) {
-    return false;
-  } else {
-    return skipRateLimitPaths.has(parts[1]);
-  }
-};
+import { H3Event } from "h3";
+import { AuthPermission, hasPermission, userAdditionalFields } from "~~/shared/auth";
+export { AuthPermission } from "~~/shared/auth";
 
 const options = {
   session: {
@@ -27,49 +14,7 @@ const options = {
     }
   },
   user: {
-    additionalFields: {
-      permissions: {
-        type: "number",
-        required: true,
-        defaultValue: 1,
-        input: false,
-      },
-      flair: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-      youtube: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-      bilibili: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-      discord: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-      bluesky: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-      twitter: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-      reddit: {
-        type: "string",
-        defaultValue: "none",
-        input: false,
-      },
-    },
+    additionalFields: userAdditionalFields,
   },
   secondaryStorage: {
     get: async key => useKV().getItemRaw(`auth:session:${key}`),
@@ -123,7 +68,9 @@ const options = {
   secret: process.env.BETTER_AUTH_SECRET,
 } satisfies BetterAuthOptions;
 
-let _auth: ReturnType<typeof betterAuth>;
+export type ServerAuth = ReturnType<typeof betterAuth<typeof options>>;
+
+let _auth: ServerAuth;
 export function serverAuth() {
   if (!_auth) {
     _auth = betterAuth({
@@ -149,4 +96,36 @@ function getBaseURL() {
     } catch { } // (e) {}
   }
   return baseURL;
+}
+
+export const requirePermission = (
+  allow: Exclude<AuthPermission, AuthPermission.Guest>,
+  other?: (event: H3Event) => boolean,
+) => async (event: H3Event) => {
+
+  const headers = event.headers;
+  const session = await serverAuth().api.getSession({
+    headers: headers,
+  });
+  if (session === null || !hasPermission(session.user.permissions, allow)) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+
+  event.context.auth = session;
+
+  if (other && !other(event)) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
+  }
+};
+
+declare module "h3" {
+  interface H3EventContext {
+    auth?: ServerAuth["$Infer"]["Session"],
+  }
 }

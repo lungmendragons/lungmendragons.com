@@ -1,0 +1,1 @@
+export { AuthPermission } from "~~/shared/auth";

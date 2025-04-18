@@ -11,7 +11,7 @@ import {
 } from "~/utils/markdown-editor";
 
 definePageMeta({
-  auth: { only: "writer" },
+  auth: { only: AuthPermission.Writer },
 });
 
 useSeoMeta({

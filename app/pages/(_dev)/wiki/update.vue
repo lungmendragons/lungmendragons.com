@@ -2,7 +2,7 @@
 import { Octokit } from "octokit";
 
 definePageMeta({
-  auth: { only: "admin" },
+  auth: { only: AuthPermission.Admin },
 });
 
 const octokit = new Octokit({ auth: process.env.GITHUB_API_TOKEN });

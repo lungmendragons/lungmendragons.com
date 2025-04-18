@@ -4,6 +4,7 @@ import HeroiconsInformationCircle from "~icons/heroicons/information-circle";
 import MageMessageDotsRoundPlus from "~icons/mage/message-dots-round-plus?width=24px&height=24px";
 import type { CSSProperties } from "vue";
 import ResourceIndexSuggest from "~/components/ResourceIndex/Suggest.vue";
+import { hasPermission, AuthPermission } from "~~/shared/auth";
 
 useSeoMeta({
   title: "Arknights Resource Index | Lungmen Dragons",
@@ -224,7 +225,7 @@ function deadSwitchStyle({
           </NTooltip>
         </NFlex>
       </NFlex>
-      <NCard v-if="user && (user.permissions & 4)">
+      <NCard v-if="user && hasPermission(user.permissions, AuthPermission.Member)">
         <span class="mr-2">
           Member view:
         </span>

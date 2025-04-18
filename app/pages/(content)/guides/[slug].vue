@@ -44,7 +44,7 @@ definePageMeta({
 onMounted(() => {
   // todo: improve this fetch, ugly as hell, feels inefficient
   $fetch(`/api/pages/guides/${slug}`)
-    .then((page) => {
+    .then(page => {
       requested.value = page;
       authorId.value = page.author;
       $fetch(`/api/users/${page.author}`)
@@ -52,7 +52,7 @@ onMounted(() => {
           requested.value.author = user;
         });
     })
-    .catch((error) => {
+    .catch(error => {
       if (error.statusCode === 404) {
         notFound.value = true;
         requested.value = {

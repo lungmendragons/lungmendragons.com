@@ -17,3 +17,8 @@ id = "87ccb37cafbd4f25b37c9f4bda4fe37f"
 [[r2_buckets]]
 binding = "BLOB"
 bucket_name = "lungmendragons-com"
+
+[[durable_objects.bindings]]
+name = "WSDurableObject"
+class_name = "WSDurableObject"
+script_name = "bingo-server"

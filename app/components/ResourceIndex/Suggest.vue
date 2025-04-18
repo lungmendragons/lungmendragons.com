@@ -59,10 +59,6 @@ function doSubmit() {
     method: "PUT",
     body: {
       data: formValue.value,
-      user: {
-        id: user.value?.id,
-        name: user.value?.name,
-      },
       time: Date.now(),
     },
   }).then(async (res) => {

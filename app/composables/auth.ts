@@ -6,6 +6,7 @@ import {
   usernameClient,
 } from "better-auth/client/plugins";
 import type { RouteLocationRaw } from "vue-router";
+import { userAdditionalFields } from "~~/shared/auth";
 
 interface RuntimeAuthConfig {
   redirectUserTo: RouteLocationRaw | string;
@@ -25,51 +26,7 @@ export function useAuth() {
     plugins: [
       adminClient(),
       usernameClient(),
-      inferAdditionalFields({
-        user: {
-          permissions: {
-            type: "number",
-            required: true,
-            defaultValue: 1,
-            input: false,
-          },
-          flair: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          youtube: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          bilibili: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          discord: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          bluesky: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          twitter: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-          reddit: {
-            type: "string",
-            defaultValue: "none",
-            input: false,
-          },
-        },
-      }),
+      inferAdditionalFields({ user: userAdditionalFields }),
     ],
   });
 
