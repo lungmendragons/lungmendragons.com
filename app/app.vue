@@ -38,21 +38,31 @@ import LogoColorIcon from "~/components/Logo/ColorIcon.vue";
 import { useFavicon, useMediaQuery, useDark } from "@vueuse/core";
 // import { NThemeEditor } from "naive-ui";
 
+const subdomain = useSubdomain();
 const isDark = useDark();
 const favicon = computed(() => isDark.value ? "/svg/logo/LDAngledColored.svg" : "/svg/logo/LDAngledBlack.svg");
 useFavicon(favicon);
 
 const isLG = useMediaQuery(mediaQuery.minWidth.lg as string);
-const layout = computed(() => isLG.value ? "desktop" : "mobile");
+const layout = computed(() => {
+  if (subdomain.value) {
+    return "empty";
+  } else  {
+    return isLG.value ? "desktop" : "mobile";
+  }
+});
 const isLoaded = ref(false);
 
-onMounted(() => isLoaded.value = true);
+onMounted(() => {
+  isLoaded.value = true;
+  if (subdomain.value) document.body.style.all = "unset";
+});
 </script>
 
 <template>
   <NConfigProvider
-    :theme="theme"
-    :theme-overrides="themeOverrides">
+    :theme="layout !== 'empty' ? theme : null"
+    :theme-overrides="layout !== 'empty' ? themeOverrides : null">
     <NuxtRouteAnnouncer />
     <NGlobalStyle />
 
@@ -67,32 +77,27 @@ onMounted(() => isLoaded.value = true);
     <NModalProvider>
     <NNotificationProvider to="#page-content-container">
 
-    <main />
-
     <!--
       Deferring content with a loading screen until app mounted avoids annoying FOUC problems
       From what I can tell it's also significantly faster. like minimum 5x faster
     -->
     <ClientOnly>
-      <Teleport defer to="#teleports">
-        <!-- <NThemeEditor> -->
-        <NuxtLayout :name="layout">
-          <NuxtPage />
-        </NuxtLayout>
-        <!-- </NThemeEditor> -->
-      </Teleport>
+      <!-- <NThemeEditor> -->
+      <NuxtLayout :name="layout">
+        <NuxtPage />
+      </NuxtLayout>
+      <!-- </NThemeEditor> -->
     </ClientOnly>
 
     <!-- Loading screen during hydration, shouldn't exceed ~500ms or so -->
-    <Teleport to="#teleports" :disabled="isLoaded">
-      <NFlex
-        vertical
-        justify="center"
-        :style="{ width: '100vw', height: '100svh' }">
-        <LogoColorIcon :style="{ width: 72, height: 72, margin: '12px auto' }" />
-        <LoadingDotsAnim :style="{ width: 24, height: 24, margin: '0 auto' }" />
-      </NFlex>
-    </Teleport>
+    <NFlex
+      v-if="!isLoaded"
+      vertical
+      justify="center"
+      :style="{ width: '100vw', height: '100svh' }">
+      <LogoColorIcon :style="{ width: 72, height: 72, margin: '12px auto' }" />
+      <LoadingDotsAnim :style="{ width: 24, height: 24, margin: '0 auto' }" />
+    </NFlex>
 
     </NNotificationProvider>
     </NModalProvider>

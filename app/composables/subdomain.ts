@@ -1,0 +1,1 @@
+export const useSubdomain = () => useState<string | undefined>("subdomain", () => undefined);
