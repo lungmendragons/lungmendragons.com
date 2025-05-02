@@ -41,6 +41,6 @@ useSeoMeta({
     <div class="mb-4 text-xs">
       <em>(Note: If you see a "blocked page" message where the YouTube embed should be, try refreshing the page.)</em>
     </div>
-    <BingoContainer />
+    <Bingo3Container />
   </NFlex>
 </template>
