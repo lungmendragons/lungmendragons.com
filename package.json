@@ -5,7 +5,7 @@
   "packageManager": "pnpm@10.9.0",
   "scripts": {
     "postinstall": "pnpm run prep",
-    "prep": "npx wrangler types && nuxt prepare",
+    "prep": "wrangler types && nuxt prepare && pnpm run -r prep",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "typecheck": "nuxt typecheck",
@@ -38,6 +38,8 @@
     "better-auth": "^1.2.5",
     "dompurify": "^3.2.4",
     "kysely": "^0.28.0",
+    "bingo-server": "workspace:bingo-server",
+    "bingo-logic": "workspace:bingo-logic",
     "markdown-it": "^14.1.0",
     "markdown-it-anchor": "^9.2.0",
     "markdown-it-external-link": "^1.1.0",
@@ -72,7 +74,7 @@
     "gradient-string": "^3.0.0",
     "naive-ui": "2.40.3",
     "nitro-cloudflare-dev": "^0.2.2",
-    "typescript": "^5.8.2",
+    "typescript": "catalog:",
     "typescript-eslint": "^8.29.0",
     "unplugin-auto-import": "^19.1.2",
     "unplugin-icons": "^22.1.0",
@@ -81,12 +83,13 @@
     "vite-plugin-cjs-interop": "^2.2.0",
     "vite-plugin-wasm": "^3.4.1",
     "vue-tsc": "^2.2.8",
-    "wrangler": "^4.10.0"
+    "wrangler": "catalog:"
   },
   "pnpm": {
     "overrides": {
       "@css-render/vue3-ssr": "^0.15.14",
-      "css-render": "^0.15.14"
+      "css-render": "^0.15.14",
+      "replace-in-file": "^8.3.0"
     },
     "patchedDependencies": {
       "@juggle/resize-observer": "patches/@juggle__resize-observer.patch"

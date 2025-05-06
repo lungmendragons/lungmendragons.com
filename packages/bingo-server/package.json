@@ -1,0 +1,25 @@
+{
+  "name": "bingo-server",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./*": "./src/lib/*.ts"
+  },
+  "scripts": {
+    "prep": "wrangler types",
+    "deploy": "wrangler -c ./wrangler.toml deploy",
+    "dev": "wrangler -c ./wrangler.toml dev --port 2930"
+  },
+  "dependencies": {
+    "@cloudflare/workers-types": "^4.20250409.0",
+    "@better-auth/utils": "^0.2.4",
+    "crossws": "^0.3.4",
+    "nanoid": "^5.1.5",
+    "rou3": "^0.5.1"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "wrangler": "catalog:"
+  }
+}

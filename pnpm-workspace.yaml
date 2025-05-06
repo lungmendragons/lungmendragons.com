@@ -1,0 +1,6 @@
+packages:
+  - 'packages/*'
+
+catalog:
+  wrangler: '^4.14.1'
+  typescript: '^5.8.3'
