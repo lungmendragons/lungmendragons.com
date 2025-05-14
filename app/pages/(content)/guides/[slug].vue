@@ -25,21 +25,27 @@ function getDateString(time: string): string {
   );
 };
 
-useSeoMeta({
-  title: () => `${requested.value.title} | Lungmen Dragons`,
-  ogTitle: () => `${requested.value.title} | Lungmen Dragons`,
-  twitterTitle: () => `${requested.value.title} | Lungmen Dragons`,
-  description: () => requested.value.description,
-  ogDescription: () => requested.value.description,
-  twitterDescription: () => requested.value.description,
-  ogUrl: () => `https://lungmendragons.com/guides/${slug}`,
-  twitterCard: "summary",
+useHeadSafe({
+  meta: [
+    { name: "title", content: computed(() => `${requested.value.title} | Lungmen Dragons`) },
+    { name: "description", content: computed(() => requested.value.description) },
+    { property: "og:title", content: computed(() => `${requested.value.title} | Lungmen Dragons`) },
+    { property: "og:description", content: computed(() => requested.value.description) },
+    { property: "og:url", content: computed(() => `https://lungmendragons.com/guides/${slug}`) },
+    { name: "twitter:card", content: "summary" },
+  ],
 });
 
-definePageMeta({
-  title: () => `${requested.value.title} | Lungmen Dragons`,
-  description: () => requested.value.description,
-})
+useSeoMeta({
+  title: computed(() => `${requested.value.title} | Lungmen Dragons`),
+  ogTitle: computed(() => `${requested.value.title} | Lungmen Dragons`),
+  twitterTitle: computed(() => `${requested.value.title} | Lungmen Dragons`),
+  description: computed(() => requested.value.description),
+  ogDescription: computed(() => requested.value.description),
+  twitterDescription: computed(() => requested.value.description),
+  ogUrl: computed(() => `https://lungmendragons.com/guides/${slug}`),
+  twitterCard: "summary",
+});
 
 onMounted(() => {
   // todo: improve this fetch, ugly as hell, feels inefficient
