@@ -1,14 +1,16 @@
 <script setup lang="ts">
 const route = useRoute();
-const game = ref("");
-// console.log(route.query);
+const bingo = useBingo();
 
-onMounted(() => {
+onMounted(async () => {
   document.body.style.all = "unset";
-  if (route.query.game) game.value = route.query.game as string;
+  if (route.query.game) {
+    const roomId = route.query.game as string;
+    await bingo.joinRoom(roomId, "bingo stream source");
+  }
 });
 </script>
 
 <template>
-  <BingoGrid :game-id="game" />
+  <BingoGrid v-if="bingo.session.value" :click="async (idx) => undefined" />
 </template>

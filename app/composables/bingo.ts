@@ -273,8 +273,16 @@ export function useBingo() {
   }
 
   async function onWsClose(ev: CloseEvent) {
-
+    session.value = undefined;
+    users.value = {};
+    teams.value = [];
+    websocket.value = undefined;
+    roomId.value = undefined;
+    isSync.value = undefined;
+    user.value = undefined;
   }
+  
+  const protocols = (token: string) => [ `token.${token}`, "bingo" ];
 
   async function createSession(def: BoardDef) {
     session.value = new GameSession(def);
@@ -308,7 +316,7 @@ export function useBingo() {
       }
     ];
 
-    const ws = new WebSocket(url, [`token.${data}`]);
+    const ws = new WebSocket(url, protocols(data));
     ws.binaryType = "arraybuffer";
 
     ws.onopen = onWsOpen;
@@ -325,7 +333,7 @@ export function useBingo() {
 
     thisName = name;
 
-    const ws = new WebSocket(url, [`token.${data}`]);
+    const ws = new WebSocket(url, protocols(data));
     ws.binaryType = "arraybuffer";
 
     ws.onopen = onWsOpen;

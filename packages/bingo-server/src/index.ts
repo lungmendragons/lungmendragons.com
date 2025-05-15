@@ -46,11 +46,22 @@ export class WSDurableObject extends DurableObject {
     const protocols = getProtocols(request.headers.get("Sec-WebSocket-Protocol"));
 
     let token: string | undefined = undefined;
+    let hasBingoProtocol = false;
     for (const protocol of protocols) {
       if (protocol.startsWith("token.")) {
         // "token.".length
         token = protocol.slice(6);
       }
+      if (protocol === "bingo") {
+        hasBingoProtocol = true;
+      }
+    }
+    
+    if(!hasBingoProtocol) {
+      return new Response(null, {
+        status: 400,
+        statusText: "subprotocol `bingo` not present.",
+      });
     }
 
     if (!token) {
@@ -83,7 +94,7 @@ export class WSDurableObject extends DurableObject {
     }
   }
 
-  createRoom(token: TokenData) {    
+  createRoom(token: TokenData) {
     let room: string;
     while (true) {
       room = nanoid(16);
@@ -102,7 +113,7 @@ export class WSDurableObject extends DurableObject {
       room,
     };
     setClientData(server, clientData);
-    
+
     console.log(`opening ${clientData.id} in ${clientData.room}`);
 
     return new Response(null, {
@@ -131,10 +142,13 @@ export class WSDurableObject extends DurableObject {
       room,
     };
     setClientData(server, clientData);
-    
+
     console.log(`opening ${clientData.id} in ${clientData.room}`);
 
     return new Response(null, {
+      headers: {
+        "Sec-Websocket-Protocol": "bingo",
+      },
       status: 101,
       webSocket: client,
     });
@@ -150,7 +164,7 @@ export class WSDurableObject extends DurableObject {
         const buffer = base64Url.decode(data).buffer;
         message = BinaryReader.using(buffer, ClientMessage.decode);
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e);
       return;
     }
@@ -234,13 +248,13 @@ export class WSDurableObject extends DurableObject {
       client: clientData,
     });
 
-    client.close(code, reason);
+    client.close(1000, reason);
   }
 
   sendAll(from: WebSocket | undefined, room: string, message: ServerMessage) {
-    const data = from? getClientData(from): { id: "none" };
+    const data = from ? getClientData(from) : { id: "none" };
     console.log(`sending ${JSON.stringify(message, (key, value) => {
-      if(isUint8Array(value)) {
+      if (isUint8Array(value)) {
         return base64Url.encode(value);
       } else {
         return value;
@@ -257,7 +271,7 @@ export class WSDurableObject extends DurableObject {
   sendSingle(to: WebSocket, message: ServerMessage) {
     const data = getClientData(to);
     console.log(`sending ${JSON.stringify(message, (key, value) => {
-      if(isUint8Array(value)) {
+      if (isUint8Array(value)) {
         return base64Url.encode(value);
       } else {
         return value;

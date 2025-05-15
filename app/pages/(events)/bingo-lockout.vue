@@ -40,7 +40,7 @@ async function clickTile(tile: TileId) {
         <NDivider />
         <NDivider />
       </NFlex>
-      <BingoGrid v-if="bingo.session.value" :board="bingo.session.value" :teams="bingo.teams.value" :click="clickTile" />
+      <BingoGrid v-if="bingo.session.value" :click="clickTile" />
     </NFlex>
   </NFlex>
 </template>
