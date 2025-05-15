@@ -31,7 +31,7 @@ export class GameSession {
   constructor(def: BoardDef) {
     this.boardDef = def;
     this.activeBoard = {
-      tiles: this.boardDef.tiles.map((def, id) => ({
+      tiles: this.boardDef.tiles.map((_, id) => ({
         claimed: [],
         id,
       })),
@@ -55,10 +55,10 @@ export class GameSession {
   }
 
   getScores(): Record<TeamId, number> {
-    let out: Record<TeamId, number> = {};
+    const out: Record<TeamId, number> = {};
     for (let tile = 0; tile < this.boardDef.tiles.length; tile += 1) {
-      let active = this.activeBoard.tiles[tile]!;
-      let def = this.boardDef.tiles[tile]!;
+      const active = this.activeBoard.tiles[tile]!;
+      const def = this.boardDef.tiles[tile]!;
 
       for (const team of active.claimed) {
         out[team] = (out[team] ?? 0) + def.points;
@@ -68,12 +68,12 @@ export class GameSession {
   }
 
   clickTile(team: TeamId, tile: TileId) {
-    let active = this.activeBoard.tiles[tile]!;
-    let def = this.boardDef.tiles[tile]!;
+    const active = this.activeBoard.tiles[tile]!;
+    const def = this.boardDef.tiles[tile]!;
     if (active.claimed.length === 0) {
       active.claimed.push(team);
     } else {
-      let idx = active.claimed.indexOf(team);
+      const idx = active.claimed.indexOf(team);
       if (idx === -1) {
         // the current team has not claimed the tile.
         if (def.exclusive) {

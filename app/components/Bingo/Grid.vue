@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// import { GameSession, type TileId } from "bingo-logic";
-import { renderDropdownLabel } from "~/utils/bingo/helpers";
+import { NFlex } from "naive-ui";
+import type { DropdownOption } from "naive-ui";
+import type { VNodeChild } from "vue";
 
 const bingo = useBingo();
 const board = bingo.session.value!;
@@ -9,8 +10,22 @@ function gridArea(i: number, _w: number, _h: number) {
   return `${Math.floor(i / 5) + 1} / ${(i % 5) + 1} / ${Math.floor(i / 5) + 2} / ${(i % 5) + 2}`;
 }
 
-function clickTile(tile: number, team: number) {
-  bingo.actions.clickTile(tile, team);
+function renderDropdownLabel(option: DropdownOption): VNodeChild {
+  return h(
+    NFlex,
+    { align: "center" },
+    [
+      h("div", {
+        style: {
+          backgroundColor: option.hex,
+          borderRadius: "50%",
+          width: "16px",
+          height: "16px",
+        }
+      }),
+      option.label as string,
+    ]
+  );
 }
 </script>
 
@@ -25,8 +40,8 @@ function clickTile(tile: number, team: number) {
           trigger="click"
           :options="bingo.teamColorMap"
           :render-label="renderDropdownLabel"
-          @select="clickTile(board.extraTile(i), $event)">
-          <BingoTileStandard
+          @select="bingo.actions.clickTile(board.extraTile(i), $event)">
+          <BingoTile
             :key="`tile-${board.extraTile(i)}`"
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
             :tile-id="board.extraTile(i)"
@@ -40,8 +55,8 @@ function clickTile(tile: number, team: number) {
           trigger="click"
           :options="bingo.teamColorMap"
           :render-label="renderDropdownLabel"
-          @select="clickTile(board.mainTile(i), $event)">
-          <BingoTileStandard
+          @select="bingo.actions.clickTile(board.mainTile(i), $event)">
+          <BingoTile
             :key="`tile-${board.mainTile(i)}`"
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
             :tile-id="board.mainTile(i)"

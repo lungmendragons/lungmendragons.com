@@ -1,6 +1,22 @@
-import { GameSession, type ActiveBoard, type BoardDef, type TeamId, type TileId } from "bingo-logic";
-import { ServerOpcode, ServerMessage, ClientOpcode, ClientMessage, ClientData } from "bingo-server/protocol";
-import { BinaryReader, BinaryWriter, s } from "binary-schema";
+import {
+  GameSession,
+  type ActiveBoard,
+  type BoardDef,
+  type TeamId,
+  type TileId
+} from "bingo-logic";
+import {
+  ServerOpcode,
+  ClientOpcode,
+  ClientMessageSchema,
+  ServerMessageSchema,
+  type ServerMessage,
+} from "bingo-server/protocol";
+import {
+  BinaryReader,
+  BinaryWriter,
+  s,
+} from "binary-schema";
 
 export type BingoAction = {
   kind: "click_tile",
@@ -14,7 +30,7 @@ export type BingoAction = {
   team: number,
 };
 
-const BingoAction: s.Schema<BingoAction> = s.union("kind", {
+const BingoActionSchema: s.Schema<BingoAction> = s.union("kind", {
   click_tile: {
     tile: s.u8,
     team: s.u8,
@@ -50,24 +66,24 @@ interface User {
   teams: TeamId[],
 }
 
-const Team: s.Schema<Team> = s.struct({
+const TeamSchema: s.Schema<Team> = s.struct({
   color: s.string,
   name: s.string,
 });
 
-const User: s.Schema<User> = s.struct({
+const UserSchema: s.Schema<User> = s.struct({
   id: s.string,
   name: s.string,
   teams: s.array(s.u8),
 });
 
-const ActiveBoard: s.Schema<ActiveBoard> = s.struct({
+const ActiveBoardSchema: s.Schema<ActiveBoard> = s.struct({
   tiles: s.array(s.struct({
     claimed: s.array(s.u8),
   })),
 });
 
-const BoardDef: s.Schema<BoardDef> = s.struct({
+const BoardDefSchema: s.Schema<BoardDef> = s.struct({
   width: s.u8,
   height: s.u8,
   extra: s.u8,
@@ -79,11 +95,11 @@ const BoardDef: s.Schema<BoardDef> = s.struct({
   })),
 });
 
-const BingoSyncData: s.Schema<BingoSyncData> = s.struct({
-  active: s.option(ActiveBoard),
-  def: s.option(BoardDef),
-  users: s.option(s.array(User)),
-  teams: s.option(s.array(Team)),
+const BingoSyncDataSchema: s.Schema<BingoSyncData> = s.struct({
+  active: s.option(ActiveBoardSchema),
+  def: s.option(BoardDefSchema),
+  users: s.option(s.array(UserSchema)),
+  teams: s.option(s.array(TeamSchema)),
   start: s.option(s.f64),
 });
 
@@ -94,7 +110,7 @@ export function useBingo() {
   const users = useState<Record<UserId, User>>("bingoUsers", () => ({}));
   const teams = useState<Team[]>("bingoTeams", () => []);
 
-  type Syncs = {
+  interface Syncs {
     active?: boolean,
     board?: boolean,
     users?: boolean,
@@ -107,7 +123,7 @@ export function useBingo() {
   const isSync = useState<boolean | undefined>("bingoIsSync", () => undefined);
   const user = useState<UserId | undefined>("bingoUser", () => undefined);
 
-  let thisName: string | undefined = undefined;
+  let thisName: string | undefined;
 
   type ServerMessageHooks = {
     [K in ServerOpcode]: (message: Extract<ServerMessage, { opcode: K }>) => Promise<void>;
@@ -120,10 +136,29 @@ export function useBingo() {
     ) => Promise<Syncs | undefined>;
   };
 
+  const runSync = (syncs: Syncs) => {
+    if (!isSync.value) return;
+    const data = {
+      active: syncs.active ? session.value?.activeBoard : undefined,
+      def: syncs.board ? session.value?.boardDef : undefined,
+      start: syncs.active ? session.value?.start : undefined,
+      teams: syncs.teams ? teams.value : undefined,
+      users: syncs.users ? Object.values(users.value) : undefined,
+    };
+    
+    console.log(`sending syncs: ${JSON.stringify(data)}`);
+
+    websocket.value?.send(BinaryWriter.using({
+      opcode: ClientOpcode.SendSync,
+      data: BinaryWriter.using(data, BingoSyncDataSchema.encode),
+      to: syncs.to,
+    }, ClientMessageSchema.encode));
+  };
+
   const bingoActionHooks: BingoActionHooks = {
     click_tile: async (id, { tile, team }) => {
       if (!session.value) return;
-      let user = users.value[id];
+      const user = users.value[id];
       if (!user) return;
 
       // if (user.teams.includes(team)) {
@@ -141,7 +176,7 @@ export function useBingo() {
       return { users: true }
     },
     join_team: async (id, { team }) => {
-      let user = users.value[id];
+      const user = users.value[id];
       if (!user) return;
       user.teams.push(team);
       return { users: true }
@@ -167,35 +202,9 @@ export function useBingo() {
       };
       websocket.value?.send(BinaryWriter.using({
         opcode: ClientOpcode.SendAction,
-        data: BinaryWriter.using(actionData as any, BingoAction.encode),
-      }, ClientMessage.encode));
+        data: BinaryWriter.using(actionData as any, BingoActionSchema.encode),
+      }, ClientMessageSchema.encode));
     }
-  };
-
-  const runSync = (syncs: Syncs) => {
-    if (!isSync.value) return;
-    const data = {
-      active: syncs.active ? session.value?.activeBoard : undefined,
-      def: syncs.board ? session.value?.boardDef : undefined,
-      start: syncs.active ? session.value?.start : undefined,
-      teams: syncs.teams ? teams.value : undefined,
-      users: syncs.users ? Object.values(users.value) : undefined,
-    };
-    
-    console.log(`sending syncs: ${JSON.stringify(data)}`);
-
-    websocket.value?.send(BinaryWriter.using({
-      opcode: ClientOpcode.SendSync,
-      data: BinaryWriter.using(data, BingoSyncData.encode),
-      to: syncs.to,
-    }, ClientMessage.encode));
-  };
-
-  const executeServerMessageHook = async <K extends ServerOpcode>(
-    opcode: K,
-    data: Extract<ServerMessage, { opcode: K }>,
-  ) => {
-    await serverMessageHooks[opcode](data as any);
   };
 
   const serverMessageHooks: ServerMessageHooks = {
@@ -207,12 +216,12 @@ export function useBingo() {
     },
     [ServerOpcode.SendAction]: async ({ client, data }) => {
       if (!isSync.value) return;
-      const action = BinaryReader.using(data, BingoAction.decode);
+      const action = BinaryReader.using(data, BingoActionSchema.decode);
       executeAction(action.kind, client.id, action);
     },
     [ServerOpcode.SendSync]: async ({ client, data }) => {
       if (!client.sync) return;
-      const syncData = BinaryReader.using(data, BingoSyncData.decode);
+      const syncData = BinaryReader.using(data, BingoSyncDataSchema.decode);
       
       console.log(`receiving syncs: ${JSON.stringify(syncData)}`);
       
@@ -256,10 +265,17 @@ export function useBingo() {
     },
   };
 
-  async function onWsOpen(ev: Event) {
+  const executeServerMessageHook = async <K extends ServerOpcode>(
+    opcode: K,
+    data: Extract<ServerMessage, { opcode: K }>,
+  ) => {
+    await serverMessageHooks[opcode](data as any);
+  };
+
+  async function onWsOpen(_: Event) {
     const data = BinaryWriter.using({
       opcode: ClientOpcode.Init,
-    }, ClientMessage.encode);
+    }, ClientMessageSchema.encode);
     websocket.value?.send(data);
   }
 
@@ -268,11 +284,11 @@ export function useBingo() {
       return;
     }
     const buffer = ev.data;
-    const message = BinaryReader.using(buffer, ServerMessage.decode);
+    const message = BinaryReader.using(buffer, ServerMessageSchema.decode);
     executeServerMessageHook(message.opcode, message);
   }
 
-  async function onWsClose(ev: CloseEvent) {
+  async function onWsClose(_: CloseEvent) {
     session.value = undefined;
     users.value = {};
     teams.value = [];
@@ -298,7 +314,7 @@ export function useBingo() {
       width: 5,
       height: 5,
       extra: 3,
-      tiles: new Array(5 * 5 + 3).fill(0).map((v, i) => ({
+      tiles: Array.from({length: 5 * 5 + 3}).fill(0).map((_, i) => ({
         exclusive: true,
         stealable: false,
         points: 1,

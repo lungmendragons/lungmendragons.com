@@ -1,3 +1,4 @@
+/* eslint no-restricted-syntax: ["off"] */
 import { s } from "binary-schema";
 
 export const enum ClientOpcode {
@@ -23,13 +24,13 @@ export interface ClientData {
 
 export type PublicClientData = Omit<ClientData, "token">;
 
-export const ClientData: s.Schema<ClientData> = s.struct({
+export const ClientDataSchema: s.Schema<ClientData> = s.struct({
   sync: s.boolean,
   room: s.string,
   id: s.string,
   token: s.string,
 });
-export const PublicClientData: s.Schema<PublicClientData> = s.struct({
+export const PublicClientDataSchema: s.Schema<PublicClientData> = s.struct({
   sync: s.boolean,
   room: s.string,
   id: s.string,
@@ -47,14 +48,14 @@ export type ClientMessage =
   { opcode: ClientOpcode.ChangeSync, id: string } |
   { opcode: ClientOpcode.Init };
 
-export const ServerMessage: s.Schema<ServerMessage> = s.union("opcode", {
-  [ServerOpcode.Init]: { client: ClientData },
-  [ServerOpcode.SendAction]: { client: PublicClientData, data: s.bytearray },
-  [ServerOpcode.SendSync]: { client: PublicClientData, data: s.bytearray },
-  [ServerOpcode.Close]: { client: PublicClientData },
+export const ServerMessageSchema: s.Schema<ServerMessage> = s.union("opcode", {
+  [ServerOpcode.Init]: { client: ClientDataSchema },
+  [ServerOpcode.SendAction]: { client: PublicClientDataSchema, data: s.bytearray },
+  [ServerOpcode.SendSync]: { client: PublicClientDataSchema, data: s.bytearray },
+  [ServerOpcode.Close]: { client: PublicClientDataSchema },
 });
 
-export const ClientMessage: s.Schema<ClientMessage> = s.union("opcode", {
+export const ClientMessageSchema: s.Schema<ClientMessage> = s.union("opcode", {
   [ClientOpcode.SendAction]: { data: s.bytearray },
   [ClientOpcode.SendSync]: { data: s.bytearray, to: s.option(s.string) },
   [ClientOpcode.ChangeSync]: { id: s.string },

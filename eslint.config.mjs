@@ -17,6 +17,7 @@ export default withNuxt(
     // https://github.com/antfu/eslint-config/tree/main/src/configs
     rules: {
       // https://eslint.org/docs/latest/rules/
+      "no-case-declarations": [ "off" ],
       "no-console": [ "off" ],
       "unused-imports/no-unused-vars": [ "off" ], // ts rule covers this
 
@@ -52,6 +53,7 @@ export default withNuxt(
           ignoreRestSiblings: true,
         },
       ],
+      "ts/prefer-literal-enum-member": [ "off" ],
 
       // https://eslint.vuejs.org/rules/
       "vue/first-attribute-linebreak": [ "off" ],
