@@ -96,23 +96,23 @@ export function struct <V extends StructFields>(fields: V): Schema<StructSchemaT
 
 export function array <D>(entry: Schema<D>): Schema<D[]> {
   return rawSchema({
-  encode: (w, d) => w.array(d, entry.encode),
-  decode: r => r.array(entry.decode),
-})
+    encode: (w, d) => w.array(d, entry.encode),
+    decode: r => r.array(entry.decode),
+  })
 }
 
 export function option <D>(inner: Schema<D>): Schema<D | undefined> {
   return rawSchema({
-  encode: (w, d) => w.option(d, inner.encode),
-  decode: r => r.option(inner.decode),
-})
+    encode: (w, d) => w.option(d, inner.encode),
+    decode: r => r.option(inner.decode),
+  })
 }
 
 export function record <D>(inner: Schema<D>): Schema<Record<string, D>> {
   return rawSchema({
-  encode: (w, d) => w.record(d, inner.encode),
-  decode: r => r.record(inner.decode),
-})
+    encode: (w, d) => w.record(d, inner.encode),
+    decode: r => r.record(inner.decode),
+  })
 }
 
 export type UnionVars = Record<string | number, StructFields>;
