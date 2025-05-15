@@ -1,32 +1,15 @@
 import { NFlex } from "naive-ui";
-import type { SelectRenderLabel, SelectRenderTag } from "naive-ui";
+import type { DropdownOption } from "naive-ui";
+import type { VNodeChild } from "vue";
 
-export const renderColorSelectTag: SelectRenderTag = ({ option }): VNode => {
+export function renderDropdownLabel(option: DropdownOption): VNodeChild {
   return h(
     NFlex,
     { align: "center" },
     [
       h("div", {
         style: {
-          backgroundColor: option.value,
-          borderRadius: "50%",
-          width: "16px",
-          height: "16px",
-        }
-      }),
-      option.label as string,
-    ]
-  )
-}
-
-export const renderColorSelectLabel: SelectRenderLabel = (option): VNode => {
-  return h(
-    NFlex,
-    { align: "center" },
-    [
-      h("div", {
-        style: {
-          backgroundColor: option.value,
+          backgroundColor: option.hex,
           borderRadius: "50%",
           width: "16px",
           height: "16px",

@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { computedAsync } from "@vueuse/core";
-import { GameSession, type TileId } from "bingo-logic";
-
-const { click } = defineProps<{
-  click: (idx: TileId) => Promise<void>,
-}>();
+// import { GameSession, type TileId } from "bingo-logic";
+import { renderDropdownLabel } from "~/utils/bingo/helpers";
 
 const bingo = useBingo();
 const board = bingo.session.value!;
 
-function gridArea(i: number, w: number, h: number) {
+function gridArea(i: number, _w: number, _h: number) {
   return `${Math.floor(i / 5) + 1} / ${(i % 5) + 1} / ${Math.floor(i / 5) + 2} / ${(i % 5) + 2}`;
 }
 
+function clickTile(tile: number, team: number) {
+  bingo.actions.clickTile(tile, team);
+}
 </script>
 
 <template>
@@ -21,22 +20,34 @@ function gridArea(i: number, w: number, h: number) {
     class="board-container">
     <!-- {{ route.query.game ?? "default" }} -->
     <NFlex class="board-bonus" justify="space-between">
-      <BingoTileStandard
-        v-for="(_, i) in board.boardDef.extra"
-        :key="`tile-${board.extraTile(i)}`"
-        :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
-        :tileId="board.extraTile(i)"
-        @click="click(board.extraTile(i))"
-      />
+      <template v-for="(_, i) in board.boardDef.extra" :key="i">
+        <NDropdown
+          trigger="click"
+          :options="bingo.teamColorMap"
+          :render-label="renderDropdownLabel"
+          @select="clickTile(board.extraTile(i), $event)">
+          <BingoTileStandard
+            :key="`tile-${board.extraTile(i)}`"
+            :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+            :tile-id="board.extraTile(i)"
+          />
+        </NDropdown>
+      </template>
     </NFlex>
     <div class="board-standard">
-      <BingoTileStandard
-        v-for="(_, i) in board.boardDef.width * board.boardDef.height"
-        :key="`tile-${board.mainTile(i)}`"
-        :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
-        :tileId="board.mainTile(i)"
-        @click="click(board.mainTile(i))"
-      />
+      <template v-for="(_, i) in board.boardDef.width * board.boardDef.height" :key="i">
+        <NDropdown
+          trigger="click"
+          :options="bingo.teamColorMap"
+          :render-label="renderDropdownLabel"
+          @select="clickTile(board.mainTile(i), $event)">
+          <BingoTileStandard
+            :key="`tile-${board.mainTile(i)}`"
+            :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+            :tile-id="board.mainTile(i)"
+          />
+        </NDropdown>
+      </template>
     </div>
   </NFlex>
 </template>

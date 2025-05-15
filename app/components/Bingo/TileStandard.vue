@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { type TileDef, type ActiveTile, GameSession, type TileId, type TeamId } from "bingo-logic";
+// import { type TileDef, type ActiveTile, GameSession, type TileId, type TeamId } from "bingo-logic";
+import type { TileId } from "bingo-logic";
 
 const { tileId: id } = defineProps<{
   tileId: TileId,

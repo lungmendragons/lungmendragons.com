@@ -307,12 +307,12 @@ export function useBingo() {
     });
     teams.value = [
       {
-        color: "#ff0000",
-        name: "red",
+        color: "#2080F0",
+        name: "Team 1",
       },
       {
-        color: "#0000ff",
-        name: "blue",
+        color: "#D03050",
+        name: "Team 2",
       }
     ];
 
@@ -343,6 +343,13 @@ export function useBingo() {
     websocket.value = ws;
   }
 
+  function updateTeamColors(colors: string[]) {
+    teams.value = colors.map((color, i) => ({
+      name: `Team ${i + 1}`,
+      color,
+    }));
+  }
+
   return {
     createRoom,
     joinRoom,
@@ -360,5 +367,11 @@ export function useBingo() {
         if (user.value) executeAction("join_team", user.value, { team });
       },
     },
+    teamColorMap: computed(() => {
+      return teams.value.map(
+        ({ color, name }, key) => ({ label: name, hex: color, key })
+      );
+    }).value,
+    updateTeamColors,
   };
 }

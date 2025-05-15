@@ -1,24 +1,12 @@
 <script setup lang="ts">
-import type { TeamId, TileId } from "bingo-logic";
-
 const bingo = useBingo();
-
 const roomIdField = ref("");
 const nameField = ref("");
-const activeTeam = ref<TeamId>();
-
-async function clickTile(tile: TileId) {
-  // set teams for testing.
-  if (bingo.isSync.value) {
-    activeTeam.value = 0;
-  } else {
-    activeTeam.value = 1;
-  }
-  
-  if (activeTeam.value !== undefined) {
-    bingo.actions.clickTile(tile, activeTeam.value);
-  }
-}
+const teams = bingo.teams;
+const model = ref([
+  "#2080F0",
+  "#D03050",
+])
 </script>
 
 <template>
@@ -30,17 +18,51 @@ async function clickTile(tile: TileId) {
           Users: {{Object.values(bingo.users.value ?? {}).map(v => `${v.id}/${v.name}`)}} <br>
         </div>
         <NDivider />
-        <NInput type="text" v-model:value="nameField" placeholder="display name" />
+        <NInput
+          type="text"
+          v-model:value="nameField"
+          placeholder="display name"
+        />
         <NButton @click="bingo.createRoom(nameField)">init</NButton>
         <div>
           <NButton class="w-20" @click="bingo.joinRoom(roomIdField, nameField)">join</NButton>
           <NDivider vertical />
-          <NInput type="text" v-model:value="roomIdField" class="max-w-40" placeholder="room ID" />
+          <NInput
+            type="text"
+            v-model:value="roomIdField"
+            class="max-w-40"
+            placeholder="room ID"
+          />
         </div>
         <NDivider />
-        <NDivider />
+        <NForm v-if="bingo.session.value" :model="model">
+          <NFormItem
+            v-for="(team, i) in teams"
+            :key="i"
+            :label="team.name"
+            :path="`teams[${i}].color`"
+            label-placement="left">
+            <NColorPicker
+              v-if="model[i]"
+              v-model:value="model[i]"
+              :modes="['hex']"
+              :show-alpha="false"
+              :swatches="[
+                '#18A058',
+                '#2080F0',
+                '#F0A020',
+                '#D03050',
+              ]"
+            />
+          </NFormItem>
+          <NFormItem>
+            <NButton @click="bingo.updateTeamColors(model)">
+              Confirm
+            </NButton>
+          </NFormItem>
+        </NForm>
       </NFlex>
-      <BingoGrid v-if="bingo.session.value" :click="clickTile" />
+      <BingoGrid v-if="bingo.session.value" />
     </NFlex>
   </NFlex>
 </template>
