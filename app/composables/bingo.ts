@@ -1,270 +1,356 @@
-import { nanoid } from "nanoid";
-import type {
-  BingoSession,
-  BingoBoard,
-  BingoTileStandard,
-  BingoTileBonus,
-  BingoAdmin,
-  BingoPlayer,
-  BingoSpectator,
-} from "~/utils/bingo/types";
-import {
-  BingoTileColor,
-  BingoUserRole,
-} from "~/utils/bingo/types";
+import { GameSession, type ActiveBoard, type BoardDef, type TeamId, type TileId } from "bingo-logic";
+import { ServerOpcode, ServerMessage, ClientOpcode, ClientMessage, ClientData } from "bingo-server/protocol";
+import { BinaryReader, BinaryWriter, s } from "binary-schema";
+
+export type BingoAction = {
+  kind: "click_tile",
+  tile: TileId,
+  team: TeamId,
+} | {
+  kind: "enter_room",
+  name: string,
+} | {
+  kind: "join_team",
+  team: number,
+};
+
+const BingoAction: s.Schema<BingoAction> = s.union("kind", {
+  click_tile: {
+    tile: s.u8,
+    team: s.u8,
+  },
+  enter_room: {
+    name: s.string,
+  },
+  join_team: {
+    team: s.u8,
+  },
+});
+
+// TODO: probably only send relevant sync data.
+
+interface BingoSyncData {
+  active: ActiveBoard | undefined,
+  def: BoardDef | undefined,
+  users: User[] | undefined,
+  teams: Team[] | undefined,
+  start: number | undefined,
+}
+
+export interface Team {
+  color: string,
+  name: string,
+}
+
+type UserId = string;
+
+interface User {
+  id: UserId,
+  name: string,
+  teams: TeamId[],
+}
+
+const Team: s.Schema<Team> = s.struct({
+  color: s.string,
+  name: s.string,
+});
+
+const User: s.Schema<User> = s.struct({
+  id: s.string,
+  name: s.string,
+  teams: s.array(s.u8),
+});
+
+const ActiveBoard: s.Schema<ActiveBoard> = s.struct({
+  tiles: s.array(s.struct({
+    claimed: s.array(s.u8),
+  })),
+});
+
+const BoardDef: s.Schema<BoardDef> = s.struct({
+  width: s.u8,
+  height: s.u8,
+  extra: s.u8,
+  tiles: s.array(s.struct({
+    text: s.string,
+    points: s.u8,
+    stealable: s.boolean,
+    exclusive: s.boolean,
+  })),
+});
+
+const BingoSyncData: s.Schema<BingoSyncData> = s.struct({
+  active: s.option(ActiveBoard),
+  def: s.option(BoardDef),
+  users: s.option(s.array(User)),
+  teams: s.option(s.array(Team)),
+  start: s.option(s.f64),
+});
 
 export function useBingo() {
-  const bingo = useState<BingoSession | undefined>("bingoSession", () => undefined);
+  const url = import.meta.dev ? "ws://localhost:2930" : "wss://bingo.lungmendragons.com";
 
-  const _auth = useAuth();
-  type User = NonNullable<typeof _auth.user.value>;
+  const session = useState<GameSession | undefined>("bingoSession", () => undefined);
+  const users = useState<Record<UserId, User>>("bingoUsers", () => ({}));
+  const teams = useState<Team[]>("bingoTeams", () => []);
 
-  async function getBingoSession(id: string): Promise<BingoSession | undefined> {
-    const session = await $fetch(`/api/pages/bingo/${id}`, { method: "GET" });
-    if (!session) {
-      return undefined;
+  type Syncs = {
+    active?: boolean,
+    board?: boolean,
+    users?: boolean,
+    teams?: boolean,
+    to?: string,
+  };
+
+  const websocket = useState<WebSocket | undefined>("bingoWebsocket", () => shallowRef());
+  const roomId = useState<string | undefined>("bingoRoomId", () => undefined);
+  const isSync = useState<boolean | undefined>("bingoIsSync", () => undefined);
+  const user = useState<UserId | undefined>("bingoUser", () => undefined);
+
+  let thisName: string | undefined = undefined;
+
+  type ServerMessageHooks = {
+    [K in ServerOpcode]: (message: Extract<ServerMessage, { opcode: K }>) => Promise<void>;
+  };
+
+  type BingoActionHooks = {
+    [K in BingoAction["kind"]]: (
+      user: UserId,
+      data: Omit<Extract<BingoAction, { kind: K }>, "kind">,
+    ) => Promise<Syncs | undefined>;
+  };
+
+  const bingoActionHooks: BingoActionHooks = {
+    click_tile: async (id, { tile, team }) => {
+      if (!session.value) return;
+      let user = users.value[id];
+      if (!user) return;
+
+      // if (user.teams.includes(team)) {
+      session.value.clickTile(team, tile);
+      return { active: true };
+      // }
+    },
+    enter_room: async (id, { name }) => {
+      users.value[id] = {
+        id,
+        name,
+        teams: [],
+      };
+      runSync({ board: true, teams: true, users: true, active: true, to: id });
+      return { users: true }
+    },
+    join_team: async (id, { team }) => {
+      let user = users.value[id];
+      if (!user) return;
+      user.teams.push(team);
+      return { users: true }
+    },
+  };
+
+  const executeAction = async <K extends BingoAction["kind"]>(
+    action: K,
+    id: UserId,
+    data: Omit<Extract<BingoAction, { kind: K }>, "kind">,
+    forceNoSync: boolean = false,
+  ) => {
+    console.log(`action ${action}: ${JSON.stringify(data)}`);
+    const syncs = await bingoActionHooks[action](id, data);
+    if (isSync.value) {
+      if (!forceNoSync) {
+        runSync(syncs ?? {});
+      }
     } else {
-      bingo.value = session as BingoSession;
-      return bingo.value;
+      const actionData = {
+        kind: action,
+        ...data,
+      };
+      websocket.value?.send(BinaryWriter.using({
+        opcode: ClientOpcode.SendAction,
+        data: BinaryWriter.using(actionData as any, BingoAction.encode),
+      }, ClientMessage.encode));
     }
   };
 
-  async function updateBingoSession(): Promise<BingoSession | undefined> {
-    if (!bingo.value) return undefined;
-    const session = await $fetch(`/api/pages/bingo/${bingo.value.id}`, { method: "GET" });
-    if (!session) {
-      return undefined;
-    } else {
-      await $fetch(`/api/pages/bingo/${bingo.value.id}`, { method: "PUT", body: bingo.value });
-      return bingo.value;
-    }
-  }
-
-  async function createBingoSession(user: User): Promise<BingoSession> {
-    // if (!user) return "User not found";
-
-    const nano = nanoid(12);
-
-    const admin: BingoAdmin = {
-      id: user.id,
-      nickname: user.name,
-      role: BingoUserRole.ADMIN,
-      // rep: null,
-      color: BingoTileColor.RED,
-      sessionId: nano,
-      connect: async (): Promise<BingoSession | null> => {
-        if (bingo.value) {
-          bingo.value.admins.push(admin);
-          await updateBingoSession();
-          return bingo.value;
-        }
-        return null;
-      },
-      disconnect: async (): Promise<void> => {
-        if (bingo.value && admin.sessionId) {
-          const index = bingo.value.admins.findIndex((a) => a.id === user.id);
-          if (index !== -1) bingo.value.admins.splice(index, 1);
-          await updateBingoSession();
-        }
-      },
+  const runSync = (syncs: Syncs) => {
+    if (!isSync.value) return;
+    const data = {
+      active: syncs.active ? session.value?.activeBoard : undefined,
+      def: syncs.board ? session.value?.boardDef : undefined,
+      start: syncs.active ? session.value?.start : undefined,
+      teams: syncs.teams ? teams.value : undefined,
+      users: syncs.users ? Object.values(users.value) : undefined,
     };
+    
+    console.log(`sending syncs: ${JSON.stringify(data)}`);
 
-    const b: BingoSession = {
-      id: nano,
-      board: null,
-      admins: [],
-      players: [],
-      spectators: [],
-    };
-
-    bingo.value = b;
-    await $fetch(`/api/pages/bingo/${nano}`, { method: "PUT", body: b });
-    admin.connect();
-
-    return bingo.value;
-  }
-
-  async function createBingoPlayer(u: User, c: BingoTileColor): Promise<BingoPlayer | null> {
-    if (!bingo.value) return null;
-    const player: BingoPlayer = {
-      id: u.id,
-      nickname: u.name,
-      role: BingoUserRole.PLAYER,
-      score: 0,
-      color: c,
-      sessionId: bingo.value.id,
-      connect: async (): Promise<BingoSession | null> => {
-        if (bingo.value) {
-          bingo.value.players.push(player);
-          await updateBingoSession();
-          return bingo.value;
-        }
-        return null;
-      },
-      disconnect: async (): Promise<void> => {
-        if (bingo.value && player.sessionId) {
-          const index = bingo.value.players.findIndex((a) => a.id === player.id);
-          if (index !== -1) bingo.value.players.splice(index, 1);
-          await updateBingoSession();
-        }
-      },
-    };
-    bingo.value.players.push(player);
-    await updateBingoSession();
-    return player;
+    websocket.value?.send(BinaryWriter.using({
+      opcode: ClientOpcode.SendSync,
+      data: BinaryWriter.using(data, BingoSyncData.encode),
+      to: syncs.to,
+    }, ClientMessage.encode));
   };
 
-  async function createBingoSpectator(u: User): Promise<BingoSpectator | null> {
-    if (!bingo.value) return null;
-    const spectator: BingoSpectator = {
-      id: u.id,
-      nickname: u.name,
-      role: BingoUserRole.SPECTATOR,
-      sessionId: bingo.value.id,
-      connect: () => {
-        if (bingo.value) bingo.value.spectators.push(spectator);
-      },
-      disconnect: () => {
-        if (bingo.value) {
-          const index = bingo.value.spectators.findIndex((spectator) => spectator.id === u.id);
-          if (index !== -1) bingo.value.spectators.splice(index, 1);
+  const executeServerMessageHook = async <K extends ServerOpcode>(
+    opcode: K,
+    data: Extract<ServerMessage, { opcode: K }>,
+  ) => {
+    await serverMessageHooks[opcode](data as any);
+  };
+
+  const serverMessageHooks: ServerMessageHooks = {
+    [ServerOpcode.Init]: async ({ client }) => {
+      isSync.value = client.sync;
+      user.value = client.id;
+      roomId.value = client.room;
+      executeAction("enter_room", client.id, { name: thisName ?? client.id });
+    },
+    [ServerOpcode.SendAction]: async ({ client, data }) => {
+      if (!isSync.value) return;
+      const action = BinaryReader.using(data, BingoAction.decode);
+      executeAction(action.kind, client.id, action);
+    },
+    [ServerOpcode.SendSync]: async ({ client, data }) => {
+      if (!client.sync) return;
+      const syncData = BinaryReader.using(data, BingoSyncData.decode);
+      
+      console.log(`receiving syncs: ${JSON.stringify(syncData)}`);
+      
+      if (session.value) {
+        if (syncData.active) {
+          session.value.activeBoard = syncData.active;
+          console.log(`active synced`);
+          triggerRef(session);
         }
+        if (syncData.def) {
+          session.value.boardDef = syncData.def;
+        }
+        if (syncData.start) {
+          session.value.start = syncData.start;
+        }
+      } else {
+        if (syncData.def) {
+          session.value = new GameSession(syncData.def);
+          if (syncData.active) {
+            session.value.activeBoard = syncData.active;
+          }
+          if (syncData.start) {
+            session.value.start = syncData.start;
+          }
+        }
+      }
+      if (syncData.users) {
+        users.value = {};
+        for (const user of syncData.users) {
+          users.value[user.id] = user;
+        }
+      }
+      if (syncData.teams) {
+        teams.value = syncData.teams;
+      }
+    },
+    [ServerOpcode.Close]: async ({ client }) => {
+      if (!isSync.value) return;
+      delete users.value[client.id];
+      runSync({ users: true });
+    },
+  };
+
+  async function onWsOpen(ev: Event) {
+    const data = BinaryWriter.using({
+      opcode: ClientOpcode.Init,
+    }, ClientMessage.encode);
+    websocket.value?.send(data);
+  }
+
+  async function onWsMessage(ev: MessageEvent) {
+    if (!(ev.data instanceof ArrayBuffer)) {
+      return;
+    }
+    const buffer = ev.data;
+    const message = BinaryReader.using(buffer, ServerMessage.decode);
+    executeServerMessageHook(message.opcode, message);
+  }
+
+  async function onWsClose(ev: CloseEvent) {
+
+  }
+
+  async function createSession(def: BoardDef) {
+    session.value = new GameSession(def);
+  }
+
+  async function createRoom(name: string) {
+    const data = await $fetch(`/api/bingo/auth/create`, {
+      method: "post"
+    });
+
+    thisName = name;
+    createSession({
+      width: 5,
+      height: 5,
+      extra: 3,
+      tiles: new Array(5 * 5 + 3).fill(0).map((v, i) => ({
+        exclusive: true,
+        stealable: false,
+        points: 1,
+        text: `idx ${i}`,
+      })),
+    });
+    teams.value = [
+      {
+        color: "#ff0000",
+        name: "red",
       },
-    };
-    bingo.value.spectators.push(spectator);
-    await updateBingoSession();
-    return spectator;
-  };
-  
-  async function createBingoBoard(): Promise<BingoBoard | null> {
-    if (!bingo.value) return null;
-    const tiles: BingoTileStandard[] = [];
-    const bonus: BingoTileBonus[] = [];
-    for (let i = 0; i < 25; i++) {
-      const n = nanoid(6);
-      tiles.push({
-        id: n,
-        task: n,
-        points: Math.ceil(Math.random() * 5),
-        claim: null,
-        // modifier: null,
-      });
-    }
-    for (let i = 0; i < 3; i++) {
-      const n = nanoid(6);
-      bonus.push({
-        id: n,
-        task: n,
-        // points: Math.floor(Math.random() * 5),
-        claim: null,
-        modifier: 1.2,
-      });
-    }
-    const board: BingoBoard = {
-      id: nanoid(6),
-      tiles,
-      bonus,
-    };
-    bingo.value.board = board;
-    await updateBingoSession();
-    return board;
-  };
+      {
+        color: "#0000ff",
+        name: "blue",
+      }
+    ];
 
-  // async function claimBingoTile(i: number, admin: BingoAdmin): Promise<void> {
-  async function claimBingoTileStandard(i: number, color: BingoTileColor): Promise<void> {
-    if (!bingo.value || !bingo.value.board /* || !admin.rep */) return;
-    const tile = bingo.value.board.tiles[i];
-    await claimTile(tile, color);
+    const ws = new WebSocket(url, [`token.${data}`]);
+    ws.binaryType = "arraybuffer";
+
+    ws.onopen = onWsOpen;
+    ws.onmessage = onWsMessage;
+    ws.onclose = onWsClose;
+
+    websocket.value = ws;
   }
 
-  async function claimBingoTileBonus(i: number, color: BingoTileColor): Promise<void> {
-    if (!bingo.value || !bingo.value.board /* || !admin.rep */) return;
-    const tile = bingo.value.board.bonus[i];
-    await claimTile(tile, color);
-  }
+  async function joinRoom(room: string, name: string) {
+    const data = await $fetch(`/api/bingo/auth/join/${room}`, {
+      method: "post"
+    });
 
-  async function claimTile(tile: BingoTileStandard | BingoTileBonus | undefined, color: BingoTileColor): Promise<void> {
-    if (tile && !tile.claim) {
-      // tile.claim = admin.rep;
-      tile.claim = color;
-      await updateBingoSession();
-    } else if (tile && tile.claim) {
-      tile.claim = null;
-      await updateBingoSession();
-    }
-  }
+    thisName = name;
 
-  async function updatePlayerScores(): Promise<void> {
-    if (!bingo.value || !bingo.value.board) return;
-    for (const player of bingo.value.players) {
-      const tiles = bingo.value.board.tiles.filter((tile) => tile.claim === player.color); // .color is temporary
-      const baseScore = tiles.reduce((acc, tile) => {
-        if (tile.points) return acc + tile.points;
-        return acc;
-      }, 0);
-      const bonus = bingo.value.board.bonus.filter((tile) => tile.claim === player.color); // .color is temporary
-      const totalScore = bonus.reduce((acc, tile) => {
-        if (tile.modifier) return acc * tile.modifier;
-        return acc;
-      }, baseScore);
-      player.score = totalScore;
-    }
-  }
+    const ws = new WebSocket(url, [`token.${data}`]);
+    ws.binaryType = "arraybuffer";
 
-  // delete when backend ready
-  async function getScoreTemporary(c: BingoTileColor): Promise<number> {
-    if (!bingo.value || !bingo.value.board) return 0;
-    const tiles = bingo.value.board.tiles.filter((tile) => tile.claim === c);
-    const baseScore = tiles.reduce((acc, tile) => {
-      if (tile.points) return acc + tile.points;
-      return acc;
-    }, 0);
-    const bonus = bingo.value.board.bonus.filter((tile) => tile.claim === c);
-    const totalScore = bonus.reduce((acc, tile) => {
-      if (tile.modifier) return acc * tile.modifier;
-      return acc;
-    }, baseScore);
-    return totalScore;
-  }
+    ws.onopen = onWsOpen;
+    ws.onmessage = onWsMessage;
+    ws.onclose = onWsClose;
 
-  async function assignPlayerToAdmin(admin: BingoAdmin, player: BingoPlayer): Promise<void> {
-    if (!bingo.value) return;
-    const a = bingo.value.admins.find((a) => a.id === admin.id);
-    const p = bingo.value.players.find((p) => p.id === player.id);
-    if (!a || !p) return;
-    // a.rep = p;
-    a.color = p.color;
-    await updateBingoSession();
-  }
-  
-  function destroyBingoSession() {
-    bingo.value = undefined;
-    // todo
-  }
-  
-  // temporary
-  function changeColor(user: User, color: BingoTileColor): void {
-    const a = bingo.value?.admins.find((a) => a.id === user.id);
-    if (!a) return;
-    a.color = color;
+    websocket.value = ws;
   }
 
   return {
-    getBingoSession,
-    updateBingoSession,
-    createBingoSession,
-    createBingoPlayer,
-    createBingoSpectator,
-    createBingoBoard,
-    claimBingoTileStandard,
-    claimBingoTileBonus,
-    updatePlayerScores,
-    getScoreTemporary,
-    assignPlayerToAdmin,
-    destroyBingoSession,
-
-    // temporary
-    changeColor,
-  }
+    createRoom,
+    joinRoom,
+    roomId: computed(() => roomId.value),
+    users,
+    teams,
+    session,
+    localUserId: user,
+    isSync,
+    actions: {
+      clickTile: (tile: TileId, team: TeamId) => {
+        if (user.value) executeAction("click_tile", user.value, { team, tile });
+      },
+      joinTeam: (team: TeamId) => {
+        if (user.value) executeAction("join_team", user.value, { team });
+      },
+    },
+  };
 }
-

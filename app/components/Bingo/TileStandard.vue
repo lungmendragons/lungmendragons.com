@@ -1,9 +1,26 @@
 <script setup lang="ts">
-import type { BingoTileStandard } from "~/utils/bingo/types";
+import { type TileDef, type ActiveTile, GameSession, type TileId, type TeamId } from "bingo-logic";
 
-const props = defineProps<{
-  tile: BingoTileStandard;
+const { tileId: id } = defineProps<{
+  tileId: TileId,
 }>();
+
+const bingo = useBingo();
+const tile = computed(() => {
+  const res = bingo.session.value?.getTile(id);
+  if(res === undefined) return undefined;
+  return {
+    def: res[0],
+    active: res[1],
+  }
+});
+
+const claimed = computed(() => {
+  const team = tile.value?.active.claimed[0];
+  if(team === undefined) return undefined;
+  return bingo.teams.value[team];
+});
+
 </script>
 
 <template>
@@ -13,17 +30,17 @@ const props = defineProps<{
     align="center"
     class="bingo-tile"
     :style="{
-      backgroundColor: props.tile.claim ?? '#1a1a1a',
+      backgroundColor: claimed?.color ?? '#1a1a1a',
       textShadow: '1px 1px 3px black, 0 0 3px black',
     }">
     <div class="bingo-claim">
-      claim: {{ props.tile.claim }}
+      claim: {{ claimed?.name ?? "none" }}
     </div>
     <div class="bingo-task">
-      task: {{ props.tile.task }}
+      task: {{ tile?.def.text ?? "" }}
     </div>
     <div class="bingo-points">
-      pts: {{ props.tile.points }}
+      pts: {{ tile?.def.points ?? "" }}
     </div>
   </NFlex>
 </template>

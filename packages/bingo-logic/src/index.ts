@@ -25,16 +25,6 @@ export class GameSession {
   boardDef: BoardDef;
   /** The board that is currently displayed in the game. */
   activeBoard: ActiveBoard;
-  /**
-   * A map of a user id to the corresponding user.
-   */
-  users: Map<UserId, User> = new Map();
-  /**
-   * An array of teams in the game.
-   * 
-   * Teams are the participants in a bingo game.
-   */
-  teams: Team[] = [];
   /** The timestamp when the game was started. */
   start: number | undefined;
 
@@ -52,39 +42,47 @@ export class GameSession {
     return this.start !== undefined;
   }
 
+  mainTile(idx: number): TileId {
+    return idx;
+  }
+
+  extraTile(idx: number): TileId {
+    return this.boardDef.width * this.boardDef.height + idx;
+  }
+
+  getTile(id: TileId): [TileDef, ActiveTile] {
+    return [this.boardDef.tiles[id]!, this.activeBoard.tiles[id]!];
+  }
+
   getScores(): Record<TeamId, number> {
-    let out = new Array<number>(this.teams.length).fill(0);
+    let out: Record<TeamId, number> = {};
     for (let tile = 0; tile < this.boardDef.tiles.length; tile += 1) {
       let active = this.activeBoard.tiles[tile]!;
       let def = this.boardDef.tiles[tile]!;
 
       for (const team of active.claimed) {
-        out[team]! += def.points;
+        out[team] = (out[team] ?? 0) + def.points;
       }
     }
     return out;
   }
 
-  clickTile(user: User, team: Team, tile: TileId): boolean {
-    if(!user.permissions.teams.includes(team.id)) {
-      return false;
-    }
-    
+  clickTile(team: TeamId, tile: TileId) {
     let active = this.activeBoard.tiles[tile]!;
     let def = this.boardDef.tiles[tile]!;
     if (active.claimed.length === 0) {
-      active.claimed.push(team.id);
+      active.claimed.push(team);
     } else {
-      let idx = active.claimed.indexOf(team.id);
+      let idx = active.claimed.indexOf(team);
       if (idx === -1) {
         // the current team has not claimed the tile.
         if (def.exclusive) {
           if (def.stealable) {
             active.claimed.length = 0;
-            active.claimed.push(team.id);
+            active.claimed.push(team);
           }
         } else {
-          active.claimed.push(team.id);
+          active.claimed.push(team);
         }
       } else {
         // the current team has claimed the tile, so toggling the click
@@ -92,32 +90,9 @@ export class GameSession {
         active.claimed.splice(idx);
       }
     }
-    
-    return true;
   }
 }
 
-/** A user connected to the game server room. */
-export interface User {
-  /** A nanoid for the user. */
-  id: UserId,
-  /** The name of the user. */
-  name: string,
-  /** A set of permissions for actions the user is able to take. */
-  permissions: Permissions,
-}
-
-/** A team in the bingo game which can claim and own tiles. */
-export interface Team {
-  /** The hex code for the color of the team. */
-  color: string,
-  /** The name of the team. */
-  name: string,
-  /** The ID of the team. */
-  id: TeamId,
-  /** The users that can claim tiles on the teams behalf. */
-  members: UserId[],
-}
 
 export interface ActiveBoard {
   tiles: ActiveTile[],
@@ -130,19 +105,7 @@ export interface ActiveTile {
   // will also contain any information needed to do more complicated logic.
 }
 
-/** An id for a team. */
-type TeamId = number;
-
 /** An id for a tile on the bingo board. */
-type TileId = number;
+export type TileId = number;
 
-/** A nanoid describing a user. */
-type UserId = string;
-
-/** A set of permissions a user has. */
-export interface Permissions {
-  /** A teams that this user can claim tiles on behalf of. */
-  teams: TeamId[],
-  /** A permission that allows a user to edit the permissions for another user. */
-  editPermissions: boolean,
-}
+export type TeamId = number;

@@ -81,11 +81,14 @@ importers:
       better-auth:
         specifier: ^1.2.5
         version: 1.2.5(typescript@5.8.3)
+      binary-schema:
+        specifier: 'workspace:'
+        version: link:packages/binary-schema
       bingo-logic:
-        specifier: workspace:bingo-logic
+        specifier: 'workspace:'
         version: link:packages/bingo-logic
       bingo-server:
-        specifier: workspace:bingo-server
+        specifier: 'workspace:'
         version: link:packages/bingo-server
       dompurify:
         specifier: ^3.2.4
@@ -221,6 +224,8 @@ importers:
         specifier: 'catalog:'
         version: 4.14.1(@cloudflare/workers-types@4.20250503.0)
 
+  packages/binary-schema: {}
+
   packages/bingo-logic:
     devDependencies:
       typescript:
@@ -235,6 +240,12 @@ importers:
       '@cloudflare/workers-types':
         specifier: ^4.20250409.0
         version: 4.20250503.0
+      binary-schema:
+        specifier: 'workspace:'
+        version: link:../binary-schema
+      bingo-logic:
+        specifier: 'workspace:'
+        version: link:../bingo-logic
       crossws:
         specifier: ^0.3.4
         version: 0.3.4

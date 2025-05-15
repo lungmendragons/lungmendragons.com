@@ -1,27 +1,33 @@
 import { base64Url } from "@better-auth/utils/base64";
 import { createHMAC } from "@better-auth/utils/hmac";
+import { BinaryReader, BinaryWriter, s } from "binary-schema";
 
-const hmac = createHMAC("SHA-256", "base64url");
+const hmac = createHMAC("SHA-256", "base64urlnopad");
 
-const serializeToken = (
-  data: string,
-  signature: string,
-) => `${base64Url.encode(data)}.${base64Url.encode(signature)}`;
+export async function createToken(
+  data: TokenData,
+) {
+  const buffer = encodeTokenData(data);
 
-export const createToken = async (data: string) => serializeToken(data, await hmac.sign(await signKey(), data));
+  let signature = await hmac.sign(await signKey(), buffer);
+  
+  const token = `${base64Url.encode(buffer)}.${signature}`;
+  
+  return token;
+}
 
-export const verifyToken = async (
+export async function verifyToken(
   token: string
-) => {
+) {
   try {
     const split = token.split(".");
     if (split.length !== 2) {
       return null;
     }
-    const string_data = new TextDecoder().decode(base64Url.decode(split[0]!));
-    const valid = await hmac.verify(await verifyKey(), string_data, base64Url.decode(split[1]!));
+    const data = base64Url.decode(split[0]!);
+    const valid = await hmac.verify(await verifyKey(), data, split[1]!);
     if (valid) {
-      return string_data;
+      return decodeTokenData(data);
     } else {
       return null;
     }
@@ -30,26 +36,40 @@ export const verifyToken = async (
   }
 };
 
-export const serializeData = (
-  expires: number,
-  perms: number,
-) => JSON.stringify([
-  expires,
-  perms,
-]);
-
-export const deserializeData = (data: string) => {
-  const [expires, perms] = JSON.parse(data) as [number, number];
-  return { expires, perms };
+export const enum RoomActionKind {
+  Create,
+  Join,
 }
+
+export type RoomAction = { action: RoomActionKind.Create } | { action: RoomActionKind.Join, room: string };
+
+export const RoomAction: s.Schema<RoomAction> = s.union("action", {
+  [RoomActionKind.Create]: {},
+  [RoomActionKind.Join]: {
+    room: s.string,
+  },
+});
+
+export interface TokenData {
+  expires: number,
+  room: RoomAction,
+}
+
+export const TokenData: s.Schema<TokenData> = s.struct({
+  expires: s.f64,
+  room: RoomAction,
+});
+
+export const encodeTokenData = (data: TokenData) => BinaryWriter.using(data, TokenData.encode);
+export const decodeTokenData = (data: Uint8Array) => BinaryReader.using(data.buffer, TokenData.decode);
 
 let cachedSignKey: CryptoKey;
 const signKey = async () => {
-  cachedSignKey ??= await hmac.importKey(base64Url.decode(process.env.BINGO_AUTH_SECRET!), "sign");
+  cachedSignKey ??= await hmac.importKey(process.env.BINGO_AUTH_SECRET!, "sign");
   return cachedSignKey;
 }
 let cachedVerifyKey: CryptoKey;
 const verifyKey = async () => {
-  cachedVerifyKey ??= await hmac.importKey(base64Url.decode(process.env.BINGO_AUTH_SECRET!), "verify");
+  cachedVerifyKey ??= await hmac.importKey(process.env.BINGO_AUTH_SECRET!, "verify");
   return cachedVerifyKey;
 }
