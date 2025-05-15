@@ -118,7 +118,7 @@ export class BinaryWriter {
     }
 
     this.u16(entries.length);
-    for (const [k, v] of entries) {
+    for (const [ k, v ] of entries) {
       this.string(k);
       f(this, v);
     }
@@ -126,7 +126,7 @@ export class BinaryWriter {
 
   option<T>(
     data: T | undefined,
-    f: (w: BinaryWriter, data: T) => void
+    f: (w: BinaryWriter, data: T) => void,
   ) {
     if (data === undefined) {
       this.boolean(false);

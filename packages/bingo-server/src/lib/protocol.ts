@@ -16,10 +16,10 @@ export const enum ServerOpcode {
 }
 
 export interface ClientData {
-  sync: boolean,
-  room: string,
-  id: string,
-  token: string,
+  sync: boolean;
+  room: string;
+  id: string;
+  token: string;
 }
 
 export type PublicClientData = Omit<ClientData, "token">;
@@ -37,15 +37,15 @@ export const PublicClientDataSchema: s.Schema<PublicClientData> = s.struct({
 });
 
 export type ServerMessage =
-  { opcode: ServerOpcode.Init, client: ClientData } |
-  { opcode: ServerOpcode.SendAction, client: PublicClientData, data: Uint8Array } |
-  { opcode: ServerOpcode.SendSync, client: PublicClientData, data: Uint8Array } |
-  { opcode: ServerOpcode.Close, client: PublicClientData };
+  { opcode: ServerOpcode.Init; client: ClientData } |
+  { opcode: ServerOpcode.SendAction; client: PublicClientData; data: Uint8Array } |
+  { opcode: ServerOpcode.SendSync; client: PublicClientData; data: Uint8Array } |
+  { opcode: ServerOpcode.Close; client: PublicClientData };
 
 export type ClientMessage =
-  { opcode: ClientOpcode.SendAction, data: Uint8Array } |
-  { opcode: ClientOpcode.SendSync, data: Uint8Array, to: string | undefined } |
-  { opcode: ClientOpcode.ChangeSync, id: string } |
+  { opcode: ClientOpcode.SendAction; data: Uint8Array } |
+  { opcode: ClientOpcode.SendSync; data: Uint8Array; to: string | undefined } |
+  { opcode: ClientOpcode.ChangeSync; id: string } |
   { opcode: ClientOpcode.Init };
 
 export const ServerMessageSchema: s.Schema<ServerMessage> = s.union("opcode", {

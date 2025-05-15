@@ -28,8 +28,8 @@ export default {
       const id = env.WSDurableObject.idFromName("bingoserver");
       return env.WSDurableObject.get(id, { locationHint: "enam" }).fetch(request);
     }
-  }
-}
+  },
+};
 
 function getPublicClientData(client: WebSocket): PublicClientData {
   const data = getClientData(client);
@@ -70,8 +70,8 @@ export class WSDurableObject extends DurableObject {
         hasBingoProtocol = true;
       }
     }
-    
-    if(!hasBingoProtocol) {
+
+    if (!hasBingoProtocol) {
       return new Response(null, {
         status: 400,
         statusText: "subprotocol `bingo` not present.",
@@ -118,7 +118,7 @@ export class WSDurableObject extends DurableObject {
     };
 
     const { 0: client, 1: server } = new WebSocketPair();
-    this.ctx.acceptWebSocket(server, [room]);
+    this.ctx.acceptWebSocket(server, [ room ]);
 
     const clientData: ClientData = {
       sync: true,
@@ -147,7 +147,7 @@ export class WSDurableObject extends DurableObject {
     }
 
     const { 0: client, 1: server } = new WebSocketPair();
-    this.ctx.acceptWebSocket(server, [room]);
+    this.ctx.acceptWebSocket(server, [ room ]);
 
     const clientData: ClientData = {
       sync: false,
@@ -219,7 +219,7 @@ export class WSDurableObject extends DurableObject {
           for (const peer of this.ctx.getWebSockets(clientData.room)) {
             const cd = getClientData(client);
             if (cd.id === message.id) {
-              target = [peer, cd];
+              target = [ peer, cd ];
               break;
             }
           }

@@ -6,7 +6,7 @@ const teams = bingo.teams;
 const model = ref([
   "#2080F0",
   "#D03050",
-])
+]);
 </script>
 
 <template>
@@ -15,21 +15,25 @@ const model = ref([
       <NFlex vertical class="w-[300px]">
         <div>
           Game ID: {{ bingo.roomId ?? "none" }} <br>
-          Users: {{Object.values(bingo.users.value ?? {}).map(v => `${v.id}/${v.name}`)}} <br>
+          Users: {{ Object.values(bingo.users.value ?? {}).map(v => `${v.id}/${v.name}`) }} <br>
         </div>
         <NDivider />
         <NInput
-          type="text"
           v-model:value="nameField"
+          type="text"
           placeholder="display name"
         />
-        <NButton @click="bingo.createRoom(nameField)">init</NButton>
+        <NButton @click="bingo.createRoom(nameField)">
+          init
+        </NButton>
         <div>
-          <NButton class="w-20" @click="bingo.joinRoom(roomIdField, nameField)">join</NButton>
+          <NButton class="w-20" @click="bingo.joinRoom(roomIdField, nameField)">
+            join
+          </NButton>
           <NDivider vertical />
           <NInput
-            type="text"
             v-model:value="roomIdField"
+            type="text"
             class="max-w-40"
             placeholder="room ID"
           />

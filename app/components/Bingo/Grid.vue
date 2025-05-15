@@ -21,10 +21,10 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           borderRadius: "50%",
           width: "16px",
           height: "16px",
-        }
+        },
       }),
       option.label as string,
-    ]
+    ],
   );
 }
 </script>

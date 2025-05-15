@@ -4,12 +4,12 @@ type Encoder<D> = (w: BinaryWriter, d: D) => void;
 type Decoder<D> = (r: BinaryReader) => D;
 
 export interface Schema<D> {
-  Infer: D,
-  encode: Encoder<D>,
-  decode: Decoder<D>,
+  Infer: D;
+  encode: Encoder<D>;
+  decode: Decoder<D>;
 }
 
-export function rawSchema <D>(data: Pick<Schema<D>, "encode" | "decode">): Schema<D> {
+export function rawSchema<D>(data: Pick<Schema<D>, "encode" | "decode">): Schema<D> {
   return data as Schema<D>;
 }
 
@@ -76,17 +76,17 @@ type StructSchemaType<S extends StructFields> = keyof S extends infer K extends 
   [K2 in K]: S[K2]["Infer"];
 } : never;
 
-export function struct <V extends StructFields>(fields: V): Schema<StructSchemaType<V>> {
+export function struct<V extends StructFields>(fields: V): Schema<StructSchemaType<V>> {
   const entries = Object.entries(fields) as [keyof V, Schema<any>][];
   return rawSchema({
     encode: (w, d) => {
-      for (const [k, v] of entries) {
+      for (const [ k, v ] of entries) {
         v.encode(w, d[k]);
       }
     },
-    decode: r => {
+    decode: (r) => {
       const out: Record<string, any> = {};
-      for (const [k, v] of entries) {
+      for (const [ k, v ] of entries) {
         out[k as string] = v.decode(r);
       }
       return out as any;
@@ -94,25 +94,25 @@ export function struct <V extends StructFields>(fields: V): Schema<StructSchemaT
   });
 }
 
-export function array <D>(entry: Schema<D>): Schema<D[]> {
+export function array<D>(entry: Schema<D>): Schema<D[]> {
   return rawSchema({
-  encode: (w, d) => w.array(d, entry.encode),
-  decode: r => r.array(entry.decode),
-})
+    encode: (w, d) => w.array(d, entry.encode),
+    decode: r => r.array(entry.decode),
+  });
 }
 
-export function option <D>(inner: Schema<D>): Schema<D | undefined> {
+export function option<D>(inner: Schema<D>): Schema<D | undefined> {
   return rawSchema({
-  encode: (w, d) => w.option(d, inner.encode),
-  decode: r => r.option(inner.decode),
-})
+    encode: (w, d) => w.option(d, inner.encode),
+    decode: r => r.option(inner.decode),
+  });
 }
 
-export function record <D>(inner: Schema<D>): Schema<Record<string, D>> {
+export function record<D>(inner: Schema<D>): Schema<Record<string, D>> {
   return rawSchema({
-  encode: (w, d) => w.record(d, inner.encode),
-  decode: r => r.record(inner.decode),
-})
+    encode: (w, d) => w.record(d, inner.encode),
+    decode: r => r.record(inner.decode),
+  });
 }
 
 export type UnionVars = Record<string | number, StructFields>;
@@ -121,22 +121,22 @@ type EnumSchemaType<S extends UnionVars, Key extends string> =
     [K in (Key | keyof S[V])]: K extends Key ? V : S[V][K]["Infer"];
   } : never : never;
 
-export function union <
+export function union<
   K extends string,
   V extends UnionVars,
 >(key: K, vars: V): Schema<EnumSchemaType<V, K>> {
   const idx2vars: Record<number, [string | number, Decoder<any>]> = {};
   const name2vars: Record<string | number, [number, Encoder<any>]> = {};
   let i = 0;
-  for (const [k, v] of Object.entries(vars)) {
+  for (const [ k, v ] of Object.entries(vars)) {
     const s = struct(v);
     const intkey = +k;
-    if(Number.isNaN(intkey)) {
-      idx2vars[i] = [k, s.decode];
-      name2vars[k] = [i, s.encode];
+    if (Number.isNaN(intkey)) {
+      idx2vars[i] = [ k, s.decode ];
+      name2vars[k] = [ i, s.encode ];
     } else {
-      idx2vars[i] = [intkey, s.decode];
-      name2vars[intkey] = [i, s.encode];
+      idx2vars[i] = [ intkey, s.decode ];
+      name2vars[intkey] = [ i, s.encode ];
     }
     i++;
   }
@@ -144,13 +144,13 @@ export function union <
   return rawSchema({
     encode: (w, d) => {
       const kind = d[key] as string | number;
-      const [i, encode] = name2vars[kind]!;
+      const [ i, encode ] = name2vars[kind]!;
       w.u8(i);
       encode(w, d);
     },
-    decode: r => {
+    decode: (r) => {
       const kind = r.u8();
-      const [k, decode] = idx2vars[kind]!;
+      const [ k, decode ] = idx2vars[kind]!;
       const out = decode(r);
       out[key] = k;
       return out;

@@ -2,25 +2,26 @@
 import type { TileId } from "bingo-logic";
 
 const { tileId: id } = defineProps<{
-  tileId: TileId,
+  tileId: TileId;
 }>();
 
 const bingo = useBingo();
 const tile = computed(() => {
   const res = bingo.session.value?.getTile(id);
-  if(res === undefined) return undefined;
+  if (res === undefined)
+    return undefined;
   return {
     def: res[0],
     active: res[1],
-  }
+  };
 });
 
 const claimed = computed(() => {
   const team = tile.value?.active.claimed[0];
-  if(team === undefined) return undefined;
+  if (team === undefined)
+    return undefined;
   return bingo.teams.value[team];
 });
-
 </script>
 
 <template>

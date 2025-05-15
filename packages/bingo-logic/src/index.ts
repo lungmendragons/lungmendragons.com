@@ -1,23 +1,23 @@
 // Data for how the board is generated. Effectively a function that creates a BoardDef.
 export interface BoardGenerator {
-  board: BoardDef,
+  board: BoardDef;
 }
 
 // A definition for a bingo board.
 export interface BoardDef {
-  width: number,
-  height: number,
-  extra: number,
+  width: number;
+  height: number;
+  extra: number;
   // should have a length of width * height + extra
   // this is row major, with extra tiles occuring at the end.
-  tiles: TileDef[],
+  tiles: TileDef[];
 }
 
 export interface TileDef {
-  text: string,
-  points: number,
-  stealable: boolean,
-  exclusive: boolean,
+  text: string;
+  points: number;
+  stealable: boolean;
+  exclusive: boolean;
 }
 
 export class GameSession {
@@ -51,7 +51,7 @@ export class GameSession {
   }
 
   getTile(id: TileId): [TileDef, ActiveTile] {
-    return [this.boardDef.tiles[id]!, this.activeBoard.tiles[id]!];
+    return [ this.boardDef.tiles[id]!, this.activeBoard.tiles[id]! ];
   }
 
   getScores(): Record<TeamId, number> {
@@ -93,15 +93,14 @@ export class GameSession {
   }
 }
 
-
 export interface ActiveBoard {
-  tiles: ActiveTile[],
+  tiles: ActiveTile[];
 }
 
 /** A single tile on the active bingo board. */
 export interface ActiveTile {
   /** The teams that have claimed the tile. */
-  claimed: TeamId[],
+  claimed: TeamId[];
   // will also contain any information needed to do more complicated logic.
 }
 

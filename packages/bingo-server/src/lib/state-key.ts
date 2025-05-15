@@ -10,7 +10,7 @@ export const enum RoomActionKind {
   Join,
 }
 
-export type RoomAction = { action: RoomActionKind.Create } | { action: RoomActionKind.Join, room: string };
+export type RoomAction = { action: RoomActionKind.Create } | { action: RoomActionKind.Join; room: string };
 
 export const RoomActionSchema: s.Schema<RoomAction> = s.union("action", {
   [RoomActionKind.Create]: {},
@@ -20,8 +20,8 @@ export const RoomActionSchema: s.Schema<RoomAction> = s.union("action", {
 });
 
 export interface TokenData {
-  expires: number,
-  room: RoomAction,
+  expires: number;
+  room: RoomAction;
 }
 
 export const TokenDataSchema: s.Schema<TokenData> = s.struct({
@@ -35,12 +35,12 @@ export const decodeTokenData = (data: Uint8Array) => BinaryReader.using(data.buf
 let cachedSignKey: CryptoKey;
 let cachedVerifyKey: CryptoKey;
 
-async function signKey () {
+async function signKey() {
   cachedSignKey ??= await hmac.importKey(process.env.BINGO_AUTH_SECRET!, "sign");
   return cachedSignKey;
 }
 
-async function verifyKey () {
+async function verifyKey() {
   cachedVerifyKey ??= await hmac.importKey(process.env.BINGO_AUTH_SECRET!, "verify");
   return cachedVerifyKey;
 }
@@ -51,14 +51,14 @@ export async function createToken(
   const buffer = encodeTokenData(data);
 
   const signature = await hmac.sign(await signKey(), buffer);
-  
+
   const token = `${base64Url.encode(buffer)}.${signature}`;
-  
+
   return token;
 }
 
 export async function verifyToken(
-  token: string
+  token: string,
 ) {
   try {
     const split = token.split(".");

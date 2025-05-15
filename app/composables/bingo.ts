@@ -3,7 +3,7 @@ import {
   type ActiveBoard,
   type BoardDef,
   type TeamId,
-  type TileId
+  type TileId,
 } from "bingo-logic";
 import {
   ServerOpcode,
@@ -19,15 +19,15 @@ import {
 } from "binary-schema";
 
 export type BingoAction = {
-  kind: "click_tile",
-  tile: TileId,
-  team: TeamId,
+  kind: "click_tile";
+  tile: TileId;
+  team: TeamId;
 } | {
-  kind: "enter_room",
-  name: string,
+  kind: "enter_room";
+  name: string;
 } | {
-  kind: "join_team",
-  team: number,
+  kind: "join_team";
+  team: number;
 };
 
 const BingoActionSchema: s.Schema<BingoAction> = s.union("kind", {
@@ -46,24 +46,24 @@ const BingoActionSchema: s.Schema<BingoAction> = s.union("kind", {
 // TODO: probably only send relevant sync data.
 
 interface BingoSyncData {
-  active: ActiveBoard | undefined,
-  def: BoardDef | undefined,
-  users: User[] | undefined,
-  teams: Team[] | undefined,
-  start: number | undefined,
+  active: ActiveBoard | undefined;
+  def: BoardDef | undefined;
+  users: User[] | undefined;
+  teams: Team[] | undefined;
+  start: number | undefined;
 }
 
 export interface Team {
-  color: string,
-  name: string,
+  color: string;
+  name: string;
 }
 
 type UserId = string;
 
 interface User {
-  id: UserId,
-  name: string,
-  teams: TeamId[],
+  id: UserId;
+  name: string;
+  teams: TeamId[];
 }
 
 const TeamSchema: s.Schema<Team> = s.struct({
@@ -111,11 +111,11 @@ export function useBingo() {
   const teams = useState<Team[]>("bingoTeams", () => []);
 
   interface Syncs {
-    active?: boolean,
-    board?: boolean,
-    users?: boolean,
-    teams?: boolean,
-    to?: string,
+    active?: boolean;
+    board?: boolean;
+    users?: boolean;
+    teams?: boolean;
+    to?: string;
   };
 
   const websocket = useState<WebSocket | undefined>("bingoWebsocket", () => shallowRef());
@@ -137,7 +137,8 @@ export function useBingo() {
   };
 
   const runSync = (syncs: Syncs) => {
-    if (!isSync.value) return;
+    if (!isSync.value)
+      return;
     const data = {
       active: syncs.active ? session.value?.activeBoard : undefined,
       def: syncs.board ? session.value?.boardDef : undefined,
@@ -145,7 +146,7 @@ export function useBingo() {
       teams: syncs.teams ? teams.value : undefined,
       users: syncs.users ? Object.values(users.value) : undefined,
     };
-    
+
     console.log(`sending syncs: ${JSON.stringify(data)}`);
 
     websocket.value?.send(BinaryWriter.using({
@@ -157,9 +158,11 @@ export function useBingo() {
 
   const bingoActionHooks: BingoActionHooks = {
     click_tile: async (id, { tile, team }) => {
-      if (!session.value) return;
+      if (!session.value)
+        return;
       const user = users.value[id];
-      if (!user) return;
+      if (!user)
+        return;
 
       // if (user.teams.includes(team)) {
       session.value.clickTile(team, tile);
@@ -173,13 +176,14 @@ export function useBingo() {
         teams: [],
       };
       runSync({ board: true, teams: true, users: true, active: true, to: id });
-      return { users: true }
+      return { users: true };
     },
     join_team: async (id, { team }) => {
       const user = users.value[id];
-      if (!user) return;
+      if (!user)
+        return;
       user.teams.push(team);
-      return { users: true }
+      return { users: true };
     },
   };
 
@@ -215,16 +219,18 @@ export function useBingo() {
       executeAction("enter_room", client.id, { name: thisName ?? client.id });
     },
     [ServerOpcode.SendAction]: async ({ client, data }) => {
-      if (!isSync.value) return;
+      if (!isSync.value)
+        return;
       const action = BinaryReader.using(data, BingoActionSchema.decode);
       executeAction(action.kind, client.id, action);
     },
     [ServerOpcode.SendSync]: async ({ client, data }) => {
-      if (!client.sync) return;
+      if (!client.sync)
+        return;
       const syncData = BinaryReader.using(data, BingoSyncDataSchema.decode);
-      
+
       console.log(`receiving syncs: ${JSON.stringify(syncData)}`);
-      
+
       if (session.value) {
         if (syncData.active) {
           session.value.activeBoard = syncData.active;
@@ -259,7 +265,8 @@ export function useBingo() {
       }
     },
     [ServerOpcode.Close]: async ({ client }) => {
-      if (!isSync.value) return;
+      if (!isSync.value)
+        return;
       delete users.value[client.id];
       runSync({ users: true });
     },
@@ -297,7 +304,7 @@ export function useBingo() {
     isSync.value = undefined;
     user.value = undefined;
   }
-  
+
   const protocols = (token: string) => [ `token.${token}`, "bingo" ];
 
   async function createSession(def: BoardDef) {
@@ -306,7 +313,7 @@ export function useBingo() {
 
   async function createRoom(name: string) {
     const data = await $fetch(`/api/bingo/auth/create`, {
-      method: "post"
+      method: "post",
     });
 
     thisName = name;
@@ -314,7 +321,7 @@ export function useBingo() {
       width: 5,
       height: 5,
       extra: 3,
-      tiles: Array.from({length: 5 * 5 + 3}).fill(0).map((_, i) => ({
+      tiles: Array.from({ length: 5 * 5 + 3 }).fill(0).map((_, i) => ({
         exclusive: true,
         stealable: false,
         points: 1,
@@ -329,7 +336,7 @@ export function useBingo() {
       {
         color: "#D03050",
         name: "Team 2",
-      }
+      },
     ];
 
     const ws = new WebSocket(url, protocols(data));
@@ -344,7 +351,7 @@ export function useBingo() {
 
   async function joinRoom(room: string, name: string) {
     const data = await $fetch(`/api/bingo/auth/join/${room}`, {
-      method: "post"
+      method: "post",
     });
 
     thisName = name;
@@ -377,15 +384,17 @@ export function useBingo() {
     isSync,
     actions: {
       clickTile: (tile: TileId, team: TeamId) => {
-        if (user.value) executeAction("click_tile", user.value, { team, tile });
+        if (user.value)
+          executeAction("click_tile", user.value, { team, tile });
       },
       joinTeam: (team: TeamId) => {
-        if (user.value) executeAction("join_team", user.value, { team });
+        if (user.value)
+          executeAction("join_team", user.value, { team });
       },
     },
     teamColorMap: computed(() => {
       return teams.value.map(
-        ({ color, name }, key) => ({ label: name, hex: color, key })
+        ({ color, name }, key) => ({ label: name, hex: color, key }),
       );
     }).value,
     updateTeamColors,

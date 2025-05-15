@@ -1,6 +1,6 @@
 import { createToken, RoomActionKind } from "bingo-server/state-key";
 
-export default eventHandler(async event => {
+export default eventHandler(async (event) => {
   const { room } = event.context.params || {};
 
   return await createToken({
