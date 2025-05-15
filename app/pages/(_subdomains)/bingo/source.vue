@@ -12,5 +12,5 @@ onMounted(async () => {
 </script>
 
 <template>
-  <BingoGrid v-if="bingo.session.value" :click="async (idx) => undefined" />
+  <BingoGrid v-if="bingo.session.value" />
 </template>
