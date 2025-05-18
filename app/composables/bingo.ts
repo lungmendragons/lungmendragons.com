@@ -27,7 +27,12 @@ export type BingoAction = {
   name: string;
 } | {
   kind: "join_team";
-  team: number;
+  team: TeamId;
+} | {
+  kind: "set_team_data";
+  team: TeamId;
+  color: string | undefined;
+  name: string | undefined;
 };
 
 const BingoActionSchema: s.Schema<BingoAction> = s.union("kind", {
@@ -40,6 +45,11 @@ const BingoActionSchema: s.Schema<BingoAction> = s.union("kind", {
   },
   join_team: {
     team: s.u8,
+  },
+  set_team_data: {
+    team: s.u8,
+    color: s.option(s.string),
+    name: s.option(s.string),
   },
 });
 
@@ -184,6 +194,21 @@ export function useBingo() {
         return;
       user.teams.push(team);
       return { users: true };
+    },
+    set_team_data: async (id, { team, name, color }) => {
+      const teamData = teams.value[team];
+      if (!teamData)
+        return;
+      if (!users.value[id]?.teams.includes(team))
+        return;
+
+      if (name !== undefined) {
+        teamData.name = name;
+      }
+      if (color !== undefined) {
+        teamData.color = color;
+      }
+      return { teams: true };
     },
   };
 
@@ -366,13 +391,6 @@ export function useBingo() {
     websocket.value = ws;
   }
 
-  function updateTeamColors(colors: string[]) {
-    teams.value = colors.map((color, i) => ({
-      name: `Team ${i + 1}`,
-      color,
-    }));
-  }
-
   return {
     createRoom,
     joinRoom,
@@ -391,12 +409,15 @@ export function useBingo() {
         if (user.value)
           executeAction("join_team", user.value, { team });
       },
+      setTeamData: (team: TeamId, data: Partial<Team>) => {
+        if (user.value)
+          executeAction("set_team_data", user.value, { team, color: data.color, name: data.name });
+      },
     },
     teamColorMap: computed(() => {
       return teams.value.map(
         ({ color, name }, key) => ({ label: name, hex: color, key }),
       );
     }).value,
-    updateTeamColors,
   };
 }
