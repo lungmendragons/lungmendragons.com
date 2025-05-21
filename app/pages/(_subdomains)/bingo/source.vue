@@ -6,11 +6,11 @@ onMounted(async () => {
   document.body.style.all = "unset";
   if (route.query.game) {
     const roomId = route.query.game as string;
-    await bingo.joinRoom(roomId, "bingo stream source");
+    await bingo.joinRoom("bingo stream source", roomId);
   }
 });
 </script>
 
 <template>
-  <BingoGrid v-if="bingo.session.value" />
+  <BingoGrid />
 </template>

@@ -193,6 +193,11 @@ export default defineNuxtConfig({
   eslint: {
     config: {
       standalone: false,
+      // can be uncommented to provide slow type-aware lints. mainly useful
+      // for floating promises.
+      // typescript: {
+      //   tsconfigPath: "./tsconfig.json",
+      // },
     },
   },
   css: [
@@ -215,8 +220,8 @@ export default defineNuxtConfig({
   },
   image: {
     screens: {
-      "xs": 432,
-      "sm": 576,
+      xs: 432,
+      sm: 576,
     },
   },
 });

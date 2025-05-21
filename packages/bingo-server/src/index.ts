@@ -179,7 +179,7 @@ export class WSDurableObject extends DurableObject {
         message = BinaryReader.using(buffer, ClientMessageSchema.decode);
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
       return;
     }
 

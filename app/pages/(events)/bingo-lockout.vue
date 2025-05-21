@@ -2,11 +2,12 @@
 const bingo = useBingo();
 const roomIdField = ref("");
 const nameField = ref("");
-const teams = bingo.teams;
 const model = ref([
   "#2080F0",
   "#D03050",
 ]);
+
+const teams = computed(bingo.teams);
 </script>
 
 <template>
@@ -14,8 +15,8 @@ const model = ref([
     <NFlex>
       <NFlex vertical class="w-[300px]">
         <div>
-          Game ID: {{ bingo.roomId ?? "none" }} <br>
-          Users: {{ Object.values(bingo.users.value ?? {}).map(v => `${v.id}/${v.name}`) }} <br>
+          Game ID: {{ bingo.inRoom()?.roomId ?? "none" }} <br>
+          Users: {{ Object.values(bingo.inRoom()?.users ?? {}).map(v => `${v.id}/${v.name}`) }} <br>
         </div>
         <NDivider />
         <NInput
@@ -27,7 +28,7 @@ const model = ref([
           init
         </NButton>
         <div>
-          <NButton class="w-20" @click="bingo.joinRoom(roomIdField, nameField)">
+          <NButton class="w-20" @click="bingo.joinRoom(nameField, roomIdField)">
             join
           </NButton>
           <NDivider vertical />
@@ -39,7 +40,7 @@ const model = ref([
           />
         </div>
         <NDivider />
-        <NForm v-if="bingo.session.value" :model="model">
+        <NForm v-if="teams" :model="model">
           <NFormItem
             v-for="(team, i) in teams"
             :key="i"
@@ -60,13 +61,13 @@ const model = ref([
             />
           </NFormItem>
           <NFormItem>
-            <NButton @click="bingo.updateTeamColors(model)">
+            <NButton @click="model.forEach((v, i) => bingo.setTeamColor(i, v))">
               Confirm
             </NButton>
           </NFormItem>
         </NForm>
       </NFlex>
-      <BingoGrid v-if="bingo.session.value" />
+      <BingoGrid />
     </NFlex>
   </NFlex>
 </template>

@@ -42,10 +42,9 @@ export default withNuxt(
 
       // https://typescript-eslint.io/rules/
       "ts/no-unused-vars": [
-        "error",
+        "warn",
         {
-          args: "all",
-          argsIgnorePattern: "^_",
+          args: "none",
           caughtErrors: "all",
           caughtErrorsIgnorePattern: "^_",
           destructuredArrayIgnorePattern: "^_",
@@ -53,6 +52,8 @@ export default withNuxt(
           ignoreRestSiblings: true,
         },
       ],
+      "ts/consistent-type-definitions": [ "off" ],
+      // "ts/no-floating-promises": [ "warn" ],
       "ts/prefer-literal-enum-member": [ "off" ],
 
       // https://eslint.vuejs.org/rules/

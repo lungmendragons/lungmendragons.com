@@ -7,7 +7,7 @@ const { tileId: id } = defineProps<{
 
 const bingo = useBingo();
 const tile = computed(() => {
-  const res = bingo.session.value?.getTile(id);
+  const res = bingo.board()?.getTile(id);
   if (res === undefined)
     return undefined;
   return {
@@ -20,7 +20,7 @@ const claimed = computed(() => {
   const team = tile.value?.active.claimed[0];
   if (team === undefined)
     return undefined;
-  return bingo.teams.value[team];
+  return bingo.teams()![team];
 });
 </script>
 
@@ -32,7 +32,7 @@ const claimed = computed(() => {
     class="bingo-tile"
     :style="{
       backgroundColor: claimed?.color ?? '#1a1a1a',
-      textShadow: '1px 1px 3px black, 0 0 3px black',
+      // textShadow: '1px 1px 3px black, 0 0 3px black',
     }">
     <div class="bingo-claim">
       claim: {{ claimed?.name ?? "none" }}
@@ -54,6 +54,7 @@ const claimed = computed(() => {
   margin: auto;
   border: 1px solid #ccc;
   transition: background-color 0.3s;
+  color: #ffffff;
 
   /* temporary */
   cursor: pointer;

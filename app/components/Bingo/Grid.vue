@@ -4,7 +4,8 @@ import type { DropdownOption } from "naive-ui";
 import type { VNodeChild } from "vue";
 
 const bingo = useBingo();
-const board = bingo.session.value!;
+
+const board = computed(bingo.board);
 
 function gridArea(i: number, _w: number, _h: number) {
   return `${Math.floor(i / 5) + 1} / ${(i % 5) + 1} / ${Math.floor(i / 5) + 2} / ${(i % 5) + 2}`;
@@ -31,6 +32,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
 
 <template>
   <NFlex
+    v-if="board"
     vertical
     class="board-container">
     <!-- {{ route.query.game ?? "default" }} -->
@@ -40,7 +42,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           trigger="click"
           :options="bingo.teamColorMap"
           :render-label="renderDropdownLabel"
-          @select="bingo.actions.clickTile(board.extraTile(i), $event)">
+          @select="bingo.clickTile($event, board.extraTile(i))">
           <BingoTile
             :key="`tile-${board.extraTile(i)}`"
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
@@ -55,7 +57,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           trigger="click"
           :options="bingo.teamColorMap"
           :render-label="renderDropdownLabel"
-          @select="bingo.actions.clickTile(board.mainTile(i), $event)">
+          @select="bingo.clickTile($event, board.mainTile(i))">
           <BingoTile
             :key="`tile-${board.mainTile(i)}`"
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
