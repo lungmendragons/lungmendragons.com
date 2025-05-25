@@ -21,8 +21,8 @@ function combine<
   return { type, data } as unknown as Combine<V>;
 }
 
-type MachineCfg<S extends StateSet, E extends EventSet> = {
-  initial: () => Combine<S>;
+type MachineCfg<C extends any[], S extends StateSet, E extends EventSet> = {
+  initial: (...args: C) => Combine<S>;
   state: {
     [SK in keyof S]?: {
       [EK in keyof E]?: (state: S[SK], event: E[EK], ctx: EventCtx<S, E>) => Promise<void>;
@@ -49,16 +49,17 @@ interface MachineInstance<S extends StateSet, E extends EventSet> {
 type Key<V> = string & keyof V;
 
 export function stateMachine<
+  C extends any[],
   S extends StateSet,
   E extends EventSet,
 >(
-  f: () => MachineCfg<S, E>,
-): () => MachineInstance<S, E> {
+  f: () => MachineCfg<C, S, E>,
+): (...args: C) => MachineInstance<S, E> {
   const cfg = f();
 
   class StateMachine {
-    constructor() {
-      this.state = cfg.initial();
+    constructor(...args: C) {
+      this.state = cfg.initial(...args);
     }
 
     state: Combine<S>;
@@ -85,16 +86,24 @@ export function stateMachine<
     }
   };
 
-  return () => {
-    const out: Omit<MachineInstance<S, E>, "Infer"> = new StateMachine();
+  return (...args: C) => {
+    const out: Omit<MachineInstance<S, E>, "Infer"> = new StateMachine(...args);
     return out as MachineInstance<S, E>;
   };
 }
 
-export function cfg<
+export function states<
   S extends StateSet,
   E extends EventSet,
->(data: MachineCfg<S, E>): MachineCfg<S, E> {
+>(state: MachineCfg<any, S, E>["state"]): MachineCfg<any, S, E>["state"] {
+  return state;
+}
+
+export function cfg<
+  C extends any[],
+  S extends StateSet,
+  E extends EventSet,
+>(data: MachineCfg<C, S, E>): MachineCfg<C, S, E> {
   return data;
 }
 

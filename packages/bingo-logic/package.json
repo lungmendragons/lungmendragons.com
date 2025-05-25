@@ -5,7 +5,8 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
-    "./*": "./src/*.ts"
+    "./*": "./src/*.ts",
+    "./gen": "./src/gen/index.ts"
   },
   "devDependencies": {
     "typescript": "catalog:"

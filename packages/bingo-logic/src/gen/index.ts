@@ -1,7 +1,4 @@
-export function shuffle<A extends any[]>(array: A): A {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [ array[i], array[j] ] = [ array[j]!, array[i]! ];
-  }
-  return array;
-}
+import type { BoardDef } from "..";
+
+export { default as rng5x5 } from "./top-32-16";
+export { default as rng4x4 } from "./top-64";

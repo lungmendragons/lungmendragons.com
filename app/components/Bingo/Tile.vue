@@ -34,15 +34,15 @@ const claimed = computed(() => {
       backgroundColor: claimed?.color ?? '#1a1a1a',
       // textShadow: '1px 1px 3px black, 0 0 3px black',
     }">
-    <div class="bingo-claim">
+    <!-- <div class="bingo-claim">
       claim: {{ claimed?.name ?? "none" }}
-    </div>
+    </div> -->
     <div class="bingo-task">
-      task: {{ tile?.def.text ?? "" }}
+      {{ tile?.def.text ?? "" }}
     </div>
-    <div class="bingo-points">
+    <!-- <div class="bingo-points">
       pts: {{ tile?.def.points ?? "" }}
-    </div>
+    </div> -->
   </NFlex>
 </template>
 
@@ -58,6 +58,11 @@ const claimed = computed(() => {
 
   /* temporary */
   cursor: pointer;
+}
+
+.bingo-task {
+  padding: 8px;
+  text-align: center;
 }
 
 /* .bingo-claim, .bingo-task, .bingo-points {

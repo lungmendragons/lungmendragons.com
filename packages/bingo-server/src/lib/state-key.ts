@@ -59,7 +59,7 @@ export async function createToken(
 
 export async function verifyToken(
   token: string,
-) {
+): Promise<[ TokenData, string ] | null> {
   try {
     const split = token.split(".");
     if (split.length !== 2) {
@@ -68,7 +68,7 @@ export async function verifyToken(
     const data = base64Url.decode(split[0]!);
     const valid = await hmac.verify(await verifyKey(), data, split[1]!);
     if (valid) {
-      return decodeTokenData(data);
+      return [ decodeTokenData(data), split[0] ];
     } else {
       return null;
     }

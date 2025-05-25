@@ -1,7 +1,7 @@
 import type { BoardDef, TileDef } from "..";
-import { shuffle } from ".";
+import { shuffle } from "./util";
 
-export interface Pools extends Record<string, TileDef[]> {
+interface Pools {
   f3_boss: TileDef[];
   currency: TileDef[];
   recruiting: TileDef[];
@@ -12,15 +12,15 @@ export interface Pools extends Record<string, TileDef[]> {
   portal_scout: TileDef[];
   spine_of_epoch: TileDef[];
   stage_specific: TileDef[];
-  squad_easy: TileDef[];
-  squad_medium: TileDef[];
+  squad_playstyle: TileDef[];
+  squad_restrict: TileDef[];
   squad_class: TileDef[];
   enemy_shift: TileDef[];
   enemy_effect: TileDef[];
   enemy_leak: TileDef[];
   enemy_defeat: TileDef[];
   op_kit: TileDef[];
-  op_enemt: TileDef[];
+  op_enemy: TileDef[];
   op_death: TileDef[];
   op_deploy: TileDef[];
   emergency: TileDef[];
@@ -31,7 +31,7 @@ export interface Pools extends Record<string, TileDef[]> {
   face_off: TileDef[];
 }
 
-export function generate(pools: Pools): BoardDef {
+export default function generate(pools: Pools): BoardDef {
   Object.values(pools).forEach(v => shuffle(v));
   const stage0 = {
     boss: [ pools.f3_boss[0]! ],
@@ -51,8 +51,8 @@ export function generate(pools: Pools): BoardDef {
     b12: shuffle([
       pools.spine_of_epoch[0]!,
       pools.stage_specific[0]!,
-      pools.squad_easy[0]!,
-      pools.squad_medium[0]!,
+      pools.squad_playstyle[0]!,
+      pools.squad_restrict[0]!,
       pools.squad_class[0]!,
     ]),
     b3: shuffle([
@@ -63,7 +63,7 @@ export function generate(pools: Pools): BoardDef {
     ]),
     b4: shuffle([
       pools.op_kit[0]!,
-      pools.op_enemt[0]!,
+      pools.op_enemy[0]!,
       pools.op_death[0]!,
       pools.op_deploy[0]!,
     ]),

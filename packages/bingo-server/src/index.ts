@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import { nanoid } from "nanoid";
 import { base64Url } from "@better-auth/utils/base64";
 import {
+  decodeTokenData,
   RoomActionKind,
   verifyToken,
   type TokenData,
@@ -17,14 +18,73 @@ import {
   type ClientData,
   type PublicClientData,
 } from "./lib/protocol";
-import { isArrayBuffer, isUint8Array } from "node:util/types";
+import { isArrayBuffer } from "node:util/types";
 import { BinaryReader, BinaryWriter } from "binary-schema";
 
+const getProtocols = (header: string | null) => !header ? [] : header.split(",").map(x => x.trim());
+async function validateToken(request: Request) {
+  const protocols = getProtocols(request.headers.get("Sec-WebSocket-Protocol"));
+
+  let token: string | undefined;
+  let hasBingoProtocol = false;
+  for (const protocol of protocols) {
+    if (protocol.startsWith("token.")) {
+      // "token.".length
+      token = protocol.slice(6);
+    }
+    if (protocol === "bingo") {
+      hasBingoProtocol = true;
+    }
+  }
+
+  if (!hasBingoProtocol) {
+    return new Response(null, {
+      status: 400,
+      statusText: "subprotocol `bingo` not present.",
+    });
+  }
+
+  if (!token) {
+    return new Response(null, {
+      status: 401,
+      statusText: "requires `token.` protocol in the `Sec-WebSocket-Protocol` header",
+    });
+  }
+
+  const res = await verifyToken(token);
+  if (res === null) {
+    return new Response(null, {
+      status: 403,
+      statusText: "invalid token",
+    });
+  }
+
+  const [ tokenData, out ] = res;
+
+  if (tokenData.expires <= Date.now()) {
+    return new Response(null, {
+      status: 403,
+      statusText: "expired token",
+    });
+  }
+
+  return out;
+}
+
 export default {
-  async fetch(request: Request, env: Env) {
-    if (request.headers.get("upgrade") !== "websocket") {
+  async fetch(req: Request, env: Env) {
+    if (req.headers.get("upgrade") !== "websocket") {
       return new Response(null, { status: 426, statusText: "expected websocket upgrade" });
     } else {
+      const res = await validateToken(req);
+      if (res instanceof Response) {
+        return res;
+      }
+
+      const request = new Request(req);
+
+      request.headers.append("bingo-token-data", res);
+
       const id = env.WSDurableObject.idFromName("bingoserver");
       return env.WSDurableObject.get(id, { locationHint: "enam" }).fetch(request);
     }
@@ -49,56 +109,13 @@ function setClientData(client: WebSocket, data: ClientData) {
   client.serializeAttachment(BinaryWriter.using(data, ClientDataSchema.encode));
 }
 
-const getProtocols = (header: string | null) => !header ? [] : header.split(",").map(x => x.trim());
-
 export class WSDurableObject extends DurableObject {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
   }
 
   async fetch(request: Request) {
-    const protocols = getProtocols(request.headers.get("Sec-WebSocket-Protocol"));
-
-    let token: string | undefined;
-    let hasBingoProtocol = false;
-    for (const protocol of protocols) {
-      if (protocol.startsWith("token.")) {
-        // "token.".length
-        token = protocol.slice(6);
-      }
-      if (protocol === "bingo") {
-        hasBingoProtocol = true;
-      }
-    }
-
-    if (!hasBingoProtocol) {
-      return new Response(null, {
-        status: 400,
-        statusText: "subprotocol `bingo` not present.",
-      });
-    }
-
-    if (!token) {
-      return new Response(null, {
-        status: 401,
-        statusText: "requires `token.` protocol in the `Sec-WebSocket-Protocol` header",
-      });
-    }
-
-    const tokenData = await verifyToken(token);
-    if (!tokenData) {
-      return new Response(null, {
-        status: 403,
-        statusText: "invalid token",
-      });
-    }
-
-    if (tokenData.expires <= Date.now()) {
-      return new Response(null, {
-        status: 403,
-        statusText: "expired token",
-      });
-    }
+    const tokenData = decodeTokenData(base64Url.decode(request.headers.get("bingo-token-data")!));
 
     switch (tokenData.room.action) {
       case RoomActionKind.Create:
@@ -128,7 +145,7 @@ export class WSDurableObject extends DurableObject {
     };
     setClientData(server, clientData);
 
-    console.log(`opening ${clientData.id} in ${clientData.room}`);
+    // console.log(`opening ${clientData.id} in ${clientData.room}`);
 
     return new Response(null, {
       status: 101,
@@ -157,7 +174,7 @@ export class WSDurableObject extends DurableObject {
     };
     setClientData(server, clientData);
 
-    console.log(`opening ${clientData.id} in ${clientData.room}`);
+    // console.log(`opening ${clientData.id} in ${clientData.room}`);
 
     return new Response(null, {
       headers: {
@@ -249,7 +266,7 @@ export class WSDurableObject extends DurableObject {
 
   webSocketClose(client: WebSocket, _code: number, reason: string, _wasClean: boolean) {
     const clientData = getPublicClientData(client);
-    console.log(`closing ${clientData.id} in ${clientData.room}`);
+    // console.log(`closing ${clientData.id} in ${clientData.room}`);
 
     // shut the whole room down.
     if (clientData.sync) {
@@ -266,14 +283,14 @@ export class WSDurableObject extends DurableObject {
   }
 
   sendAll(from: WebSocket | undefined, room: string, message: ServerMessage) {
-    const data = from ? getClientData(from) : { id: "none" };
-    console.log(`sending ${JSON.stringify(message, (_, value) => {
-      if (isUint8Array(value)) {
-        return base64Url.encode(value);
-      } else {
-        return value;
-      }
-    })} from ${data.id}`);
+    // const data = from ? getClientData(from) : { id: "none" };
+    // console.log(`sending ${JSON.stringify(message, (_, value) => {
+    //   if (isUint8Array(value)) {
+    //     return base64Url.encode(value);
+    //   } else {
+    //     return value;
+    //   }
+    // })} from ${data.id}`);
     const view = BinaryWriter.using(message, ServerMessageSchema.encode);
     for (const client of this.ctx.getWebSockets(room)) {
       if (from !== client) {
@@ -283,14 +300,14 @@ export class WSDurableObject extends DurableObject {
   }
 
   sendSingle(to: WebSocket, message: ServerMessage) {
-    const data = getClientData(to);
-    console.log(`sending ${JSON.stringify(message, (_, value) => {
-      if (isUint8Array(value)) {
-        return base64Url.encode(value);
-      } else {
-        return value;
-      }
-    })} to ${data.id}`);
+    // const data = getClientData(to);
+    // console.log(`sending ${JSON.stringify(message, (_, value) => {
+    //   if (isUint8Array(value)) {
+    //     return base64Url.encode(value);
+    //   } else {
+    //     return value;
+    //   }
+    // })} to ${data.id}`);
     const view = BinaryWriter.using(message, ServerMessageSchema.encode);
     to.send(view);
   }
