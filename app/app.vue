@@ -32,6 +32,26 @@ useSeoMeta({
   ],
 });
 
+const route = useRoute();
+
+if(route.meta.getEmbedData && import.meta.server) {
+  try {
+    const { title, description, url } = await route.meta.getEmbedData();
+    useSeoMeta({
+      title,
+      ogTitle: title,
+      twitterTitle: title,
+      description,
+      ogDescription: description,
+      twitterDescription: description,
+      ogUrl: url,
+      twitterCard: "summary",
+    })
+  } catch {
+    
+  }
+}
+
 import { theme, themeOverrides } from "~/utils/theme";
 import LoadingDotsAnim from "~/components/SVG/LoadingDotsAnim.vue";
 import LogoColorIcon from "~/components/Logo/ColorIcon.vue";

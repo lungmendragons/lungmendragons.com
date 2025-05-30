@@ -5,6 +5,18 @@
 import HeroiconsUserCircle from "~icons/heroicons/user-circle";
 import HeroiconsCalendarDays from "~icons/heroicons/calendar-days";
 
+definePageMeta({
+  getEmbedData: async () => {
+    const slug = useRoute().params.slug as string || "index";
+    const data = await $fetch(`/api/pages/guides/${slug as "*"}`);
+    return {
+      title: `${data.title} | Lungmen Dragons`,
+      description: `${data.description}`,
+      url: `https://lungmendragons.com/guides/${slug}`,
+    };
+  },
+});
+
 const { user } = useAuth();
 const notFound = ref(false);
 const slug = useRoute().params.slug as string || "index";
@@ -50,7 +62,7 @@ useSeoMeta({
 onMounted(() => {
   // todo: improve this fetch, ugly as hell, feels inefficient
   $fetch(`/api/pages/guides/${slug}`)
-    .then(page => {
+    .then((page) => {
       requested.value = page;
       authorId.value = page.author;
       $fetch(`/api/users/${page.author}`)
@@ -58,7 +70,7 @@ onMounted(() => {
           requested.value.author = user;
         });
     })
-    .catch(error => {
+    .catch((error) => {
       if (error.statusCode === 404) {
         notFound.value = true;
         requested.value = {
