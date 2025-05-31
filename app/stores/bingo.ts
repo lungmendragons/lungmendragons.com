@@ -268,7 +268,7 @@ function bingoSession(machine: BingoStateMachine) {
 
 const networkStateMachine = stateMachine(() => {
   async function connectToRoom(token: string, username: string, ctx: EventCtx<S, E>) {
-    const url = import.meta.dev ? "ws://localhost:2930" : "wss://bingo.lungmendragons.com";
+    const url = import.meta.dev ? "ws://localhost:2930" : "wss://bingosync-server.lungmendragons.com";
 
     const websocket = new WebSocket(url, [ `token.${token}`, `bingo` ]);
     websocket.binaryType = "arraybuffer";

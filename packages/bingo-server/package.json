@@ -16,9 +16,7 @@
     "@cloudflare/workers-types": "^4.20250409.0",
     "binary-schema": "workspace:",
     "bingo-logic": "workspace:",
-    "crossws": "^0.3.4",
-    "nanoid": "^5.1.5",
-    "rou3": "^0.5.1"
+    "nanoid": "^5.1.5"
   },
   "devDependencies": {
     "@types/node": "^22.15.18",

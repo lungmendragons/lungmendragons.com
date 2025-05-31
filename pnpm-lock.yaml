@@ -246,15 +246,9 @@ importers:
       bingo-logic:
         specifier: 'workspace:'
         version: link:../bingo-logic
-      crossws:
-        specifier: ^0.3.4
-        version: 0.3.4
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
-      rou3:
-        specifier: ^0.5.1
-        version: 0.5.1
     devDependencies:
       '@types/node':
         specifier: ^22.15.18

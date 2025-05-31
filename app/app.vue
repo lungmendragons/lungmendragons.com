@@ -45,8 +45,9 @@ useFavicon(favicon);
 
 const isLG = useMediaQuery(mediaQuery.minWidth.lg as string);
 const layout = computed(() => {
-  if (subdomain.value) {
-    return "empty";
+  const layout = useRoute().meta.layout;
+  if (layout) {
+    return layout;
   } else  {
     return isLG.value ? "desktop" : "mobile";
   }

@@ -1,6 +1,10 @@
 compatibility_date = "2025-04-14"
 name = "lungmendragons-com"
 
+[route]
+custom_domain = true
+pattern = "lungmendragons.com"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "lungmendragons-com"
