@@ -145,9 +145,12 @@ export class WSDurableObject extends DurableObject {
     };
     setClientData(server, clientData);
 
-    // console.log(`opening ${clientData.id} in ${clientData.room}`);
+    console.log(`opening ${clientData.id} in ${clientData.room}`);
 
     return new Response(null, {
+      headers: {
+        "Sec-Websocket-Protocol": "bingo",
+      },
       status: 101,
       webSocket: client,
     });
@@ -174,7 +177,7 @@ export class WSDurableObject extends DurableObject {
     };
     setClientData(server, clientData);
 
-    // console.log(`opening ${clientData.id} in ${clientData.room}`);
+    console.log(`opening ${clientData.id} in ${clientData.room}`);
 
     return new Response(null, {
       headers: {
@@ -266,7 +269,7 @@ export class WSDurableObject extends DurableObject {
 
   webSocketClose(client: WebSocket, _code: number, reason: string, _wasClean: boolean) {
     const clientData = getPublicClientData(client);
-    // console.log(`closing ${clientData.id} in ${clientData.room}`);
+    console.log(`closing ${clientData.id} in ${clientData.room}`);
 
     // shut the whole room down.
     if (clientData.sync) {

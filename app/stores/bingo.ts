@@ -267,7 +267,12 @@ function bingoSession(machine: BingoStateMachine) {
 }
 
 const networkStateMachine = stateMachine(() => {
-  async function connectToRoom(token: string, username: string, ctx: EventCtx<S, E>) {
+  async function connectToRoom(
+    token: string,
+    username: string,
+    ctx: EventCtx<S, E>,
+    game?: BingoStateMachine,
+  ) {
     const url = import.meta.dev ? "ws://localhost:2930" : "wss://bingosync-server.lungmendragons.com";
 
     const websocket = new WebSocket(url, [ `token.${token}`, `bingo` ]);
@@ -281,7 +286,7 @@ const networkStateMachine = stateMachine(() => {
       )
       : undefined;
     websocket.onclose = async () => await ctx.event("serverDisconnected");
-    ctx.next("connecting", { username, websocket });
+    ctx.next("connecting", { username, websocket, game });
   }
 
   function runSync(syncs: Syncs, state: S["inRoom"]) {
@@ -325,8 +330,16 @@ const networkStateMachine = stateMachine(() => {
   type S = {
     noLobby: undefined;
     gettingToken: undefined;
-    connecting: { username: string; websocket: WebSocket };
-    inServer: { username: string; websocket: WebSocket };
+    connecting: {
+      username: string;
+      websocket: WebSocket;
+      game?: BingoStateMachine;
+    };
+    inServer: {
+      username: string;
+      websocket: WebSocket;
+      game?: BingoStateMachine;
+    };
     inRoom: {
       websocket: WebSocket;
       isSync: boolean;
@@ -394,7 +407,7 @@ const networkStateMachine = stateMachine(() => {
         },
         serverMessage: handleServerMessage({
           [ServerOpcode.Init]: async (s, { client }, ctx) => {
-            const game = bingoStateMachine([
+            const game = s.game ?? bingoStateMachine([
               {
                 color: "#2080F0",
                 name: "Team 1",
@@ -421,6 +434,10 @@ const networkStateMachine = stateMachine(() => {
         leaveGame: async (s, e, ctx) => {
           s.websocket.close();
           ctx.next("noLobby");
+        },
+        offlineRoom: async (s, e, ctx) => {
+          s.websocket.close();
+          ctx.next("offline", { game: s.game });
         },
         serverMessage: handleServerMessage({
           [ServerOpcode.SendAction]: async (s, { client, data }, ctx) => {
@@ -449,7 +466,7 @@ const networkStateMachine = stateMachine(() => {
           },
         }),
         serverDisconnected: async (s, e, ctx) => {
-          ctx.next("noLobby");
+          ctx.next("offline", { game: s.game });
         },
         bingoAction: async (s, { action, user: userId }, ctx) => {
           const user = userId ?? s.userId;
@@ -502,6 +519,12 @@ const networkStateMachine = stateMachine(() => {
       },
       offline: {
         leaveGame: async (s, e, ctx) => ctx.next("noLobby"),
+        createRoom: async (s, { username }, ctx) => {
+          const game = s.game;
+          ctx.next("gettingToken");
+          const token = await $fetch(`/api/bingo/auth/create`, { method: "post" });
+          return connectToRoom(token, username, ctx, game);
+        },
         bingoAction: async (s, { action }, ctx) => {
           switch (action.kind) {
             case "click_tile":
@@ -550,6 +573,7 @@ export const useBingo = defineStore("bingosync-state", () => {
   return {
     net,
     tryGet: <K extends keyof S>(...types: K[]) => net.value.tryGet(...types),
+    state: computed(() => net.value.state.type),
     offlineRoom: async () => await net.value.event("offlineRoom"),
     createRoom: async (username: string) => await net.value.event("createRoom", { username }),
     joinRoom: async (username: string, room: string) => await net.value.event("joinRoom", { username, room }),
