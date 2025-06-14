@@ -37,6 +37,7 @@
     "@vueuse/core": "^12.8.2",
     "better-auth": "^1.2.5",
     "binary-schema": "workspace:",
+    "bingo-client": "workspace:",
     "bingo-logic": "workspace:",
     "bingo-server": "workspace:",
     "dompurify": "^3.2.4",

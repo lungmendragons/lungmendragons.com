@@ -2,5 +2,6 @@ packages:
   - 'packages/*'
 
 catalog:
-  wrangler: '^4.14.1'
-  typescript: '^5.8.3'
+  wrangler: '^4'
+  typescript: '^5'
+  ofetch: '^1'

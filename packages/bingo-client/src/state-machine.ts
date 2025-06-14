@@ -36,12 +36,12 @@ type MachineCfg<C extends any[], S extends StateSet, E extends EventSet> = {
 
 type EventCall<E extends EventSet> = <K extends Key<E>>(...params: Opt<[type: K, data: E[K]]>) => Promise<void>;
 
-interface MachineInstance<S extends StateSet, E extends EventSet> {
+export interface MachineInstance<S extends StateSet, E extends EventSet> {
   state: Combine<S>;
   event: EventCall<E>;
   tryGet: <K extends Key<S>>(...types: K[]) => S[K] | undefined;
   hooks: {
-    afterEvent?: () => void;
+    afterEvent?: (state: Combine<S>, event: Combine<E>) => void;
   };
   Infer: { state: S; event: E };
 }
@@ -75,7 +75,7 @@ export function stateMachine<
       if (hook) {
         await hook(this.state.data as S[string], data as E[K], this);
 
-        this.hooks.afterEvent?.();
+        this.hooks.afterEvent?.(this.state, combine(type, data));
       }
     };
 
@@ -105,10 +105,4 @@ export function cfg<
   E extends EventSet,
 >(data: MachineCfg<C, S, E>): MachineCfg<C, S, E> {
   return data;
-}
-
-export interface MachineComposable<S extends StateSet, E extends EventSet> {
-  state: Ref<Combine<S>>;
-  event: MachineInstance<S, E>["event"];
-  tryGet: MachineInstance<S, E>["tryGet"];
 }
