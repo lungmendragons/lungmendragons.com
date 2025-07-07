@@ -472,7 +472,7 @@ const networkStateMachine = stateMachine(() => {
           const user = userId ?? s.userId;
           switch (action.kind) {
             case "click_tile": {
-              if (!s.users[user]?.teams.includes(action.team))
+              if (!s.users[user]?.teams.includes(action.team) && action.team !== 255)
                 break;
               await s.game.event("clickTile", { team: action.team, tile: action.tile });
               runSync({ active: true }, s);
@@ -492,7 +492,8 @@ const networkStateMachine = stateMachine(() => {
               const userData = s.users[user];
               if (!userData)
                 break;
-              userData.teams.push(action.team);
+              // userData.teams.push(action.team);
+              userData.teams = [action.team];
               runSync({ users: true }, s);
               break;
             }

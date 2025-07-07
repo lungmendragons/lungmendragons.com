@@ -72,6 +72,8 @@ export class GameSession {
     const def = this.boardDef.tiles[tile]!;
     if (active.claimed.length === 0) {
       active.claimed.push(team);
+    } else if (team === 255) {
+      active.claimed.splice(-1);
     } else {
       const idx = active.claimed.indexOf(team);
       if (idx === -1) {

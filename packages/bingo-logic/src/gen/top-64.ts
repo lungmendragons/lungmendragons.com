@@ -112,10 +112,31 @@ export default function generate(pools: Pools): BoardDef {
     ])[0]!,
   };
   const out = shuffle(Object.values(stage1));
+  const extraForTesting = [
+    ...out,
+    {
+      "text": "Have no ingots upon leaving a Rogue Trader.",
+      "points": 1,
+      "stealable": false,
+      "exclusive": true
+    },
+    {
+      "text": "Have 60+ ingots.",
+      "points": 1,
+      "stealable": false,
+      "exclusive": true
+    },
+    {
+      "text": "Have 10+ shields",
+      "points": 1,
+      "stealable": false,
+      "exclusive": true
+    }
+  ];
   return {
     width: 4,
     height: 4,
-    extra: 0,
-    tiles: out,
+    extra: 3,
+    tiles: extraForTesting, // out,
   };
 }

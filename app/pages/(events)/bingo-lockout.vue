@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import type { InputInst, SelectOption } from "naive-ui";
+import { NFlex } from "naive-ui";
+import type { InputInst, DropdownOption, SelectOption } from "naive-ui";
+import type { VNodeChild } from "vue";
 import { rng4x4, rng5x5 } from "bingo-logic/gen";
+import { hasPermission, AuthPermission } from "~~/shared/auth";
+import IonBan from "~icons/ion/ban";
+import EosIconsAdmin from "~icons/eos-icons/admin";
 
+const { user } = useAuth();
 const bingo = useBingo();
 const roomIdField = ref("");
 const nameField = ref("");
@@ -57,39 +63,58 @@ const boardGenOptions: SelectOption[] = [
 async function createBoard() {
   await bingo.setBoard(boardGenFns[boardGenValue.value as keyof typeof boardGenFns]());
 }
+
+const localTeamColorMap = computed(() => {
+  const lut = bingo.teams()?.map(x => Number(x.name.slice(-1)));
+  const local = lut ? [ ...lut, 255 ] : [ 255 ];
+  return local.map(
+    (teamId, key) => {
+      if (teamId === 255)
+        return { label: "_", hex: "#FFF", key: 255 };
+      const { name, color } = (bingo.teams() ?? [])[key]!;
+      return { label: name, hex: color, key };
+    },
+  )
+});
+
+function renderDropdownLabel(option: DropdownOption): VNodeChild {
+  return h(NFlex, { align: "center" }, [
+    h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px", }}),
+    h("div", { style: { fontSize: '12px' } }, (option.label as string).slice(-1)),
+  ]);
+}
 </script>
 
 <template>
   <NFlex vertical>
     <NFlex>
-      <NFlex vertical class="w-[300px]">
+      <NFlex vertical class="w-[250px]">
         <template v-if="bingo.net.state.type === 'noLobby'">
-          Offline
-          <NButton @click="bingo.offlineRoom()">
-            create offline room
-          </NButton>
-          <NDivider />
-          Online
           <NInput
             v-model:value="nameField"
             type="text"
-            placeholder="display name"
+            placeholder="Enter display name"
           />
-          <NButton @click="bingo.createRoom(nameField)">
-            Create
+          <NDivider style="margin: 4px 0 !important" />
+          <NButton @click="bingo.offlineRoom()">
+            Create offline room
           </NButton>
-          <div>
-            <NButton class="w-20" @click="bingo.joinRoom(nameField, roomIdField)">
-              Join
-            </NButton>
-            <NDivider vertical />
+          <!-- Online -->
+          <NButton @click="bingo.createRoom(nameField)">
+            Create online room
+          </NButton>
+          <NDivider />
+          <NFlex vertical>
             <NInput
               v-model:value="roomIdField"
               type="text"
-              class="max-w-40"
-              placeholder="room ID"
+              placeholder="Room ID"
             />
-          </div>
+            <!-- <NDivider vertical /> -->
+            <NButton class="w-full" @click="bingo.joinRoom(nameField, roomIdField)">
+              Join online room
+            </NButton>
+          </NFlex>
         </template>
         <template v-else>
           <NInput
@@ -102,14 +127,48 @@ async function createBoard() {
             readonly
             @click="copyRoomId"
           />
-          <div>
-            Users: {{ Object.values(bingo.inRoom()?.users ?? {}).map(v => `${v.name}`).join(", ") }} <br>
-          </div>
-          <NButton @click="bingo.leaveGame()">
-            leave
-          </NButton>
+          <NFlex v-if="bingo.inRoom()?.isSync" vertical>
+            Users:
+            <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
+              <NFlex>
+                <!-- change to AuthPermission.BingoModerator when live, testing was annoying -->
+                <template v-if="user && hasPermission(user.permissions, AuthPermission.User)">
+                  <NButton text title="Promote user to room admin">
+                    <template #icon>
+                      <NIcon><EosIconsAdmin /></NIcon>
+                    </template>
+                  </NButton>
+                  <NButton text title="Kick user">
+                    <template #icon>
+                      <NIcon><IonBan /></NIcon>
+                    </template>
+                  </NButton>
+                </template>
+                <NDropdown
+                  size="small"
+                  trigger="click"
+                  :options="localTeamColorMap"
+                  :render-label="renderDropdownLabel"
+                  style="margin:4px"
+                  @select="bingo.joinTeam">
+                  <NTag
+                    style="width: fit-content; cursor: pointer"
+                    :color="{
+                      textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                      borderColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                    }">
+                    {{ bingoUser.name }}
+                  </NTag>
+                </NDropdown>
+              </NFlex>
+            </template>
+          </NFlex>  
         </template>
         <NDivider />
+        <NButton v-if="bingo.inRoom()?.isSync" @click="bingo.leaveGame()">
+          Leave game
+        </NButton>
+        <NDivider v-if="bingo.inRoom()?.isSync" />
         <NForm v-if="teams" :model="model">
           <NFormItem
             v-for="(team, i) in teams"
@@ -137,7 +196,10 @@ async function createBoard() {
           </NFormItem>
         </NForm>
       </NFlex>
-      <BingoGrid v-if="bingo.gameState === 'gameActive' || bingo.gameState === 'waitForStart'" />
+      <BingoGrid
+        v-if="bingo.gameState === 'gameActive' || bingo.gameState === 'waitForStart'"
+        :team-color-map="localTeamColorMap"
+      />
       <template v-else-if="bingo.gameState === 'boardUnset'">
         <template v-if="bingo.netState === 'offline' || bingo.inRoom()?.isSync">
           <NSelect v-model:value="boardGenValue" :options="boardGenOptions" />
