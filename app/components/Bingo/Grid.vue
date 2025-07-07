@@ -3,7 +3,7 @@ import { NFlex, NIcon } from "naive-ui";
 import type { DropdownOption } from "naive-ui";
 import type { VNodeChild } from "vue";
 import IonClose from "~icons/ion/close";
-import type { TileId } from "bingo-logic";
+import type { TeamId, TileId } from "bingo-logic";
 
 const { teamColorMap } = defineProps<{
   teamColorMap: DropdownOption[];
@@ -20,24 +20,33 @@ function gridArea(i: number, w: number, h: number) {
 function filterTeamOptions(tile: TileId): DropdownOption[] {
   const active = board.value?.activeBoard.tiles[tile];
   const def = board.value?.boardDef.tiles[tile];
-  if (!active || !def) return [];
-  return teamColorMap.filter(team => {
+  if (!active || !def)
+    return [];
+  return teamColorMap.filter((team) => {
     if (active.claimed.length === 0)
       return team.key !== 255;
     if (def.stealable)
-      return !active.claimed.includes(team.key as number)
+      return !active.claimed.includes(team.key as number);
     return team.key === 255;
-  })
+  });
 }
 
 function renderDropdownLabel(option: DropdownOption): VNodeChild {
   const slot = option.label === "_"
     ? [ h(NIcon, null, () => h(IonClose)), option.label ]
     : [
-      h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px", }}),
-      h("div", { style: { fontSize: '12px' } }, (option.label as string).slice(-1)),
-    ];
+        h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
+        h("div", { style: { fontSize: "12px" } }, (option.label as string).slice(-1)),
+      ];
   return h(NFlex, { align: "center" }, slot);
+}
+
+async function claim(team: TeamId, tile: TileId) {
+  if (team === 255) {
+    await bingo.clearTile(tile);
+  } else {
+    await bingo.clickTile(team, tile);
+  }
 }
 </script>
 
@@ -48,7 +57,9 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
     justify="start"
     align="start"
     class="board-container">
-    <h2 class="board-heading heading-bonus">Bonus</h2>
+    <h2 class="board-heading heading-bonus">
+      Bonus
+    </h2>
     <div class="board-bonus">
       <template v-for="(_, i) in board.boardDef.extra" :key="i">
         <BingoTile
@@ -57,7 +68,6 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
           :tile-id="board.extraTile(i)"
           :extra="true"
-          @click="bingo.clickTile(localUserTeams[0]!, board.extraTile(i))"
         />
         <BingoTile
           v-else-if="localUserTeams?.length === 1"
@@ -65,7 +75,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
           :tile-id="board.extraTile(i)"
           :extra="true"
-          @click="bingo.clickTile(localUserTeams[0]!, board.extraTile(i))"
+          @click="claim(localUserTeams[0]!, board.extraTile(i))"
         />
         <NDropdown
           v-else
@@ -78,7 +88,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           :options="filterTeamOptions((board.boardDef.width * board.boardDef.height) + i)"
           :render-label="renderDropdownLabel"
           style="margin:4px"
-          @select="bingo.clickTile($event, board.extraTile(i))">
+          @select="claim($event, board.extraTile(i))">
           <BingoTile
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
             :tile-id="board.extraTile(i)"
@@ -87,7 +97,9 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
         </NDropdown>
       </template>
     </div>
-    <h2 class="board-heading heading-standard">Board</h2>
+    <h2 class="board-heading heading-standard">
+      Board
+    </h2>
     <div class="board-standard">
       <template v-for="(_, i) in board.boardDef.width * board.boardDef.height" :key="i">
         <BingoTile
@@ -101,7 +113,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           :key="`tile-${board.mainTile(i)}-1`"
           :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
           :tile-id="board.mainTile(i)"
-          @click="bingo.clickTile(localUserTeams[0]!, board.mainTile(i))"
+          @click="claim(localUserTeams[0]!, board.mainTile(i))"
         />
         <NDropdown
           v-else
@@ -114,7 +126,7 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           :options="filterTeamOptions(i)"
           :render-label="renderDropdownLabel"
           style="margin:4px"
-          @select="bingo.clickTile($event, board.mainTile(i))">
+          @select="claim($event, board.mainTile(i))">
           <BingoTile
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
             :tile-id="board.mainTile(i)"

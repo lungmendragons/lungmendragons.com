@@ -156,6 +156,7 @@ const timerDisplay = computed(() => {
               align="center"
               class="mx-auto my-4">
               <NFormItem
+                v-if="!timerStarted"
                 label="Minutes"
                 label-placement="left"
                 :show-feedback="false"
@@ -270,28 +271,28 @@ const timerDisplay = computed(() => {
                     </template>
                   </NButton>
                 </template> -->
-                <NDropdown
+                <!-- <NDropdown
                   size="small"
                   trigger="click"
                   :options="localTeamColorMap"
                   :render-label="renderDropdownLabel"
                   style="margin:4px"
-                  @select="bingo.joinTeam">
-                  <NTag
-                    style="width: fit-content; cursor: pointer"
-                    :color="{
-                      textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
-                      borderColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
-                    }">
-                    {{ bingoUser.name }}
-                  </NTag>
-                </NDropdown>
+                  @select="bingo.joinTeam"> -->
+                <NTag
+                  style="width: fit-content; cursor: pointer"
+                  :color="{
+                    textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                    borderColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                  }">
+                  {{ bingoUser.name }}
+                </NTag>
+                <!-- </NDropdown> -->
               </NFlex>
             </template>
           </NFlex>
         </template>
         <NDivider />
-        <NButton @click="bingo.leaveGame()">
+        <NButton v-if="bingo.gameState !== undefined" @click="bingo.leaveGame()">
           Leave game
         </NButton>
         <NDivider v-if="bingo.inRoom()?.isSync" />

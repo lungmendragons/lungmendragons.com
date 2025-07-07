@@ -105,6 +105,9 @@ export type BingoAction = {
   tile: TileId;
   team: TeamId;
 } | {
+  kind: "clear_tile";
+  tile: TileId;
+} | {
   kind: "enter_room";
   name: string;
 } | {
@@ -121,6 +124,9 @@ const BingoActionSchema: s.Schema<BingoAction> = s.union("kind", {
   click_tile: {
     tile: s.u8,
     team: s.u8,
+  },
+  clear_tile: {
+    tile: s.u8,
   },
   enter_room: {
     name: s.string,
@@ -161,6 +167,7 @@ export const bingoStateMachine = stateMachine(() => {
     setBoard: { board: BoardDef };
     setTimer: { timer: TimerState };
     clickTile: { team: TeamId; tile: TileId };
+    clearTile: { tile: TileId };
     setTeamData: { team: TeamId; color?: string; name?: string };
     sync: { data: BingoSyncData };
   };
@@ -265,6 +272,7 @@ export const bingoStateMachine = stateMachine(() => {
           s.timer = timer;
         },
         clickTile: async (s, { team, tile }, ctx) => s.session.clickTile(team, tile),
+        clearTile: async (s, { tile }, ctx) => s.session.clearTile(tile),
         sync: async (s, { data }, ctx) => {
           switch (data.state as keyof S) {
             // case "boardUnset":
@@ -513,6 +521,20 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               runSync({ active: true }, s);
               break;
             }
+            case "clear_tile": {
+              const active = s.game.tryGet("gameActive")?.session.getTile(action.tile)[1];
+              const userTeams = s.users[user]?.teams;
+              if (userTeams === undefined || active === undefined)
+                break;
+
+              const teamsMatch = active.claimed.every(v => userTeams.includes(v));
+              if (!teamsMatch)
+                break;
+
+              await s.game.event("clearTile", { tile: action.tile });
+              runSync({ active: true }, s);
+              break;
+            }
             case "enter_room": {
               s.users[user] = {
                 id: user,
@@ -530,7 +552,11 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               const userData = s.users[user];
               if (!userData)
                 break;
-              userData.teams.push(action.team);
+              if (action.team === 255) {
+                userData.teams = [];
+              } else {
+                userData.teams = [ action.team ];
+              }
               runSync({ users: true }, s);
               break;
             }

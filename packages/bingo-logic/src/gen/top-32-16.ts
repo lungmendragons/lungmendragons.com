@@ -117,7 +117,7 @@ export default function generate(pools: Pools): BoardDef {
   return {
     width: 5,
     height: 5,
-    extra: 0,
+    extra: 3,
     /* eslint-disable antfu/consistent-list-newline */
     tiles: [
       ...rlist.slice(0, 5),
@@ -125,6 +125,9 @@ export default function generate(pools: Pools): BoardDef {
       rlist[10]!, slist.o1, slist.o4, slist.o2, rlist[11]!,
       ...rlist.slice(12, 17),
       ...rlist.slice(17, 22),
+      { text: "cc tile 1", points: 1, stealable: true, exclusive: true },
+      { text: "cc tile 2", points: 1, stealable: true, exclusive: true },
+      { text: "cc tile 3", points: 1, stealable: true, exclusive: true },
     ],
   };
 }

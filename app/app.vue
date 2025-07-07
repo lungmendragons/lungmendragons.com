@@ -92,7 +92,7 @@ onMounted(() => {
 
     <!-- Loading screen during hydration, shouldn't exceed ~500ms or so -->
     <NFlex
-      v-if="!isLoaded"
+      v-if="!isLoaded && layout !== 'empty'"
       vertical
       justify="center"
       :style="{ width: '100vw', height: '100svh' }">

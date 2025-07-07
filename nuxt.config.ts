@@ -77,6 +77,7 @@ export default defineNuxtConfig({
         "font-src": [
           "'self'",
           "data:",
+          "fonts.gstatic.com",
         ],
         "img-src": [
           "'self'",
@@ -92,6 +93,7 @@ export default defineNuxtConfig({
         "style-src": [
           "'self'",
           "'unsafe-inline'",
+          "fonts.googleapis.com",
         ],
       },
       crossOriginEmbedderPolicy:

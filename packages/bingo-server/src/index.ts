@@ -297,7 +297,8 @@ export class WSDurableObject extends DurableObject {
     const view = BinaryWriter.using(message, ServerMessageSchema.encode);
     for (const client of this.ctx.getWebSockets(room)) {
       if (from !== client) {
-        client.send(view);
+        if (client.readyState === WebSocket.READY_STATE_OPEN)
+          client.send(view);
       }
     }
   }

@@ -51,6 +51,12 @@ export const useBingo = defineStore("bingosync-state", () => {
         tile,
       },
     }),
+    clearTile: async (tile: TileId) => await net.value.event("bingoAction", {
+      action: {
+        kind: "clear_tile",
+        tile,
+      },
+    }),
     joinTeam: async (team: TeamId) => await net.value.event("bingoAction", {
       action: {
         kind: "join_team",
