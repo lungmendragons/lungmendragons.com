@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { NFlex } from "naive-ui";
-import type { InputInst, DropdownOption, SelectOption } from "naive-ui";
+import type { InputInst, DropdownOption, SelectOption, CountdownTimeInfo, CountdownInst } from "naive-ui";
 import type { VNodeChild } from "vue";
 import { rng4x4, rng5x5 } from "bingo-logic/gen";
 import { hasPermission, AuthPermission } from "~~/shared/auth";
 import IonBan from "~icons/ion/ban";
 import EosIconsAdmin from "~icons/eos-icons/admin";
+import MdiPlay from '~icons/mdi/play';
+import MdiPause from '~icons/mdi/pause';
+import MdiCloseThick from '~icons/mdi/close-thick';
 
 const { user } = useAuth();
 const bingo = useBingo();
@@ -18,7 +21,6 @@ const model = ref([
 
 const teams = computed(bingo.teams);
 const roomId = computed(() => bingo.inRoom()?.roomId);
-
 const message = useMessage();
 const roomIdInputRef = ref<InputInst>();
 
@@ -83,6 +85,64 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
     h("div", { style: { fontSize: '12px' } }, (option.label as string).slice(-1)),
   ]);
 }
+
+const roomTimer = ref(0);
+const roomTimerActive = ref(false);
+const roomTimerSession = ref(false);
+const countdown = ref<CountdownInst>();
+
+function handleStart() {
+  if (!roomTimerSession.value) {
+    roomTimerSession.value = true;
+    if (!roomTimerActive.value) {
+      roomTimerActive.value = true;
+      message.success("Timer active");
+    }
+  }
+}
+
+function handlePlay() {
+  if (!roomTimerActive.value) {
+    roomTimerActive.value = true;
+    message.success("Timer active");
+  }
+}
+
+function handlePause() {
+  if (roomTimerActive.value) {
+    roomTimerActive.value = false;
+    message.warning("Timer paused");
+  }
+}
+
+function handleReset(): void {
+  if (roomTimerSession.value) {
+    roomTimerSession.value = false;
+    countdown.value?.reset();
+    message.info("Timer reset");
+  }
+}
+
+function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeChild {
+  return h(
+    "div",
+    {
+      style: {
+        display: "inline-block",
+        padding: '4px 16px',
+        transition: 'all 0.3s ease-in-out',
+        color: "white",
+        backgroundImage: "linear-gradient(45deg, #1b43df, #eb141d)",
+        opacity: roomTimerActive.value ? "100%" : "60%",
+      } 
+    },
+    [
+      String(minutes + (hours * 60)).padStart(2, "0"),
+      ":",
+      String(seconds).padStart(2, "0"),
+    ],
+  );
+}
 </script>
 
 <template>
@@ -117,16 +177,104 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
           </NFlex>
         </template>
         <template v-else>
-          <NInput
+          <NFlex
+            v-if="user && hasPermission(user.permissions, AuthPermission.User)"
+            align="center"
+            class="mx-auto my-4">
+            <NFormItem
+              v-if="!roomTimerSession"
+              label="Minutes"
+              label-placement="left"
+              :show-feedback="false"
+              size="small">
+              <NInputNumber
+                v-model:value="roomTimer"
+                class="w-24"
+                size="small"
+                button-placement="both"
+                :min="0"
+                :input-props="{
+                  style: { textAlign: 'center' }
+                }"
+              />
+            </NFormItem>
+            <NButton
+              v-if="!roomTimerSession"
+              :disabled="roomTimer === 0"
+              size="small"
+              secondary
+              @click="handleStart">
+              Start
+            </NButton>
+            <NButton
+              v-if="roomTimerSession && !roomTimerActive"
+              type="success"
+              size="small"
+              secondary
+              @click="handlePlay">
+              <template #icon>
+                <NIcon><MdiPlay /></NIcon>
+              </template>
+              Resume
+            </NButton>
+            <NButton
+              v-if="roomTimerActive"
+              type="warning"
+              size="small"
+              secondary
+              @click="handlePause">
+              <template #icon>
+                <NIcon><MdiPause /></NIcon>
+              </template>
+              Pause
+            </NButton>
+            <NButton
+              v-if="roomTimerSession && !roomTimerActive"
+              type="error"
+              size="small"
+              secondary
+              @click="handleReset">
+              <template #icon>
+                <NIcon><MdiCloseThick /></NIcon>
+              </template>
+              Reset
+            </NButton>
+          </NFlex>
+          <NSpin
+            size="large"
+            :rotate="false"
+            :show="roomTimerSession && !roomTimerActive">
+            <template #icon>
+              <NIcon><MdiPause /></NIcon>
+            </template>
+            <div class="bingo-timer">
+              <NCountdown
+                ref="countdown"
+                :render="renderCountdown"
+                :duration="roomTimer * 60000"
+                :active="roomTimerActive"
+              />
+            </div>
+          </NSpin>
+          <NDivider />
+          <NFormItem
             v-if="roomId !== undefined"
-            ref="roomIdInputRef"
-            :theme-overrides="{ caretColor: 'transparent' }"
-            :value="roomId"
-            type="text"
-            :autosize="true"
-            readonly
-            @click="copyRoomId"
-          />
+            label="Room ID"
+            label-placement="left">
+            <NInput
+              ref="roomIdInputRef"
+              :theme-overrides="{ caretColor: 'transparent' }"
+              :input-props="{
+                style: { cursor: 'pointer' }
+              }"
+              class="w-full"
+              :value="roomId"
+              type="text"
+              :autosize="true"
+              readonly
+              @click="copyRoomId"
+            />
+          </NFormItem>
           <NFlex v-if="bingo.inRoom()?.isSync" vertical>
             Users:
             <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
@@ -220,4 +368,16 @@ function renderDropdownLabel(option: DropdownOption): VNodeChild {
   </NFlex>
 </template>
 
-<style scoped></style>
+<style scoped>
+.bingo-timer {
+  font-variant-numeric: tabular-nums;
+  margin: 0 auto;
+  width: fit-content;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+:deep(.n-spin) {
+  color: white;
+}
+</style>
