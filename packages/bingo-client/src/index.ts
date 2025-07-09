@@ -29,6 +29,7 @@ interface BingoSyncData {
   users: User[] | undefined;
   teams: Team[] | undefined;
   start: number | undefined;
+  timer: TimerState | undefined;
 }
 
 export interface Team {
@@ -43,6 +44,22 @@ interface User {
   name: string;
   teams: TeamId[];
 }
+
+export type TimerState = {
+  kind: "paused";
+  time: number;
+} | {
+  kind: "active";
+  target: number;
+};
+const TimerStateSchema: s.Schema<TimerState> = s.union("kind", {
+  paused: {
+    time: s.f64,
+  },
+  active: {
+    target: s.f64,
+  },
+});
 
 const TeamSchema: s.Schema<Team> = s.struct({
   color: s.string,
@@ -80,6 +97,7 @@ const BingoSyncDataSchema: s.Schema<BingoSyncData> = s.struct({
   users: s.option(s.array(UserSchema)),
   teams: s.option(s.array(TeamSchema)),
   start: s.option(s.f64),
+  timer: s.option(TimerStateSchema),
 });
 
 export type BingoAction = {
@@ -122,23 +140,26 @@ interface Syncs {
   board?: boolean;
   users?: boolean;
   teams?: boolean;
+  timer?: boolean;
   to?: string;
 };
 
 export const bingoStateMachine = stateMachine(() => {
   type S = {
     boardUnset: { teams: Team[] };
-    waitForStart: {
-      session: GameSession;
-      teams: Team[];
-    };
+    // waitForStart: {
+    //   session: GameSession;
+    //   teams: Team[];
+    // };
     gameActive: {
       session: GameSession;
       teams: Team[];
+      timer: TimerState;
     };
   };
   type E = {
     setBoard: { board: BoardDef };
+    setTimer: { timer: TimerState };
     clickTile: { team: TeamId; tile: TileId };
     setTeamData: { team: TeamId; color?: string; name?: string };
     sync: { data: BingoSyncData };
@@ -176,7 +197,11 @@ export const bingoStateMachine = stateMachine(() => {
     state: {
       boardUnset: {
         setBoard: async (s, { board }, ctx) => {
-          ctx.next("gameActive", { session: new GameSession(board), teams: s.teams });
+          ctx.next("gameActive", {
+            session: new GameSession(board),
+            teams: s.teams,
+            timer: { kind: "paused", time: 0 },
+          });
         },
         setTeamData,
         sync: async (s, { data }, ctx) => {
@@ -185,44 +210,23 @@ export const bingoStateMachine = stateMachine(() => {
               if (data.teams)
                 s.teams = data.teams;
               break;
-            case "waitForStart":
-              if (data.def) {
-                const session = new GameSession(data.def);
-                syncSession(session, data);
-                ctx.next("waitForStart", { session, teams: data.teams ?? s.teams });
-              }
-              break;
-            case "gameActive":
-              if (data.def) {
-                const session = new GameSession(data.def);
-                syncSession(session, data);
-                ctx.next("gameActive", { session, teams: data.teams ?? s.teams });
-              }
-              break;
-            default:
-              console.warn("invalid sync state");
-              break;
-          }
-        },
-      },
-      waitForStart: {
-        setTeamData,
-        sync: async (s, { data }, ctx) => {
-          switch (data.state as keyof S) {
-            // case "boardUnset":
-            //   ctx.next("boardUnset", { teams: data.teams ?? s.teams });
+            // case "waitForStart":
+            //   if (data.def) {
+            //     const session = new GameSession(data.def);
+            //     syncSession(session, data);
+            //     ctx.next("waitForStart", { session, teams: data.teams ?? s.teams });
+            //   }
             //   break;
-            case "waitForStart":
-              syncSession(s.session, data);
-              if (data.teams)
-                s.teams = data.teams;
-              break;
             case "gameActive":
-              syncSession(s.session, data);
-              ctx.next("gameActive", {
-                session: s.session,
-                teams: data.teams ?? s.teams,
-              });
+              if (data.def) {
+                const session = new GameSession(data.def);
+                syncSession(session, data);
+                ctx.next("gameActive", {
+                  session,
+                  teams: data.teams ?? s.teams,
+                  timer: data.timer ?? { kind: "paused", time: 0 },
+                });
+              }
               break;
             default:
               console.warn("invalid sync state");
@@ -230,25 +234,55 @@ export const bingoStateMachine = stateMachine(() => {
           }
         },
       },
+      // waitForStart: {
+      //   setTeamData,
+      //   sync: async (s, { data }, ctx) => {
+      //     switch (data.state as keyof S) {
+      //       // case "boardUnset":
+      //       //   ctx.next("boardUnset", { teams: data.teams ?? s.teams });
+      //       //   break;
+      //       case "waitForStart":
+      //         syncSession(s.session, data);
+      //         if (data.teams)
+      //           s.teams = data.teams;
+      //         break;
+      //       case "gameActive":
+      //         syncSession(s.session, data);
+      //         ctx.next("gameActive", {
+      //           session: s.session,
+      //           teams: data.teams ?? s.teams,
+      //         });
+      //         break;
+      //       default:
+      //         console.warn("invalid sync state");
+      //         break;
+      //     }
+      //   },
+      // },
       gameActive: {
         setTeamData,
+        setTimer: async (s, { timer }, ctx) => {
+          s.timer = timer;
+        },
         clickTile: async (s, { team, tile }, ctx) => s.session.clickTile(team, tile),
         sync: async (s, { data }, ctx) => {
           switch (data.state as keyof S) {
             // case "boardUnset":
             //   ctx.next("boardUnset", { teams: data.teams ?? s.teams });
             //   break;
-            case "waitForStart":
-              syncSession(s.session, data);
-              ctx.next("waitForStart", {
-                session: s.session,
-                teams: data.teams ?? s.teams,
-              });
-              break;
+            // case "waitForStart":
+            //   syncSession(s.session, data);
+            //   ctx.next("waitForStart", {
+            //     session: s.session,
+            //     teams: data.teams ?? s.teams,
+            //   });
+            //   break;
             case "gameActive":
               syncSession(s.session, data);
               if (data.teams)
                 s.teams = data.teams;
+              if (data.timer)
+                s.timer = data.timer;
               break;
             default:
               console.warn("invalid sync state");
@@ -298,6 +332,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       start: syncs.active ? bingoSession(state.game)?.start : undefined,
       teams: syncs.teams ? state.game.state.data.teams : undefined,
       users: syncs.users ? Object.values(state.users) : undefined,
+      timer: syncs.timer ? state.game.tryGet("gameActive")?.timer : undefined,
     };
 
     state.websocket.send(BinaryWriter.using({
@@ -360,6 +395,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     serverMessage: { message: ServerMessage };
     bingoAction: { user?: UserId; action: BingoAction };
     setBoard: { board: BoardDef };
+    setTimer: { timer: TimerState };
     leaveGame: undefined;
   };
 
@@ -483,11 +519,14 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
                 name: action.name,
                 teams: s.userId === user ? s.game.state.data.teams.map((_, i) => i) : [],
               };
-              runSync({ board: true, teams: true, users: true, active: true, to: user }, s);
+              runSync({ board: true, teams: true, users: true, active: true, timer: true, to: user }, s);
               runSync({ users: true }, s);
               break;
             }
             case "join_team": {
+              // only allow room hosts to add people to teams for now if needed.
+              if (!s.isSync || user !== s.userId)
+                break;
               const userData = s.users[user];
               if (!userData)
                 break;
@@ -515,6 +554,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           await s.game.event("setBoard", { board });
           runSync({ board: true }, s);
         },
+        setTimer: async (s, { timer }, ctx) => {
+          if (!s.isSync)
+            return;
+          await s.game.event("setTimer", { timer });
+          runSync({ timer: true }, s);
+        },
       },
       offline: {
         leaveGame: async (s, e, ctx) => ctx.next("noLobby"),
@@ -535,8 +580,10 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           }
         },
         setBoard: async (s, { board }, ctx) => {
-          console.log(`meow `, board);
           await s.game.event("setBoard", { board });
+        },
+        setTimer: async (s, { timer }, ctx) => {
+          await s.game.event("setTimer", { timer });
         },
       },
     },

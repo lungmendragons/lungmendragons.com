@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import { NFlex } from "naive-ui";
-import type { InputInst, DropdownOption, SelectOption, CountdownTimeInfo, CountdownInst } from "naive-ui";
+import type { InputInst, DropdownOption, SelectOption } from "naive-ui";
 import type { VNodeChild } from "vue";
 import { rng4x4, rng5x5 } from "bingo-logic/gen";
-import { hasPermission, AuthPermission } from "~~/shared/auth";
-import IonBan from "~icons/ion/ban";
-import EosIconsAdmin from "~icons/eos-icons/admin";
-import MdiPlay from '~icons/mdi/play';
-import MdiPause from '~icons/mdi/pause';
-import MdiCloseThick from '~icons/mdi/close-thick';
+import MdiPlay from "~icons/mdi/play";
+import MdiPause from "~icons/mdi/pause";
+import MdiCloseThick from "~icons/mdi/close-thick";
+import { useNow } from "@vueuse/core";
 
-const { user } = useAuth();
 const bingo = useBingo();
 const roomIdField = ref("");
 const nameField = ref("");
@@ -21,6 +18,18 @@ const model = ref([
 
 const teams = computed(bingo.teams);
 const roomId = computed(() => bingo.inRoom()?.roomId);
+const timerState = computed(bingo.timer);
+const now = useNow({ interval: 1000 });
+const timer = computed(() => {
+  const st = timerState.value;
+  if (st === undefined)
+    return undefined;
+  if (st.kind === "active") {
+    return Math.max(st.target - now.value.getTime(), 0);
+  } else {
+    return st.time;
+  }
+});
 const message = useMessage();
 const roomIdInputRef = ref<InputInst>();
 
@@ -76,73 +85,37 @@ const localTeamColorMap = computed(() => {
       const { name, color } = (bingo.teams() ?? [])[key]!;
       return { label: name, hex: color, key };
     },
-  )
+  );
 });
 
 function renderDropdownLabel(option: DropdownOption): VNodeChild {
   return h(NFlex, { align: "center" }, [
-    h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px", }}),
-    h("div", { style: { fontSize: '12px' } }, (option.label as string).slice(-1)),
+    h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
+    h("div", { style: { fontSize: "12px" } }, (option.label as string).slice(-1)),
   ]);
 }
 
-const roomTimer = ref(0);
-const roomTimerActive = ref(false);
-const roomTimerSession = ref(false);
-const countdown = ref<CountdownInst>();
-
-function handleStart() {
-  if (!roomTimerSession.value) {
-    roomTimerSession.value = true;
-    if (!roomTimerActive.value) {
-      roomTimerActive.value = true;
-      message.success("Timer active");
-    }
-  }
+const timerInput = ref(0);
+const timerStarted = computed(() => {
+  const st = timerState.value;
+  if (!st)
+    return false;
+  if (st.kind === "paused")
+    return st.time !== 0;
+  return true;
+});
+async function handleStart() {
+  await bingo.setTimerValue(timerInput.value * 60000);
 }
-
-function handlePlay() {
-  if (!roomTimerActive.value) {
-    roomTimerActive.value = true;
-    message.success("Timer active");
-  }
+async function handleReset() {
+  await bingo.setTimerValue(0);
 }
-
-function handlePause() {
-  if (roomTimerActive.value) {
-    roomTimerActive.value = false;
-    message.warning("Timer paused");
-  }
-}
-
-function handleReset(): void {
-  if (roomTimerSession.value) {
-    roomTimerSession.value = false;
-    countdown.value?.reset();
-    message.info("Timer reset");
-  }
-}
-
-function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeChild {
-  return h(
-    "div",
-    {
-      style: {
-        display: "inline-block",
-        padding: '4px 16px',
-        transition: 'all 0.3s ease-in-out',
-        color: "white",
-        backgroundImage: "linear-gradient(45deg, #1b43df, #eb141d)",
-        opacity: roomTimerActive.value ? "100%" : "60%",
-      } 
-    },
-    [
-      String(minutes + (hours * 60)).padStart(2, "0"),
-      ":",
-      String(seconds).padStart(2, "0"),
-    ],
-  );
-}
+const timerDisplay = computed(() => {
+  const timeLeft = timer.value ?? 0;
+  const seconds = Math.floor((timeLeft / 1000) % 60).toString().padStart(2, "0");
+  const minutes = Math.floor(timeLeft / 60000).toString().padStart(2, "0");
+  return `${minutes}:${seconds}`;
+});
 </script>
 
 <template>
@@ -177,85 +150,90 @@ function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeC
           </NFlex>
         </template>
         <template v-else>
-          <NFlex
-            v-if="user && hasPermission(user.permissions, AuthPermission.User)"
-            align="center"
-            class="mx-auto my-4">
-            <NFormItem
-              v-if="!roomTimerSession"
-              label="Minutes"
-              label-placement="left"
-              :show-feedback="false"
-              size="small">
-              <NInputNumber
-                v-model:value="roomTimer"
-                class="w-24"
+          <template v-if="bingo.gameState === 'gameActive'">
+            <NFlex
+              v-if="bingo.inRoom()?.isSync"
+              align="center"
+              class="mx-auto my-4">
+              <NFormItem
+                label="Minutes"
+                label-placement="left"
+                :show-feedback="false"
+                size="small">
+                <NInputNumber
+                  v-model:value="timerInput"
+                  class="w-24"
+                  size="small"
+                  button-placement="both"
+                  :min="0"
+                  :input-props="{
+                    style: { textAlign: 'center' },
+                  }"
+                />
+              </NFormItem>
+              <NButton
+                v-if="!timerStarted"
+                :disabled="timerInput === 0"
                 size="small"
-                button-placement="both"
-                :min="0"
-                :input-props="{
-                  style: { textAlign: 'center' }
-                }"
-              />
-            </NFormItem>
-            <NButton
-              v-if="!roomTimerSession"
-              :disabled="roomTimer === 0"
-              size="small"
-              secondary
-              @click="handleStart">
-              Start
-            </NButton>
-            <NButton
-              v-if="roomTimerSession && !roomTimerActive"
-              type="success"
-              size="small"
-              secondary
-              @click="handlePlay">
-              <template #icon>
-                <NIcon><MdiPlay /></NIcon>
-              </template>
-              Resume
-            </NButton>
-            <NButton
-              v-if="roomTimerActive"
-              type="warning"
-              size="small"
-              secondary
-              @click="handlePause">
+                secondary
+                @click="handleStart">
+                Set
+              </NButton>
+              <NButton
+                v-if="timerStarted && timerState?.kind === 'paused'"
+                type="success"
+                size="small"
+                secondary
+                @click="bingo.toggleTimer">
+                <template #icon>
+                  <NIcon><MdiPlay /></NIcon>
+                </template>
+                Resume
+              </NButton>
+              <NButton
+                v-if="timerState?.kind === 'active'"
+                type="warning"
+                size="small"
+                secondary
+                @click="bingo.toggleTimer">
+                <template #icon>
+                  <NIcon><MdiPause /></NIcon>
+                </template>
+                Pause
+              </NButton>
+              <NButton
+                v-if="timerState?.kind !== 'paused'"
+                type="error"
+                size="small"
+                secondary
+                @click="handleReset">
+                <template #icon>
+                  <NIcon><MdiCloseThick /></NIcon>
+                </template>
+                Reset
+              </NButton>
+            </NFlex>
+            <NSpin
+              size="large"
+              :show="timerStarted && timerState?.kind === 'paused'"
+              :rotate="false">
               <template #icon>
                 <NIcon><MdiPause /></NIcon>
               </template>
-              Pause
-            </NButton>
-            <NButton
-              v-if="roomTimerSession && !roomTimerActive"
-              type="error"
-              size="small"
-              secondary
-              @click="handleReset">
-              <template #icon>
-                <NIcon><MdiCloseThick /></NIcon>
-              </template>
-              Reset
-            </NButton>
-          </NFlex>
-          <NSpin
-            size="large"
-            :rotate="false"
-            :show="roomTimerSession && !roomTimerActive">
-            <template #icon>
-              <NIcon><MdiPause /></NIcon>
-            </template>
-            <div class="bingo-timer">
-              <NCountdown
-                ref="countdown"
-                :render="renderCountdown"
-                :duration="roomTimer * 60000"
-                :active="roomTimerActive"
-              />
-            </div>
-          </NSpin>
+              <div class="bingo-timer">
+                <div :style="{
+                  display: 'inline-block',
+                  padding: '4px 16px',
+                  transition: 'all 0.3s ease-in-out',
+                  color: 'white',
+                  backgroundImage: 'linear-gradient(45deg, #1b43df, #eb141d)',
+                  opacity: timerState?.kind === 'active' ? '100%' : '60%',
+                }">
+                  {{ timerDisplay }}
+                </div>
+              </div>
+            </NSpin>
+          </template>
           <NDivider />
           <NFormItem
             v-if="roomId !== undefined"
@@ -265,7 +243,7 @@ function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeC
               ref="roomIdInputRef"
               :theme-overrides="{ caretColor: 'transparent' }"
               :input-props="{
-                style: { cursor: 'pointer' }
+                style: { cursor: 'pointer' },
               }"
               class="w-full"
               :value="roomId"
@@ -280,7 +258,7 @@ function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeC
             <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
               <NFlex>
                 <!-- change to AuthPermission.BingoModerator when live, testing was annoying -->
-                <template v-if="user && hasPermission(user.permissions, AuthPermission.User)">
+                <!-- <template v-if="user && hasPermission(user.permissions, AuthPermission.User)">
                   <NButton text title="Promote user to room admin">
                     <template #icon>
                       <NIcon><EosIconsAdmin /></NIcon>
@@ -291,7 +269,7 @@ function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeC
                       <NIcon><IonBan /></NIcon>
                     </template>
                   </NButton>
-                </template>
+                </template> -->
                 <NDropdown
                   size="small"
                   trigger="click"
@@ -310,10 +288,10 @@ function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeC
                 </NDropdown>
               </NFlex>
             </template>
-          </NFlex>  
+          </NFlex>
         </template>
         <NDivider />
-        <NButton v-if="bingo.inRoom()?.isSync" @click="bingo.leaveGame()">
+        <NButton @click="bingo.leaveGame()">
           Leave game
         </NButton>
         <NDivider v-if="bingo.inRoom()?.isSync" />
@@ -345,7 +323,7 @@ function renderCountdown({ hours, minutes, seconds }: CountdownTimeInfo): VNodeC
         </NForm>
       </NFlex>
       <BingoGrid
-        v-if="bingo.gameState === 'gameActive' || bingo.gameState === 'waitForStart'"
+        v-if="bingo.gameState === 'gameActive'"
         :team-color-map="localTeamColorMap"
       />
       <template v-else-if="bingo.gameState === 'boardUnset'">

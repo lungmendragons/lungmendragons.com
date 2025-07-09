@@ -14,7 +14,7 @@ export const useBingo = defineStore("bingosync-state", () => {
 
   const inRoom = () => net.value.tryGet("inRoom");
   const gameActive = () => net.value.tryGet("inRoom", "offline");
-  const board = () => gameActive()?.game.tryGet("gameActive", "waitForStart")?.session;
+  const board = () => gameActive()?.game.tryGet("gameActive")?.session;
   const teams = () => gameActive()?.game.state.data.teams;
   const localUserTeams = () => {
     const ir = inRoom();
@@ -27,6 +27,7 @@ export const useBingo = defineStore("bingosync-state", () => {
       return undefined;
     }
   };
+  const timer = () => gameActive()?.game.tryGet("gameActive")?.timer;
 
   return {
     net,
@@ -57,6 +58,22 @@ export const useBingo = defineStore("bingosync-state", () => {
       },
     }),
     setBoard: async (board: BoardDef) => await net.value.event("setBoard", { board }),
+    setTimerValue: async (time: number) => await net.value.event("setTimer", {
+      timer: { kind: "paused", time },
+    }),
+    toggleTimer: async () => {
+      const st = timer();
+      if (!st)
+        return;
+      if (st.kind === "paused") {
+        const target = Date.now() + st.time;
+        await net.value.event("setTimer", { timer: { kind: "active", target } });
+      } else {
+        const time = Math.max(st.target - Date.now(), 0);
+        await net.value.event("setTimer", { timer: { kind: "paused", time } });
+      }
+    },
+    timer,
     leaveGame: async () => await net.value.event("leaveGame"),
     board,
     teams,
