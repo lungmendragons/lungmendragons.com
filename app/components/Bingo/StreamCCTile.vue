@@ -23,6 +23,11 @@ const claimed = computed(() => {
   return bingo.teams()![team];
 });
 
+const text = computed(() => {
+  const out = tile.value?.def.text ?? "";
+  return out.replace("(stealable)", "").trim();
+});
+
 function dynFontSize(len: number): string {
   if (len < 50)
     return "18px";
@@ -58,7 +63,7 @@ function dynFontSize(len: number): string {
         // padding: (tile?.def.text.length ?? 0) > 80 ? '8px' : '8px',
       }"
     >
-      {{ tile?.def.text ?? "" }}
+      {{ text }}
     </div>
   </NFlex>
 </template>

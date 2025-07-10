@@ -5,6 +5,8 @@ const { tileId: id } = defineProps<{
   tileId: TileId;
 }>();
 
+// const regex = /^Clear .*?(F\d.*?);/i;
+
 const bingo = useBingo();
 const tile = computed(() => {
   const res = bingo.board()?.getTile(id);
@@ -14,6 +16,12 @@ const tile = computed(() => {
     def: res[0],
     active: res[1],
   };
+});
+
+const text = computed(() => {
+  const out = tile.value?.def.text ?? "";
+  // return out.replace(regex, (s, c1) => `[${c1}]`);
+  return out;
 });
 
 const claimed = computed(() => {
@@ -26,10 +34,12 @@ const claimed = computed(() => {
 function dynFontSize(len: number): string {
   if (len < 50)
     return "18px";
-  if (len < 80)
+  if (len < 70)
     return "16px";
-  else
+  else if (len < 90)
     return "15px";
+  else
+    return "14px";
 }
 </script>
 
@@ -57,7 +67,7 @@ function dynFontSize(len: number): string {
         // padding: (tile?.def.text.length ?? 0) > 80 ? '8px' : '8px',
       }"
     >
-      {{ tile?.def.text ?? "" }}
+      {{ text }}
     </div>
   </NFlex>
 </template>

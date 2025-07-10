@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { NFlex } from "naive-ui";
-import type { InputInst, DropdownOption, SelectOption } from "naive-ui";
-import type { VNodeChild } from "vue";
-import { rng4x4, rng5x5 } from "bingo-logic/gen";
+import { NFlex, NInput, NModal } from "naive-ui";
+import type { InputInst /* , DropdownOption */ } from "naive-ui";
+// import type { VNodeChild } from "vue";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
 import { useNow } from "@vueuse/core";
+import { top3216 } from "~~/packages/bingo-logic/src/gen";
 
 const bingo = useBingo();
 const roomIdField = ref("");
@@ -16,63 +16,38 @@ const model = ref([
   "#D03050",
 ]);
 
+const url = useRequestURL();
+let autojoin = false;
+const joinParam = url.searchParams.get("room");
+if (joinParam) {
+  roomIdField.value = joinParam;
+  history.replaceState({}, "", `${url.origin}${url.pathname}`);
+  autojoin = true;
+}
+
 const teams = computed(bingo.teams);
 const roomId = computed(() => bingo.inRoom()?.roomId);
-const timerState = computed(bingo.timer);
-const now = useNow({ interval: 1000 });
-const timer = computed(() => {
-  const st = timerState.value;
-  if (st === undefined)
-    return undefined;
-  if (st.kind === "active") {
-    return Math.max(st.target - now.value.getTime(), 0);
-  } else {
-    return st.time;
-  }
-});
+const roomIdUrl = computed(() => roomId.value ? `${url.origin}/bingo-lockout?room=${roomId.value}` : undefined);
 const message = useMessage();
 const roomIdInputRef = ref<InputInst>();
 
 async function copyRoomId() {
   roomIdInputRef.value?.blur();
-  if (roomId.value) {
-    await navigator.clipboard.writeText(roomId.value);
+  if (roomIdUrl.value) {
+    await navigator.clipboard.writeText(roomIdUrl.value);
     message.success("Copied");
   }
 }
 
 const boardGenData = ref<string>();
 
-const boardGenFns = {
-  top64: () => rng4x4(JSON.parse(boardGenData.value!)),
-  top32: () => rng5x5(JSON.parse(boardGenData.value!)),
-  top16: () => rng5x5(JSON.parse(boardGenData.value!)),
-  rest: () => JSON.parse(boardGenData.value!),
-};
-
-const boardGenValue = ref<string>();
-
-const boardGenOptions: SelectOption[] = [
-  {
-    label: "Top 64",
-    value: "top64",
-  },
-  {
-    label: "Top 32",
-    value: "top32",
-  },
-  {
-    label: "Top 16",
-    value: "top16",
-  },
-  {
-    label: "Rest",
-    value: "rest",
-  },
-];
-
 async function createBoard() {
-  await bingo.setBoard(boardGenFns[boardGenValue.value as keyof typeof boardGenFns]());
+  try {
+    const board = JSON.parse(boardGenData.value ?? "");
+    await bingo.setBoard(top3216(board));
+  } catch (e) {
+    console.error(e);
+  }
 }
 
 const localTeamColorMap = computed(() => {
@@ -88,13 +63,25 @@ const localTeamColorMap = computed(() => {
   );
 });
 
-function renderDropdownLabel(option: DropdownOption): VNodeChild {
-  return h(NFlex, { align: "center" }, [
-    h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
-    h("div", { style: { fontSize: "12px" } }, (option.label as string).slice(-1)),
-  ]);
-}
+// function renderDropdownLabel(option: DropdownOption): VNodeChild {
+//   return h(NFlex, { align: "center" }, [
+//     h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
+//     h("div", { style: { fontSize: "12px" } }, (option.label as string).slice(-1)),
+//   ]);
+// }
 
+const timerState = computed(bingo.timer);
+const now = useNow({ interval: 1000 });
+const timer = computed(() => {
+  const st = timerState.value;
+  if (st === undefined)
+    return undefined;
+  if (st.kind === "active") {
+    return Math.max(st.target - now.value.getTime(), 0);
+  } else {
+    return st.time;
+  }
+});
 const timerInput = ref(0);
 const timerStarted = computed(() => {
   const st = timerState.value;
@@ -116,24 +103,99 @@ const timerDisplay = computed(() => {
   const minutes = Math.floor(timeLeft / 60000).toString().padStart(2, "0");
   return `${minutes}:${seconds}`;
 });
+
+const showCreateRoom = ref(false);
+const showJoinRoom = ref(false);
+
+async function createRoom() {
+  showCreateRoom.value = false;
+  await bingo.createRoom(nameField.value);
+}
+
+async function joinRoom() {
+  showJoinRoom.value = false;
+  await bingo.joinRoom(nameField.value, takeRef(roomIdField, ""));
+}
+
+onMounted(() => {
+  if (autojoin) {
+    showJoinRoom.value = true;
+  }
+});
 </script>
 
 <template>
   <NFlex vertical>
+    <NModal v-model:show="showCreateRoom">
+      <NCard
+        style="width: 400px"
+        :bordered="false"
+        role="dialog"
+        size="medium"
+        title="Create Room"
+        aria-modal="true">
+        <NFlex>
+          <NInput
+            v-model:value="nameField"
+            autofocus
+            type="text"
+            placeholder="Enter display name"
+          />
+          <NButton
+            type="primary"
+            :disabled="nameField.trim() === ''"
+            @click="createRoom()"
+          >
+            Create
+          </NButton>
+          <NButton type="error" @click="showCreateRoom = false">
+            Cancel
+          </NButton>
+        </NFlex>
+      </NCard>
+    </NModal>
+    <NModal v-model:show="showJoinRoom">
+      <NCard
+        style="width: 400px"
+        :bordered="false"
+        role="dialog"
+        size="medium"
+        title="Join Room"
+        aria-modal="true">
+        <NFlex>
+          <NInput
+            v-model:value="nameField"
+            autofocus
+            type="text"
+            placeholder="Enter display name"
+          />
+          <NButton
+            type="primary"
+            :disabled="nameField.trim() === ''"
+            @click="joinRoom()"
+          >
+            Join
+          </NButton>
+          <NButton type="error" @click="showJoinRoom = false">
+            Cancel
+          </NButton>
+        </NFlex>
+      </NCard>
+    </NModal>
     <NFlex>
       <NFlex vertical class="w-[250px]">
         <template v-if="bingo.net.state.type === 'noLobby'">
-          <NInput
+          <!-- <NInput
             v-model:value="nameField"
             type="text"
             placeholder="Enter display name"
           />
-          <NDivider style="margin: 4px 0 !important" />
+          <NDivider style="margin: 4px 0 !important" /> -->
           <NButton @click="bingo.offlineRoom()">
             Create offline room
           </NButton>
           <!-- Online -->
-          <NButton @click="bingo.createRoom(nameField)">
+          <NButton @click="showCreateRoom = true">
             Create online room
           </NButton>
           <NDivider />
@@ -239,7 +301,8 @@ const timerDisplay = computed(() => {
           <NFormItem
             v-if="roomId !== undefined"
             label="Room ID"
-            label-placement="left">
+            label-placement="left"
+          >
             <NInput
               ref="roomIdInputRef"
               :theme-overrides="{ caretColor: 'transparent' }"
@@ -247,7 +310,7 @@ const timerDisplay = computed(() => {
                 style: { cursor: 'pointer' },
               }"
               class="w-full"
-              :value="roomId"
+              :value="roomIdUrl"
               type="text"
               :autosize="true"
               readonly
@@ -329,7 +392,6 @@ const timerDisplay = computed(() => {
       />
       <template v-else-if="bingo.gameState === 'boardUnset'">
         <template v-if="bingo.netState === 'offline' || bingo.inRoom()?.isSync">
-          <NSelect v-model:value="boardGenValue" :options="boardGenOptions" />
           <NInput
             v-model:value="boardGenData"
             type="textarea"
