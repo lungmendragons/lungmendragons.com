@@ -140,12 +140,13 @@ onMounted(() => {
             autofocus
             type="text"
             placeholder="Enter display name"
+            @keyup.enter="createRoom()"
           />
           <NButton
             type="primary"
             :disabled="nameField.trim() === ''"
             @click="createRoom()"
-          >
+            attr-type="submit">
             Create
           </NButton>
           <NButton type="error" @click="showCreateRoom = false">
@@ -172,8 +173,7 @@ onMounted(() => {
           <NButton
             type="primary"
             :disabled="nameField.trim() === ''"
-            @click="joinRoom()"
-          >
+            @click="joinRoom()">
             Join
           </NButton>
           <NButton type="error" @click="showJoinRoom = false">
