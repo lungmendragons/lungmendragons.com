@@ -20,6 +20,17 @@ export interface TileDef {
   exclusive: boolean;
 }
 
+export interface Score {
+  main: number;
+  extra: number;
+}
+
+export interface LineCount {
+  h: number;
+  v: number;
+  d: number;
+}
+
 export class GameSession {
   /** The definition for the board in the bingo game. */
   boardDef: BoardDef;
@@ -46,6 +57,10 @@ export class GameSession {
     return idx;
   }
 
+  mainTileRowCol(row: number, col: number): TileId {
+    return row * this.boardDef.width + col;
+  }
+
   extraTile(idx: number): TileId {
     return this.boardDef.width * this.boardDef.height + idx;
   }
@@ -54,16 +69,74 @@ export class GameSession {
     return [ this.boardDef.tiles[id]!, this.activeBoard.tiles[id]! ];
   }
 
-  getScores(): Record<TeamId, number> {
-    const out: Record<TeamId, number> = {};
-    for (let tile = 0; tile < this.boardDef.tiles.length; tile += 1) {
-      const active = this.activeBoard.tiles[tile]!;
-      const def = this.boardDef.tiles[tile]!;
+  getScores(): Record<TeamId, Score> {
+    const out: Record<TeamId, Score> = {};
+    const getScore = (team: TeamId) => out[team] ??= { main: 0, extra: 0 };
+
+    for (let tile = 0; tile < this.boardDef.width * this.boardDef.height; tile += 1) {
+      const [ def, active ] = this.getTile(this.mainTile(tile));
 
       for (const team of active.claimed) {
-        out[team] = (out[team] ?? 0) + def.points;
+        const score = getScore(team);
+        score.main += def.points;
       }
     }
+
+    for (let tile = 0; tile < this.boardDef.extra; tile += 1) {
+      const [ def, active ] = this.getTile(this.extraTile(tile));
+
+      for (const team of active.claimed) {
+        const score = getScore(team);
+        score.extra += def.points;
+      }
+    }
+
+    return out;
+  }
+
+  // possibly some of the worst code i have written in my life.
+  getLineCount(): Record<TeamId, LineCount> {
+    const out: Record<TeamId, LineCount> = {};
+    const getScore = (team: TeamId) => out[team] ??= { h: 0, v: 0, d: 0 };
+
+    // horizontal
+    for (let row = 0; row < this.boardDef.height; row += 1) {
+      const s: Record<TeamId, number> = {};
+      for (let col = 0; col < this.boardDef.width; col += 1) {
+        const [ _def, active ] = this.getTile(this.mainTileRowCol(row, col));
+        for (const team of active.claimed) {
+          s[team] ??= 0;
+          s[team] += 1;
+        }
+      }
+
+      for (const [ team, claimed ] of Object.entries(s)) {
+        if (claimed === this.boardDef.width)
+          getScore(+team).h += 1;
+      }
+    }
+
+    // vertical
+    for (let col = 0; col < this.boardDef.width; col += 1) {
+      const s: Record<TeamId, number> = {};
+      for (let row = 0; row < this.boardDef.height; row += 1) {
+        const [ _def, active ] = this.getTile(this.mainTileRowCol(row, col));
+        for (const team of active.claimed) {
+          s[team] ??= 0;
+          s[team] += 1;
+        }
+      }
+
+      for (const [ team, claimed ] of Object.entries(s)) {
+        if (claimed === this.boardDef.height)
+          getScore(+team).v += 1;
+      }
+    }
+
+    if (this.boardDef.height === this.boardDef.width) {
+      // do diagonals
+    }
+
     return out;
   }
 

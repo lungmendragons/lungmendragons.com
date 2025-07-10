@@ -6,15 +6,14 @@ import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
 import { useNow } from "@vueuse/core";
-import { top3216 } from "~~/packages/bingo-logic/src/gen";
 
 const bingo = useBingo();
 const roomIdField = ref("");
 const nameField = ref("");
-const model = ref([
-  "#2080F0",
-  "#D03050",
-]);
+// const model = ref([
+//   "#2080F0",
+//   "#D03050",
+// ]);
 
 const url = useRequestURL();
 let autojoin = false;
@@ -25,7 +24,7 @@ if (joinParam) {
   autojoin = true;
 }
 
-const teams = computed(bingo.teams);
+// const teams = computed(bingo.teams);
 const roomId = computed(() => bingo.inRoom()?.roomId);
 const roomIdUrl = computed(() => roomId.value ? `${url.origin}/bingo-lockout?room=${roomId.value}` : undefined);
 const message = useMessage();
@@ -42,12 +41,12 @@ async function copyRoomId() {
 const boardGenData = ref<string>();
 
 async function createBoard() {
-  try {
-    const board = JSON.parse(boardGenData.value ?? "");
-    await bingo.setBoard(top3216(board));
-  } catch (e) {
-    console.error(e);
-  }
+  // try {
+  const board = JSON.parse(boardGenData.value ?? "");
+  await bingo.setBoard(board);
+  // } catch (e) {
+  //   console.error(e);
+  // }
 }
 
 const localTeamColorMap = computed(() => {
@@ -70,8 +69,34 @@ const localTeamColorMap = computed(() => {
 //   ]);
 // }
 
+// Record<TeamId, score>
+const scores = computed(() => {
+  const board = bingo.board();
+  if (!board)
+    return undefined;
+
+  const raw = board.getScores();
+  const lines = board.getLineCount();
+
+  const out: Record<string, number> = {};
+
+  for (const [ team, score ] of Object.entries(raw)) {
+    out[team] ??= 0;
+    out[team] += score.main;
+    out[team] += score.extra === 3 ? 4 : score.extra;
+  }
+
+  for (const [ team, score ] of Object.entries(lines)) {
+    out[team] ??= 0;
+    out[team] += score.h + score.v + score.d;
+  }
+
+  // record keys are fake
+  return out as Record<number, number>;
+});
+
 const timerState = computed(bingo.timer);
-const now = useNow({ interval: 1000 });
+const now = useNow({ interval: 100 });
 const timer = computed(() => {
   const st = timerState.value;
   if (st === undefined)
@@ -145,8 +170,8 @@ onMounted(() => {
           <NButton
             type="primary"
             :disabled="nameField.trim() === ''"
-            @click="createRoom()"
-            attr-type="submit">
+            attr-type="submit"
+            @click="createRoom()">
             Create
           </NButton>
           <NButton type="error" @click="showCreateRoom = false">
@@ -169,10 +194,12 @@ onMounted(() => {
             autofocus
             type="text"
             placeholder="Enter display name"
+            @keyup.enter="joinRoom()"
           />
           <NButton
             type="primary"
             :disabled="nameField.trim() === ''"
+            attr-type="submit"
             @click="joinRoom()">
             Join
           </NButton>
@@ -302,6 +329,7 @@ onMounted(() => {
             v-if="roomId !== undefined"
             label="Room ID"
             label-placement="left"
+            :show-feedback="false"
           >
             <NInput
               ref="roomIdInputRef"
@@ -358,7 +386,7 @@ onMounted(() => {
         <NButton v-if="bingo.gameState !== undefined" @click="bingo.leaveGame()">
           Leave game
         </NButton>
-        <NDivider v-if="bingo.inRoom()?.isSync" />
+        <!-- <NDivider v-if="bingo.inRoom()?.isSync" />
         <NForm v-if="teams" :model="model">
           <NFormItem
             v-for="(team, i) in teams"
@@ -384,7 +412,7 @@ onMounted(() => {
               Confirm
             </NButton>
           </NFormItem>
-        </NForm>
+        </NForm> -->
       </NFlex>
       <BingoGrid
         v-if="bingo.gameState === 'gameActive'"
