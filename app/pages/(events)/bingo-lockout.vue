@@ -5,7 +5,7 @@ import type { InputInst /* , DropdownOption */ } from "naive-ui";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
-import { useNow } from "@vueuse/core";
+import { useNow, useTimeout } from "@vueuse/core";
 import type { BoardDef } from "bingo-logic";
 import * as z from "zod";
 
@@ -100,6 +100,15 @@ const teamScoreList = computed(() => {
   });
 });
 
+function isLeadingTeam(teamId: number, score: number) {
+  const list = teamScoreList.value.toSorted((a,b) => b.score - a.score);
+  if (
+    list[0]?.teamId === teamId ||
+    (list[1]?.score === 0 && score === list[0]?.score)
+  ) { return true; }
+  return false;
+}
+
 // function renderDropdownLabel(option: DropdownOption): VNodeChild {
 //   return h(NFlex, { align: "center" }, [
 //     h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
@@ -120,6 +129,12 @@ const timer = computed(() => {
   }
 });
 const timerInput = ref(0);
+const timerInputLocked = ref(0);
+const timerSet = ref(false);
+function timerDisplayOverride() {
+  const mins = timerInputLocked.value.toString().padStart(2, "0");
+  return `${mins}:00`;
+}
 const timerStarted = computed(() => {
   const st = timerState.value;
   if (!st)
@@ -128,11 +143,23 @@ const timerStarted = computed(() => {
     return st.time !== 0;
   return true;
 });
+const { ready: delayUsed, start: delayStart } = useTimeout(1000, { controls: true });
+function handleSet() {
+  timerInputLocked.value = timerInput.value;
+  timerSet.value = true;
+}
 async function handleStart() {
-  await bingo.setTimerValue(timerInput.value * 60000);
+  delayStart(); // prevents brief flash of pause symbol when first starting the timer
+  await bingo.setTimerValue(timerInputLocked.value * 60000);
+  await bingo.toggleTimer();
 }
 async function handleReset() {
+  timerSet.value = false;
+  timerInputLocked.value = 0;
   await bingo.setTimerValue(0);
+}
+function timerEnded() {
+  return timerStarted.value && timer.value === 0;
 }
 const timerDisplay = computed(() => {
   const timeLeft = timer.value ?? 0;
@@ -258,7 +285,7 @@ onMounted(() => {
               align="center"
               class="mx-auto my-4">
               <NFormItem
-                v-if="!timerStarted"
+                v-if="!timerStarted && !timerSet"
                 label="Minutes"
                 label-placement="left"
                 :show-feedback="false"
@@ -275,12 +302,23 @@ onMounted(() => {
                 />
               </NFormItem>
               <NButton
-                v-if="!timerStarted"
+                v-if="!timerStarted && !timerSet"
                 :disabled="timerInput === 0"
                 size="small"
                 secondary
-                @click="handleStart">
+                @click="handleSet">
                 Set
+              </NButton>
+              <NButton
+                v-if="!timerStarted && timerSet"
+                type="success"
+                size="small"
+                secondary
+                @click="handleStart">
+                <template #icon>
+                  <NIcon><MdiPlay /></NIcon>
+                </template>
+                Start
               </NButton>
               <NButton
                 v-if="timerStarted && timerState?.kind === 'paused'"
@@ -294,7 +332,7 @@ onMounted(() => {
                 Resume
               </NButton>
               <NButton
-                v-if="timerState?.kind === 'active'"
+                v-if="timerState?.kind === 'active' && !timerEnded()"
                 type="warning"
                 size="small"
                 secondary
@@ -305,7 +343,7 @@ onMounted(() => {
                 Pause
               </NButton>
               <NButton
-                v-if="timerState?.kind !== 'paused'"
+                v-if="timerEnded() || timerState?.kind === 'paused' && timerStarted"
                 type="error"
                 size="small"
                 secondary
@@ -318,47 +356,60 @@ onMounted(() => {
             </NFlex>
             <NSpin
               size="large"
-              :show="timerStarted && timerState?.kind === 'paused'"
+              :show="delayUsed && timerStarted && timerState?.kind === 'paused'"
               :rotate="false">
               <template #icon>
                 <NIcon><MdiPause /></NIcon>
               </template>
-              <div class="bingo-timer">
-                <div :style="{
-                  display: 'inline-block',
-                  padding: '4px 16px',
-                  transition: 'all 0.3s ease-in-out',
-                  color: 'white',
-                  backgroundImage: 'linear-gradient(45deg, #1b43df, #eb141d)',
-                  opacity: timerState?.kind === 'active' ? '100%' : '60%',
-                }">
-                  {{ timerDisplay }}
+              <div class="bingo-timer-container">
+                <div class="bingo-timer" :style="{ opacity: !timerEnded() ? '100%' : '60%' }">
+                  <template v-if="timerStarted">
+                    {{ timerDisplay }}
+                  </template>
+                  <template v-else-if="timerSet">
+                    {{ timerDisplayOverride() }}
+                  </template>
+                  <template v-else>
+                    00:00
+                  </template>
                 </div>
               </div>
             </NSpin>
             <!-- Score -->
-            <NFlex style="width: 80%; margin: 0 auto;" justify="center">
+            <NFlex style="width: 80%; margin: 0.25rem auto 0;" justify="center">
               <NDivider style="margin: 0">
                 Score
               </NDivider>
-              <NFlex style="width: fit-content" vertical>
+              <NFlex style="width: fit-content">
                 <template
                   v-for="({ teamId, team, score }) in teamScoreList"
-                  :key="`name-${teamId}`"
-                >
-                  <div>
-                    <!-- what -->
-                    <div
-                      class="flex w-full items-center border outline-solid rounded-sm px-[7px] h-8"
-                      :style="{
-                        borderColor: team.color,
-                        color: team.color,
-                      }">
-                      <span class="flex-1">{{ team.name }}</span>
-                      <NDivider class="flex-none" vertical />
-                      <span class="flex-none w-6 text-center">{{ score }}</span>
-                    </div>
-                  </div>
+                  :key="`name-${teamId}`">
+                  <NFlex
+                    vertical
+                    justify="center"
+                    size="small"
+                    class="text-center">
+                    <template v-if="isLeadingTeam(teamId, score)">
+                      <div class="bingo-score-team" :style="{ color: team.color }">
+                        {{ team.name }}
+                      </div>
+                      <div class="bingo-score" :style="{ backgroundColor: team.color, color: 'white' }">
+                        {{ score }}
+                      </div>
+                    </template>
+                    <template v-else>
+                      <div
+                        class="bingo-score-team"
+                        :style="{ color: timerEnded() ? '#6668' : `${team.color}66` }">
+                        {{ team.name }}
+                      </div>
+                      <div
+                        class="bingo-score"
+                        :style="{ backgroundColor: timerEnded() ? '#6668' : `${team.color}66`, color: '#666' }">
+                        {{ score }}
+                      </div>
+                    </template>
+                  </NFlex>
                 </template>
               </NFlex>
             </NFlex>
@@ -477,12 +528,37 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.bingo-timer {
+.bingo-timer-container {
   font-variant-numeric: tabular-nums;
   margin: 0 auto;
+  /* margin-bottom: 1rem; */
   width: fit-content;
   font-size: 48px;
   font-weight: 700;
+}
+
+.bingo-timer {
+  display: inline-block;
+  padding: 4px 16px;
+  transition: all 0.3s ease-in-out;
+  color: white;
+  text-shadow: 0px 1px 4px #0008;
+  background-image: linear-gradient(45deg, #1b43df, #eb141d);
+}
+
+.bingo-score-team {
+  transition: all 0.3s ease-in-out;
+  font-weight: 700;
+  text-align: center;
+}
+
+.bingo-score {
+  width: 4rem;
+  transition: all 0.3s ease-in-out;
+  font-size: 36px;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0px 1px 4px #0008;
 }
 
 :deep(.n-spin) {

@@ -2,7 +2,7 @@
   "name": "lungmendragons",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@10.9.0",
+  "packageManager": "pnpm@10.13.1",
   "scripts": {
     "postinstall": "pnpm run prep",
     "prep": "wrangler types && nuxt prepare && pnpm run -r prep",

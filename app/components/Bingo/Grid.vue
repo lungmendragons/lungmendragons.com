@@ -100,39 +100,55 @@ async function claim(team: TeamId, tile: TileId) {
     <h2 class="board-heading heading-standard">
       Board
     </h2>
-    <div class="board-standard">
-      <template v-for="(_, i) in board.boardDef.width * board.boardDef.height" :key="i">
-        <BingoTile
-          v-if="localUserTeams?.length === 0"
-          :key="`tile-${board.mainTile(i)}-0`"
-          :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
-          :tile-id="board.mainTile(i)"
-        />
-        <BingoTile
-          v-else-if="localUserTeams?.length === 1"
-          :key="`tile-${board.mainTile(i)}-1`"
-          :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
-          :tile-id="board.mainTile(i)"
-          @click="claim(localUserTeams[0]!, board.mainTile(i))"
-        />
-        <NDropdown
-          v-else
-          :key="`tile-${board.mainTile(i)}-many`"
-          size="small"
-          trigger="hover"
-          placement="bottom-end"
-          :animated="false"
-          :overlap="true"
-          :options="filterTeamOptions(i)"
-          :render-label="renderDropdownLabel"
-          style="margin:4px"
-          @select="claim($event, board.mainTile(i))">
+    <div class="board-standard-container">
+      <div class="board-cols">
+        <span class="grid-col">A</span>
+        <span class="grid-col">B</span>
+        <span class="grid-col">C</span>
+        <span class="grid-col">D</span>
+        <span class="grid-col">E</span>
+      </div>
+      <div class="board-rows">
+        <span class="grid-row">1</span>
+        <span class="grid-row">2</span>
+        <span class="grid-row">3</span>
+        <span class="grid-row">4</span>
+        <span class="grid-row">5</span>
+      </div>
+      <div class="board-standard">
+        <template v-for="(_, i) in board.boardDef.width * board.boardDef.height" :key="i">
           <BingoTile
+            v-if="localUserTeams?.length === 0"
+            :key="`tile-${board.mainTile(i)}-0`"
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
             :tile-id="board.mainTile(i)"
           />
-        </NDropdown>
-      </template>
+          <BingoTile
+            v-else-if="localUserTeams?.length === 1"
+            :key="`tile-${board.mainTile(i)}-1`"
+            :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+            :tile-id="board.mainTile(i)"
+            @click="claim(localUserTeams[0]!, board.mainTile(i))"
+          />
+          <NDropdown
+            v-else
+            :key="`tile-${board.mainTile(i)}-many`"
+            size="small"
+            trigger="hover"
+            placement="bottom-end"
+            :animated="false"
+            :overlap="true"
+            :options="filterTeamOptions(i)"
+            :render-label="renderDropdownLabel"
+            style="margin:4px"
+            @select="claim($event, board.mainTile(i))">
+            <BingoTile
+              :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+              :tile-id="board.mainTile(i)"
+            />
+          </NDropdown>
+        </template>
+      </div>
     </div>
   </NFlex>
 </template>
@@ -140,7 +156,7 @@ async function claim(team: TeamId, tile: TileId) {
 <style scoped>
 .board-container {
   width: 750px;
-  margin: 0 1rem;
+  margin: 0 1rem 2rem;
 }
 
 @media (max-width: 768px) {
@@ -155,12 +171,54 @@ async function claim(team: TeamId, tile: TileId) {
   gap: 5px;
 }
 
-.board-standard {
+.board-standard-container {
   height: 750px;
+  display: grid;
+  gap: 4px;
+  grid-template-areas:
+    ". cols"
+    "rows tiles";
+}
+
+.board-cols {
+  grid-area: cols;
+  display: grid;
+  grid-template-rows: 1;
+  grid-template-columns: repeat(5, .2fr);
+  gap: 4px;
+}
+
+.board-rows {
+  grid-area: rows;
+  display: grid;
+  grid-template-rows: repeat(5, .2fr);
+  grid-template-columns: 1;
+  gap: 4px;
+}
+
+.grid-row, .grid-col {
+  height: 100%;
+  background-color: #fff1;
+  font-weight: 700;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid-row {
+  width: 25px;
+}
+
+.grid-col {
+  height: 25px;
+}
+
+.board-standard {
+  grid-area: tiles;
   display: grid;
   grid-template-rows: repeat(5, 1fr);
   grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
+  gap: 4px;
 }
 
 @media (max-width: 768px) {
