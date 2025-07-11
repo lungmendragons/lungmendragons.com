@@ -5,10 +5,6 @@ import type { VNodeChild } from "vue";
 import IonClose from "~icons/ion/close";
 import type { TeamId, TileId } from "bingo-logic";
 
-const { teamColorMap } = defineProps<{
-  teamColorMap: DropdownOption[];
-}>();
-
 const bingo = useBingo();
 const board = computed(bingo.board);
 const localUserTeams = computed(() => bingo.localUserTeams());
@@ -17,18 +13,40 @@ function gridArea(i: number, w: number, h: number) {
   return `${Math.floor(i / w) + 1} / ${(i % h) + 1} / ${Math.floor(i / w) + 2} / ${(i % h) + 2}`;
 }
 
-function filterTeamOptions(tile: TileId): DropdownOption[] {
+const teamDropdownOptions = computed(() => {
+  const teams = bingo.teams();
+  if (!teams)
+    return [];
+  console.log(bingo.localUserTeams());
+  const out = bingo.localUserTeams()?.map((teamId, key) => {
+    const team = teams[teamId]!;
+    return {
+      label: team.name,
+      hex: team.color,
+      teamId,
+      key,
+    } satisfies DropdownOption;
+  }) ?? [];
+  console.log(out);
+  return out;
+});
+
+function teamOptions(tile: TileId): DropdownOption[] {
   const active = board.value?.activeBoard.tiles[tile];
   const def = board.value?.boardDef.tiles[tile];
+
   if (!active || !def)
     return [];
-  return teamColorMap.filter((team) => {
-    if (active.claimed.length === 0)
-      return team.key !== 255;
-    if (def.stealable)
-      return !active.claimed.includes(team.key as number);
-    return team.key === 255;
-  });
+  if (active.claimed.length === 0) {
+    return teamDropdownOptions.value;
+  }
+  if (def.stealable) {
+    return [
+      ...teamDropdownOptions.value.filter(v => !active.claimed.includes(v.teamId)),
+      { label: "_", hex: "#FFF", key: 255 },
+    ];
+  }
+  return [ { label: "_", hex: "#FFF", key: 255 } ];
 }
 
 function renderDropdownLabel(option: DropdownOption): VNodeChild {
@@ -85,7 +103,7 @@ async function claim(team: TeamId, tile: TileId) {
           placement="bottom-end"
           :animated="false"
           :overlap="true"
-          :options="filterTeamOptions((board.boardDef.width * board.boardDef.height) + i)"
+          :options="teamOptions(board.extraTile(i))"
           :render-label="renderDropdownLabel"
           style="margin:4px"
           @select="claim($event, board.extraTile(i))">
@@ -138,7 +156,7 @@ async function claim(team: TeamId, tile: TileId) {
             placement="bottom-end"
             :animated="false"
             :overlap="true"
-            :options="filterTeamOptions(i)"
+            :options="teamOptions(board.mainTile(i))"
             :render-label="renderDropdownLabel"
             style="margin:4px"
             @select="claim($event, board.mainTile(i))">

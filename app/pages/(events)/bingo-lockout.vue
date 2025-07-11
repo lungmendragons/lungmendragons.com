@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NFlex, NInput, NModal } from "naive-ui";
+import { NFlex, NInput, NModal, NPopconfirm } from "naive-ui";
 import type { InputInst /* , DropdownOption */ } from "naive-ui";
 // import type { VNodeChild } from "vue";
 import MdiPlay from "~icons/mdi/play";
@@ -31,6 +31,8 @@ const roomId = computed(() => bingo.inRoom()?.roomId);
 const roomIdUrl = computed(() => roomId.value ? `${url.origin}/bingo-lockout?room=${roomId.value}` : undefined);
 const message = useMessage();
 const roomIdInputRef = ref<InputInst>();
+
+const roomOwner = computed(() => bingo.inRoom()?.isSync ?? true);
 
 async function copyRoomId() {
   roomIdInputRef.value?.blur();
@@ -68,19 +70,6 @@ async function createBoard() {
   }
 }
 
-const localTeamColorMap = computed(() => {
-  const lut = bingo.teams()?.map(x => Number(x.name.slice(-1)));
-  const local = lut ? [ ...lut, 255 ] : [ 255 ];
-  return local.map(
-    (teamId, key) => {
-      if (teamId === 255)
-        return { label: "_", hex: "#FFF", key: 255 };
-      const { name, color } = (bingo.teams() ?? [])[key]!;
-      return { label: name, hex: color, key };
-    },
-  );
-});
-
 const teamScoreList = computed(() => {
   const game = bingo.gameSession();
   if (!game)
@@ -95,18 +84,17 @@ const teamScoreList = computed(() => {
     return {
       teamId,
       team,
-      score: rawScore.main + (rawScore.extra === 3 ? 4 : rawScore.extra) + (lineScore.h + lineScore.v + lineScore.d),
+      score: rawScore.main
+        + (rawScore.extra === 3 ? 4 : rawScore.extra)
+        + 2 * (lineScore.h + lineScore.v + lineScore.d),
     };
   });
 });
 
-function isLeadingTeam(teamId: number, score: number) {
-  const list = teamScoreList.value.toSorted((a,b) => b.score - a.score);
-  if (
-    list[0]?.teamId === teamId ||
-    (list[1]?.score === 0 && score === list[0]?.score)
-  ) { return true; }
-  return false;
+function isLeadingTeam(score: number) {
+  const list = teamScoreList.value.toSorted((a, b) => b.score - a.score);
+  const min = list[0];
+  return score === min?.score;
 }
 
 // function renderDropdownLabel(option: DropdownOption): VNodeChild {
@@ -281,9 +269,9 @@ onMounted(() => {
           <template v-if="bingo.gameState === 'gameActive'">
             <!-- Timer -->
             <NFlex
-              v-if="bingo.inRoom()?.isSync"
+              v-if="roomOwner"
               align="center"
-              class="mx-auto my-4">
+              class="mx-auto my-4 h-6">
               <NFormItem
                 v-if="!timerStarted && !timerSet"
                 label="Minutes"
@@ -389,7 +377,7 @@ onMounted(() => {
                     justify="center"
                     size="small"
                     class="text-center">
-                    <template v-if="isLeadingTeam(teamId, score)">
+                    <template v-if="isLeadingTeam(score)">
                       <div class="bingo-score-team" :style="{ color: team.color }">
                         {{ team.name }}
                       </div>
@@ -414,7 +402,7 @@ onMounted(() => {
               </NFlex>
             </NFlex>
           </template>
-          <NDivider />
+          <NDivider v-if="roomId !== undefined" />
           <NFormItem
             v-if="roomId !== undefined"
             label="Room ID"
@@ -435,7 +423,7 @@ onMounted(() => {
               @click="copyRoomId"
             />
           </NFormItem>
-          <NFlex v-if="bingo.inRoom()?.isSync" vertical>
+          <NFlex v-if="roomOwner" vertical>
             Users:
             <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
               <NFlex>
@@ -473,9 +461,22 @@ onMounted(() => {
           </NFlex>
         </template>
         <NDivider />
-        <NButton v-if="bingo.gameState !== undefined" @click="bingo.leaveGame()">
-          Leave game
-        </NButton>
+        <template v-if="bingo.gameState !== undefined">
+          <NButton @click="bingo.leaveGame()">
+            Leave game
+          </NButton>
+          <!-- <NPopconfirm v-if="bingo.state === 'inRoom'" @positive-click="bingo.offlineRoom()">
+            <template #trigger>
+              <NButton>
+                Make into offline room
+              </NButton>
+            </template>
+            Are you sure?
+          </NPopconfirm> -->
+          <NButton v-if="bingo.state === 'offline'" @click="showCreateRoom = true">
+            Make into online room
+          </NButton>
+        </template>
         <!-- <NDivider v-if="bingo.inRoom()?.isSync" />
         <NForm v-if="teams" :model="model">
           <NFormItem
@@ -504,12 +505,10 @@ onMounted(() => {
           </NFormItem>
         </NForm> -->
       </NFlex>
-      <BingoGrid
-        v-if="bingo.gameState === 'gameActive'"
-        :team-color-map="localTeamColorMap"
-      />
+      <BingoGrid v-if="bingo.gameState === 'gameActive'" />
       <template v-else-if="bingo.gameState === 'boardUnset'">
-        <template v-if="bingo.netState === 'offline' || bingo.inRoom()?.isSync">
+        <NDivider />
+        <template v-if="roomOwner">
           <NInput
             v-model:value="boardGenData"
             type="textarea"
@@ -543,6 +542,7 @@ onMounted(() => {
   transition: all 0.3s ease-in-out;
   color: white;
   text-shadow: 0px 1px 4px #0008;
+  border-radius: 4px;
   background-image: linear-gradient(45deg, #1b43df, #eb141d);
 }
 
@@ -558,6 +558,7 @@ onMounted(() => {
   font-size: 36px;
   font-weight: 700;
   text-align: center;
+  border-radius: 4px;
   text-shadow: 0px 1px 4px #0008;
 }
 

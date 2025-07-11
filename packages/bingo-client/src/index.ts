@@ -600,6 +600,9 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
             case "click_tile":
               await s.game.event("clickTile", { team: action.team, tile: action.tile });
               break;
+            case "clear_tile":
+              await s.game.event("clearTile", { tile: action.tile });
+              break;
             case "set_team_data":
               await s.game.event("setTeamData", { team: action.team, color: action.color, name: action.name });
               break;
