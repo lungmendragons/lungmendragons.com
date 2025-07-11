@@ -13,9 +13,9 @@ export const useBingo = defineStore("bingosync-state", () => {
   type S = NetworkStateMachine["Infer"]["state"];
 
   const inRoom = () => net.value.tryGet("inRoom");
-  const gameActive = () => net.value.tryGet("inRoom", "offline");
-  const board = () => gameActive()?.game.tryGet("gameActive")?.session;
-  const teams = () => gameActive()?.game.state.data.teams;
+  const gameActive = () => net.value.tryGet("inRoom", "offline")?.game;
+  const board = () => gameActive()?.tryGet("gameActive")?.session;
+  const teams = () => gameActive()?.state.data.teams;
   const localUserTeams = () => {
     const ir = inRoom();
     if (ir) {
@@ -27,7 +27,7 @@ export const useBingo = defineStore("bingosync-state", () => {
       return undefined;
     }
   };
-  const timer = () => gameActive()?.game.tryGet("gameActive")?.timer;
+  const timer = () => gameActive()?.tryGet("gameActive")?.timer;
 
   return {
     net,
@@ -85,6 +85,7 @@ export const useBingo = defineStore("bingosync-state", () => {
     teams,
     localUserTeams,
     inRoom,
+    gameSession: () => gameActive()?.tryGet("gameActive"),
     netState: computed(() => net.value.state.type),
     gameState: computed(() => net.value.tryGet("inRoom", "offline")?.game.state.type),
   };

@@ -6,6 +6,8 @@ import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
 import { useNow } from "@vueuse/core";
+import type { BoardDef } from "bingo-logic";
+import * as z from "zod";
 
 const bingo = useBingo();
 const roomIdField = ref("");
@@ -40,13 +42,30 @@ async function copyRoomId() {
 
 const boardGenData = ref<string>();
 
+const boardSchema = z.object({
+  width: z.number(),
+  height: z.number(),
+  extra: z.number(),
+  tiles: z.array(z.object({
+    text: z.string(),
+    stealable: z.boolean(),
+    exclusive: z.boolean(),
+    points: z.number(),
+  })),
+}) satisfies z.Schema<BoardDef>;
+
 async function createBoard() {
   // try {
-  const board = JSON.parse(boardGenData.value ?? "");
-  await bingo.setBoard(board);
-  // } catch (e) {
-  //   console.error(e);
-  // }
+  if (boardGenData.value === undefined)
+    return;
+  try {
+    const board = boardSchema.parse(JSON.parse(boardGenData.value));
+    await bingo.setBoard(board);
+    boardGenData.value = "";
+  } catch (e) {
+    console.warn(e);
+    message.error("Invalid board data.");
+  }
 }
 
 const localTeamColorMap = computed(() => {
@@ -62,38 +81,31 @@ const localTeamColorMap = computed(() => {
   );
 });
 
+const teamScoreList = computed(() => {
+  const game = bingo.gameSession();
+  if (!game)
+    return [];
+
+  const raw = game.session.getScores();
+  const lines = game.session.getLineCount();
+
+  return game.teams.map((team, teamId) => {
+    const rawScore = raw[teamId] ?? { main: 0, extra: 0 };
+    const lineScore = lines[teamId] ?? { h: 0, v: 0, d: 0 };
+    return {
+      teamId,
+      team,
+      score: rawScore.main + (rawScore.extra === 3 ? 4 : rawScore.extra) + (lineScore.h + lineScore.v + lineScore.d),
+    };
+  });
+});
+
 // function renderDropdownLabel(option: DropdownOption): VNodeChild {
 //   return h(NFlex, { align: "center" }, [
 //     h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
 //     h("div", { style: { fontSize: "12px" } }, (option.label as string).slice(-1)),
 //   ]);
 // }
-
-// Record<TeamId, score>
-const scores = computed(() => {
-  const board = bingo.board();
-  if (!board)
-    return undefined;
-
-  const raw = board.getScores();
-  const lines = board.getLineCount();
-
-  const out: Record<string, number> = {};
-
-  for (const [ team, score ] of Object.entries(raw)) {
-    out[team] ??= 0;
-    out[team] += score.main;
-    out[team] += score.extra === 3 ? 4 : score.extra;
-  }
-
-  for (const [ team, score ] of Object.entries(lines)) {
-    out[team] ??= 0;
-    out[team] += score.h + score.v + score.d;
-  }
-
-  // record keys are fake
-  return out as Record<number, number>;
-});
 
 const timerState = computed(bingo.timer);
 const now = useNow({ interval: 100 });
@@ -240,6 +252,7 @@ onMounted(() => {
         </template>
         <template v-else>
           <template v-if="bingo.gameState === 'gameActive'">
+            <!-- Timer -->
             <NFlex
               v-if="bingo.inRoom()?.isSync"
               align="center"
@@ -323,6 +336,32 @@ onMounted(() => {
                 </div>
               </div>
             </NSpin>
+            <!-- Score -->
+            <NFlex style="width: 80%; margin: 0 auto;" justify="center">
+              <NDivider style="margin: 0">
+                Score
+              </NDivider>
+              <NFlex style="width: fit-content" vertical>
+                <template
+                  v-for="({ teamId, team, score }) in teamScoreList"
+                  :key="`name-${teamId}`"
+                >
+                  <div>
+                    <!-- what -->
+                    <div
+                      class="flex w-full items-center border outline-solid rounded-sm px-[7px] h-8"
+                      :style="{
+                        borderColor: team.color,
+                        color: team.color,
+                      }">
+                      <span class="flex-1">{{ team.name }}</span>
+                      <NDivider class="flex-none" vertical />
+                      <span class="flex-none w-6 text-center">{{ score }}</span>
+                    </div>
+                  </div>
+                </template>
+              </NFlex>
+            </NFlex>
           </template>
           <NDivider />
           <NFormItem
