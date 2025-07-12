@@ -1,4 +1,4 @@
-import { type NetworkStateMachine, networkStateMachine } from "bingo-client";
+import { type NetworkError, type NetworkStateMachine, networkStateMachine } from "bingo-client";
 import type { TeamId, TileId, BoardDef } from "bingo-logic";
 
 const wsurl = import.meta.dev ? "ws://localhost:2930" : "wss://bingosync-server.lungmendragons.com";
@@ -6,33 +6,59 @@ const wsurl = import.meta.dev ? "ws://localhost:2930" : "wss://bingosync-server.
 export const useBingo = defineStore("bingosync-state", () => {
   const net: Ref<NetworkStateMachine> = shallowRef(networkStateMachine(wsurl, "")());
 
-  net.value.hooks.afterEvent = () => {
-    triggerRef(net);
+  net.value.hooks.afterEvent = (triggered, s, e) => {
+    if (triggered)
+      triggerRef(net);
   };
 
   type S = NetworkStateMachine["Infer"]["state"];
 
+  const gameState = () => net.value.tryGet("connecting", "inRoom", "inServer", "gettingToken", "offline")?.game;
+
   const inRoom = () => net.value.tryGet("inRoom");
-  const gameActive = () => net.value.tryGet("inRoom", "offline");
-  const board = () => gameActive()?.game.tryGet("gameActive")?.session;
-  const teams = () => gameActive()?.game.state.data.teams;
+  // const gameActive = () => net.value.tryGet("inRoom", "offline");
+  const board = () => gameState()?.tryGet("gameActive")?.session;
+  const teams = () => gameState()?.state.data.teams;
   const localUserTeams = () => {
     const ir = inRoom();
     if (ir) {
       return ir.users[ir.userId]?.teams;
     } else {
-      return net.value.tryGet("offline")?.game.state.data.teams.map((_v, i) => i);
+      return gameState()?.state.data.teams.map((_v, i) => i);
     }
   };
-  const timer = () => gameActive()?.game.tryGet("gameActive")?.timer;
+  const timer = () => gameState()?.state.data.timer;
 
   return {
     net,
     tryGet: <K extends keyof S>(...types: K[]) => net.value.tryGet(...types),
     state: computed(() => net.value.state.type),
     offlineRoom: async () => await net.value.event("offlineRoom"),
-    createRoom: async (username: string) => await net.value.event("createRoom", { username }),
-    joinRoom: async (username: string, room: string) => await net.value.event("joinRoom", { username, room }),
+    createRoom: async (
+      username: string,
+      err?: (e: NetworkError) => void,
+    ) => await net.value.event(
+      "createRoom",
+      { username },
+      err
+        ? {
+            afterEvent: (p, s, e) => e.type === "error" ? err?.(e.data) : undefined,
+          }
+        : undefined,
+    ),
+    joinRoom: async (
+      username: string,
+      room: string,
+      err?: (e: NetworkError) => void,
+    ) => await net.value.event(
+      "joinRoom",
+      { username, room },
+      err
+        ? {
+            afterEvent: (p, s, e) => e.type === "error" ? err(e.data) : undefined,
+          }
+        : undefined,
+    ),
     setTeamColor: async (team: TeamId, color: string) => await net.value.event("bingoAction", {
       action: {
         kind: "set_team_data",
@@ -61,17 +87,18 @@ export const useBingo = defineStore("bingosync-state", () => {
       },
     }),
     setBoard: async (board: BoardDef) => await net.value.event("setBoard", { board }),
-    setTimerValue: async (time: number) => await net.value.event("setTimer", {
-      timer: { kind: "paused", time },
+    setTimer: async (time: number) => await net.value.event("setTimer", {
+      timer: { kind: "set", time },
     }),
+    resetTimer: async () => await net.value.event("setTimer", { timer: { kind: "unset" } }),
     toggleTimer: async () => {
       const st = timer();
       if (!st)
         return;
-      if (st.kind === "paused") {
+      if (st.kind === "paused" || st.kind === "set") {
         const target = Date.now() + st.time;
         await net.value.event("setTimer", { timer: { kind: "active", target } });
-      } else {
+      } else if (st.kind === "active") {
         const time = Math.max(st.target - Date.now(), 0);
         await net.value.event("setTimer", { timer: { kind: "paused", time } });
       }
@@ -82,9 +109,12 @@ export const useBingo = defineStore("bingosync-state", () => {
     teams,
     localUserTeams,
     inRoom,
-    gameSession: () => gameActive()?.game.tryGet("gameActive"),
-    gameActive,
+    gameSession: () => gameState()?.tryGet("gameActive"),
+    gameStateDisplay: gameState,
+    // gameActive,
     netState: computed(() => net.value.state.type),
-    gameState: computed(() => net.value.tryGet("inRoom", "offline")?.game.state.type),
+    gameState: computed(() => {
+      return net.value.tryGet("inRoom", "offline", "gettingToken", "connecting", "inServer")?.game?.state.type;
+    }),
   };
 });

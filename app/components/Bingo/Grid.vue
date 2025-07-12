@@ -75,46 +75,48 @@ async function claim(team: TeamId, tile: TileId) {
     justify="start"
     align="start"
     class="board-container">
-    <h2 class="board-heading heading-bonus">
-      Bonus
-    </h2>
-    <div class="board-bonus">
-      <template v-for="(_, i) in board.boardDef.extra" :key="i">
-        <BingoTile
-          v-if="localUserTeams?.length === 0"
-          :key="`tile-${board.extraTile(i)}-0`"
-          :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
-          :tile-id="board.extraTile(i)"
-          :extra="true"
-        />
-        <BingoTile
-          v-else-if="localUserTeams?.length === 1"
-          :key="`tile-${board.extraTile(i)}-1`"
-          :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
-          :tile-id="board.extraTile(i)"
-          :extra="true"
-          @click="claim(localUserTeams[0]!, board.extraTile(i))"
-        />
-        <NDropdown
-          v-else
-          :key="`tile-${board.extraTile(i)}-many`"
-          size="small"
-          trigger="hover"
-          placement="bottom-end"
-          :animated="false"
-          :overlap="true"
-          :options="teamOptions(board.extraTile(i))"
-          :render-label="renderDropdownLabel"
-          style="margin:4px"
-          @select="claim($event, board.extraTile(i))">
+    <template v-if="board.boardDef.extra > 0">
+      <h2 class="board-heading heading-bonus">
+        Bonus
+      </h2>
+      <div class="board-bonus">
+        <template v-for="(_, i) in board.boardDef.extra" :key="i">
           <BingoTile
+            v-if="localUserTeams?.length === 0"
+            :key="`tile-${board.extraTile(i)}-0`"
             :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
             :tile-id="board.extraTile(i)"
             :extra="true"
           />
-        </NDropdown>
-      </template>
-    </div>
+          <BingoTile
+            v-else-if="localUserTeams?.length === 1"
+            :key="`tile-${board.extraTile(i)}-1`"
+            :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+            :tile-id="board.extraTile(i)"
+            :extra="true"
+            @click="claim(localUserTeams[0]!, board.extraTile(i))"
+          />
+          <NDropdown
+            v-else
+            :key="`tile-${board.extraTile(i)}-many`"
+            size="small"
+            trigger="hover"
+            placement="bottom-end"
+            :animated="false"
+            :overlap="true"
+            :options="teamOptions(board.extraTile(i))"
+            :render-label="renderDropdownLabel"
+            style="margin:4px"
+            @select="claim($event, board.extraTile(i))">
+            <BingoTile
+              :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+              :tile-id="board.extraTile(i)"
+              :extra="true"
+            />
+          </NDropdown>
+        </template>
+      </div>
+    </template>
     <h2 class="board-heading heading-standard">
       Board
     </h2>

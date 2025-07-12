@@ -18,7 +18,7 @@ import {
   s,
 } from "binary-schema";
 import { cfg, stateMachine, type EventCtx } from "./state-machine";
-import { $fetch } from "ofetch";
+import { $fetch, FetchError } from "ofetch";
 
 // TODO: probably only send relevant sync data.
 
@@ -51,6 +51,11 @@ export type TimerState = {
 } | {
   kind: "active";
   target: number;
+} | {
+  kind: "set";
+  time: number;
+} | {
+  kind: "unset";
 };
 const TimerStateSchema: s.Schema<TimerState> = s.union("kind", {
   paused: {
@@ -59,6 +64,10 @@ const TimerStateSchema: s.Schema<TimerState> = s.union("kind", {
   active: {
     target: s.f64,
   },
+  set: {
+    time: s.f64,
+  },
+  unset: {},
 });
 
 const TeamSchema: s.Schema<Team> = s.struct({
@@ -152,7 +161,7 @@ interface Syncs {
 
 export const bingoStateMachine = stateMachine(() => {
   type S = {
-    boardUnset: { teams: Team[] };
+    boardUnset: { teams: Team[]; timer: TimerState };
     // waitForStart: {
     //   session: GameSession;
     //   teams: Team[];
@@ -199,6 +208,7 @@ export const bingoStateMachine = stateMachine(() => {
       type: "boardUnset",
       data: {
         teams,
+        timer: { kind: "unset" },
       },
     }),
     state: {
@@ -207,15 +217,20 @@ export const bingoStateMachine = stateMachine(() => {
           ctx.next("gameActive", {
             session: new GameSession(board),
             teams: s.teams,
-            timer: { kind: "paused", time: 0 },
+            timer: s.timer,
           });
         },
         setTeamData,
+        setTimer: async (s, { timer }, ctx) => {
+          s.timer = timer;
+        },
         sync: async (s, { data }, ctx) => {
           switch (data.state as keyof S) {
             case "boardUnset":
               if (data.teams)
                 s.teams = data.teams;
+              if (data.timer)
+                s.timer = data.timer;
               break;
             // case "waitForStart":
             //   if (data.def) {
@@ -231,7 +246,7 @@ export const bingoStateMachine = stateMachine(() => {
                 ctx.next("gameActive", {
                   session,
                   teams: data.teams ?? s.teams,
-                  timer: data.timer ?? { kind: "paused", time: 0 },
+                  timer: data.timer ?? { kind: "unset" },
                 });
               }
               break;
@@ -314,20 +329,31 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     token: string,
     username: string,
     ctx: EventCtx<S, E>,
+    prev: keyof S,
     game?: BingoStateMachine,
   ) {
     const websocket = new WebSocket(wsurl, [ `token.${token}`, `bingo` ]);
+    ctx.next("connecting", { username, websocket, game, prev });
     websocket.binaryType = "arraybuffer";
 
-    websocket.onopen = async () => await ctx.event("serverConnected");
+    const opened = { value: false };
+
+    websocket.onopen = async () => {
+      opened.value = true;
+      await ctx.event("serverConnected");
+    };
     websocket.onmessage = async ev => ev.data instanceof ArrayBuffer
       ? await ctx.event(
         "serverMessage",
         { message: BinaryReader.using(ev.data, ServerMessageSchema.decode) },
       )
       : undefined;
-    websocket.onclose = async () => await ctx.event("serverDisconnected");
-    ctx.next("connecting", { username, websocket, game });
+    websocket.onclose = async () => {
+      if (!opened.value) {
+        await ctx.event("error", { kind: "ws" });
+      }
+      await ctx.event("serverDisconnected");
+    };
   }
 
   function runSync(syncs: Syncs, state: S["inRoom"]) {
@@ -340,7 +366,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       start: syncs.active ? bingoSession(state.game)?.start : undefined,
       teams: syncs.teams ? state.game.state.data.teams : undefined,
       users: syncs.users ? Object.values(state.users) : undefined,
-      timer: syncs.timer ? state.game.tryGet("gameActive")?.timer : undefined,
+      timer: syncs.timer ? state.game.state.data.timer : undefined,
     };
 
     state.websocket.send(BinaryWriter.using({
@@ -371,11 +397,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
 
   type S = {
     noLobby: undefined;
-    gettingToken: undefined;
+    gettingToken: { game?: BingoStateMachine };
     connecting: {
       username: string;
       websocket: WebSocket;
       game?: BingoStateMachine;
+      prev: keyof S;
     };
     inServer: {
       username: string;
@@ -405,6 +432,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     setBoard: { board: BoardDef };
     setTimer: { timer: TimerState };
     leaveGame: undefined;
+    error: NetworkError;
   };
 
   return cfg<[], S, E>({
@@ -412,14 +440,36 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     state: {
       noLobby: {
         createRoom: async (s, { username }, ctx) => {
-          ctx.next("gettingToken");
-          const token = await $fetch<string>(`${fetchurl}/api/bingo/auth/create`, { method: "post" });
-          return connectToRoom(token, username, ctx);
+          ctx.next("gettingToken", { });
+          let token: string;
+          try {
+            token = await $fetch<string>(`${fetchurl}/api/bingo/auth/create`, { method: "post" });
+          } catch (e) {
+            if (e instanceof FetchError) {
+              await ctx.event("error", { kind: "token", inner: e });
+            } else {
+              await ctx.event("error", { kind: "token" });
+            }
+            ctx.next("noLobby");
+            return;
+          }
+          return connectToRoom(token, username, ctx, "noLobby", undefined);
         },
         joinRoom: async (s, { username, room }, ctx) => {
-          ctx.next("gettingToken");
-          const token = await $fetch<string>(`${fetchurl}/api/bingo/auth/join/${room}`, { method: "post" });
-          return connectToRoom(token, username, ctx);
+          ctx.next("gettingToken", {});
+          let token: string;
+          try {
+            token = await $fetch<string>(`${fetchurl}/api/bingo/auth/join/${room}`, { method: "post" });
+          } catch (e) {
+            if (e instanceof FetchError) {
+              await ctx.event("error", { kind: "token", inner: e });
+            } else {
+              await ctx.event("error", { kind: "token" });
+            }
+            ctx.next("noLobby");
+            return;
+          }
+          return connectToRoom(token, username, ctx, "noLobby", undefined);
         },
         offlineRoom: async (s, e, ctx) => {
           const game = bingoStateMachine([
@@ -441,6 +491,15 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
             opcode: ClientOpcode.Init,
           }, ClientMessageSchema.encode));
           ctx.next("inServer", s);
+        },
+        serverDisconnected: async (s, e, ctx) => {
+          switch (s.prev) {
+            case "noLobby":
+              ctx.next("noLobby");
+              break;
+            case "offline":
+              ctx.next("offline", { game: s.game! });
+          }
         },
       },
       inServer: {
@@ -591,9 +650,30 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
         leaveGame: async (s, e, ctx) => ctx.next("noLobby"),
         createRoom: async (s, { username }, ctx) => {
           const game = s.game;
-          ctx.next("gettingToken");
-          const token = await $fetch<string>(`${fetchurl}/api/bingo/auth/create`, { method: "post" });
-          return connectToRoom(token, username, ctx, game);
+          game.state.data.teams = [
+            {
+              color: "#2080F0",
+              name: "Team 1",
+            },
+            {
+              color: "#D03050",
+              name: "Team 2",
+            },
+          ];
+          ctx.next("gettingToken", { game });
+          let token: string;
+          try {
+            token = await $fetch<string>(`${fetchurl}/api/bingo/auth/create`, { method: "post" });
+          } catch (e) {
+            if (e instanceof FetchError) {
+              await ctx.event("error", { kind: "token", inner: e });
+            } else {
+              await ctx.event("error", { kind: "token" });
+            }
+            ctx.next("offline", { game });
+            return;
+          }
+          return connectToRoom(token, username, ctx, "offline", game);
         },
         bingoAction: async (s, { action }, ctx) => {
           switch (action.kind) {
@@ -619,3 +699,9 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
   });
 });
 export type NetworkStateMachine = ReturnType<ReturnType<typeof networkStateMachine>>;
+export type NetworkError = {
+  kind: "ws";
+} | {
+  kind: "token";
+  inner?: FetchError;
+};

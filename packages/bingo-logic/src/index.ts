@@ -99,11 +99,10 @@ export class GameSession {
     const out: Record<TeamId, LineCount> = {};
     const getScore = (team: TeamId) => out[team] ??= { h: 0, v: 0, d: 0 };
 
-    // horizontal
-    for (let row = 0; row < this.boardDef.height; row += 1) {
+    const checkLine = (tiles: TileId[], k: "h" | "v" | "d") => {
       const s: Record<TeamId, number> = {};
-      for (let col = 0; col < this.boardDef.width; col += 1) {
-        const [ _def, active ] = this.getTile(this.mainTileRowCol(row, col));
+      for (const tileId of tiles) {
+        const [ _def, active ] = this.getTile(tileId);
         for (const team of active.claimed) {
           s[team] ??= 0;
           s[team] += 1;
@@ -112,29 +111,25 @@ export class GameSession {
 
       for (const [ team, claimed ] of Object.entries(s)) {
         if (claimed === this.boardDef.width)
-          getScore(+team).h += 1;
+          getScore(+team)[k] += 1;
       }
+    };
+
+    // horizontal
+    for (let row = 0; row < this.boardDef.height; row += 1) {
+      checkLine(Array.from({ length: this.boardDef.width }, (_v, col) => this.mainTileRowCol(row, col)), "h");
     }
 
     // vertical
     for (let col = 0; col < this.boardDef.width; col += 1) {
-      const s: Record<TeamId, number> = {};
-      for (let row = 0; row < this.boardDef.height; row += 1) {
-        const [ _def, active ] = this.getTile(this.mainTileRowCol(row, col));
-        for (const team of active.claimed) {
-          s[team] ??= 0;
-          s[team] += 1;
-        }
-      }
-
-      for (const [ team, claimed ] of Object.entries(s)) {
-        if (claimed === this.boardDef.height)
-          getScore(+team).v += 1;
-      }
+      checkLine(Array.from({ length: this.boardDef.height }, (_v, row) => this.mainTileRowCol(row, col)), "v");
     }
 
     if (this.boardDef.height === this.boardDef.width) {
-      // do diagonals
+      const d = this.boardDef.width;
+
+      checkLine(Array.from({ length: d }, (_v, n) => this.mainTileRowCol(n, n)), "d");
+      checkLine(Array.from({ length: d }, (_v, n) => this.mainTileRowCol(n, d - n - 1)), "d");
     }
 
     return out;

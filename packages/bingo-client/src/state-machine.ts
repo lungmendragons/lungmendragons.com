@@ -4,6 +4,9 @@ type EventSet = Record<string, any>;
 type Opt<A> = A extends [ type: infer K, data: infer D ] ?
   D extends undefined ? [ type: K, data?: D ] : [ type: K, data: D ] : never;
 
+type TriOpt<A> = A extends [ type: infer K, data: infer D, hooks: infer H ] ?
+  D extends undefined ? [ type: K, data?: D, hooks?: H ] : [ type: K, data: D, hooks?: H ] : never;
+
 export interface EventCtx<S extends StateSet, E extends EventSet> {
   next: <K extends Key<S>>(...params: Opt<[type: K, data: S[K]]>) => void;
   event: EventCall<E>;
@@ -38,10 +41,12 @@ type EventCall<E extends EventSet> = <K extends Key<E>>(...params: Opt<[type: K,
 
 export interface MachineInstance<S extends StateSet, E extends EventSet> {
   state: Combine<S>;
-  event: EventCall<E>;
+  event: <K extends Key<E>>(...params: [
+    ...TriOpt<[type: K, data: E[K], hooks: MachineInstance<S, E>["hooks"]]>,
+  ]) => Promise<void>;
   tryGet: <K extends Key<S>>(...types: K[]) => S[K] | undefined;
   hooks: {
-    afterEvent?: (state: Combine<S>, event: Combine<E>) => void;
+    afterEvent?: (eventProcessed: boolean, state: Combine<S>, event: Combine<E>) => void;
   };
   Infer: { state: S; event: E };
 }
@@ -70,13 +75,29 @@ export function stateMachine<
       this.state = combine(type, data);
     }
 
-    async event<K extends Key<E>>(type: K, data?: E[K]) {
-      const hook = cfg.state[this.state.type as string]?.[type];
-      if (hook) {
-        await hook(this.state.data as S[string], data as E[K], this);
+    async event<K extends Key<E>>(type: K, data?: E[K], hooks?: MachineInstance<S, E>["hooks"]) {
+      const ctx: EventCtx<S, E> = {
+        next: (t, d?) => this.next(t, d),
+        event: async (t, d?) => {
+          const handler = cfg.state[this.state.type as string]?.[t];
+          if (handler) {
+            await handler(this.state.data as any, d as any, ctx);
+            ctx.hooks.afterEvent?.(true, this.state, combine(t, d));
+          } else {
+            ctx.hooks.afterEvent?.(false, this.state, combine(t, d));
+          }
+        },
+        hooks: {
+          afterEvent: hooks?.afterEvent
+            ? (p, s, e) => {
+                hooks.afterEvent!(p, s, e);
+                this.hooks.afterEvent?.(p, s, e);
+              }
+            : this.hooks.afterEvent,
+        },
+      };
 
-        this.hooks.afterEvent?.(this.state, combine(type, data));
-      }
+      await (ctx.event as any)(type, data);
     };
 
     tryGet<K extends Key<S>>(...types: K[]) {

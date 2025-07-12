@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { NFlex, NInput, NModal, NPopconfirm } from "naive-ui";
+import { NFlex, NInput, NModal } from "naive-ui";
 import type { InputInst /* , DropdownOption */ } from "naive-ui";
 // import type { VNodeChild } from "vue";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
-import { useNow, useTimeout } from "@vueuse/core";
+import { useNow } from "@vueuse/core";
 import type { BoardDef } from "bingo-logic";
 import * as z from "zod";
 
@@ -18,13 +18,17 @@ const nameField = ref("");
 // ]);
 
 const url = useRequestURL();
-let autojoin = false;
+const autojoin = ref(false);
 const joinParam = url.searchParams.get("room");
 if (joinParam) {
   roomIdField.value = joinParam;
   history.replaceState({}, "", `${url.origin}${url.pathname}`);
-  autojoin = true;
+  autojoin.value = true;
 }
+
+watchEffect(() => {
+  console.log(bingo.gameState);
+});
 
 // const teams = computed(bingo.teams);
 const roomId = computed(() => bingo.inRoom()?.roomId);
@@ -112,39 +116,26 @@ const timer = computed(() => {
     return undefined;
   if (st.kind === "active") {
     return Math.max(st.target - now.value.getTime(), 0);
-  } else {
+  } else if (st.kind === "set" || st.kind === "paused") {
     return st.time;
+  } else {
+    return 0;
   }
 });
 const timerInput = ref(0);
-const timerInputLocked = ref(0);
-const timerSet = ref(false);
-function timerDisplayOverride() {
-  const mins = timerInputLocked.value.toString().padStart(2, "0");
-  return `${mins}:00`;
-}
 const timerStarted = computed(() => {
-  const st = timerState.value;
-  if (!st)
-    return false;
-  if (st.kind === "paused")
-    return st.time !== 0;
-  return true;
+  const kind = timerState.value?.kind;
+  return kind === "active" || kind === "paused";
 });
-const { ready: delayUsed, start: delayStart } = useTimeout(1000, { controls: true });
-function handleSet() {
-  timerInputLocked.value = timerInput.value;
-  timerSet.value = true;
-}
-async function handleStart() {
-  delayStart(); // prevents brief flash of pause symbol when first starting the timer
-  await bingo.setTimerValue(timerInputLocked.value * 60000);
-  await bingo.toggleTimer();
+const timerSet = computed(() => {
+  return (timerState.value?.kind ?? "unset") !== "unset";
+});
+
+async function handleSet() {
+  await bingo.setTimer(timerInput.value * 60000);
 }
 async function handleReset() {
-  timerSet.value = false;
-  timerInputLocked.value = 0;
-  await bingo.setTimerValue(0);
+  await bingo.resetTimer();
 }
 function timerEnded() {
   return timerStarted.value && timer.value === 0;
@@ -161,17 +152,35 @@ const showJoinRoom = ref(false);
 
 async function createRoom() {
   showCreateRoom.value = false;
-  await bingo.createRoom(nameField.value);
+
+  await bingo.createRoom(nameField.value, (err) => {
+    if (err.kind === "token") {
+      message.error("Could not retrieve bingo token.");
+    } else if (err.kind === "ws") {
+      message.error("Could not connect to bingo server.");
+    }
+  });
 }
 
 async function joinRoom() {
   showJoinRoom.value = false;
-  await bingo.joinRoom(nameField.value, takeRef(roomIdField, ""));
+
+  await bingo.joinRoom(nameField.value, takeRef(roomIdField, ""), (err) => {
+    if (err.kind === "token") {
+      message.error("Could not retrieve bingo token.");
+    } else if (err.kind === "ws") {
+      message.error("Could not connect to bingo server.");
+    }
+  });
 }
 
+const gameStateDisplay = computed(bingo.gameStateDisplay);
+
 onMounted(() => {
-  if (autojoin) {
-    showJoinRoom.value = true;
+  if (autojoin.value) {
+    autojoin.value = false;
+    if (bingo.state === "noLobby")
+      showJoinRoom.value = true;
   }
 });
 </script>
@@ -236,8 +245,8 @@ onMounted(() => {
         </NFlex>
       </NCard>
     </NModal>
-    <NFlex>
-      <NFlex vertical class="w-[250px]">
+    <NFlex :wrap="false">
+      <NFlex vertical class="flex-none w-[250px]">
         <template v-if="bingo.net.state.type === 'noLobby'">
           <!-- <NInput
             v-model:value="nameField"
@@ -266,7 +275,7 @@ onMounted(() => {
           </NFlex>
         </template>
         <template v-else>
-          <template v-if="bingo.gameState === 'gameActive'">
+          <template v-if="gameStateDisplay">
             <!-- Timer -->
             <NFlex
               v-if="roomOwner"
@@ -302,7 +311,7 @@ onMounted(() => {
                 type="success"
                 size="small"
                 secondary
-                @click="handleStart">
+                @click="bingo.toggleTimer">
                 <template #icon>
                   <NIcon><MdiPlay /></NIcon>
                 </template>
@@ -331,7 +340,7 @@ onMounted(() => {
                 Pause
               </NButton>
               <NButton
-                v-if="timerEnded() || timerState?.kind === 'paused' && timerStarted"
+                v-if="timerEnded() || timerState?.kind === 'paused' && timerSet"
                 type="error"
                 size="small"
                 secondary
@@ -344,27 +353,22 @@ onMounted(() => {
             </NFlex>
             <NSpin
               size="large"
-              :show="delayUsed && timerStarted && timerState?.kind === 'paused'"
+              :show="timerState?.kind === 'paused'"
               :rotate="false">
               <template #icon>
                 <NIcon><MdiPause /></NIcon>
               </template>
               <div class="bingo-timer-container">
                 <div class="bingo-timer" :style="{ opacity: !timerEnded() ? '100%' : '60%' }">
-                  <template v-if="timerStarted">
-                    {{ timerDisplay }}
-                  </template>
-                  <template v-else-if="timerSet">
-                    {{ timerDisplayOverride() }}
-                  </template>
-                  <template v-else>
-                    00:00
-                  </template>
+                  {{ timerDisplay }}
                 </div>
               </div>
             </NSpin>
             <!-- Score -->
-            <NFlex style="width: 80%; margin: 0.25rem auto 0;" justify="center">
+            <NFlex
+              v-if="teamScoreList.length > 0"
+              style="width: 80%; margin: 0.25rem auto 0;"
+              justify="center">
               <NDivider style="margin: 0">
                 Score
               </NDivider>
@@ -423,7 +427,7 @@ onMounted(() => {
               @click="copyRoomId"
             />
           </NFormItem>
-          <NFlex v-if="roomOwner" vertical>
+          <NFlex v-if="bingo.inRoom()?.isSync" vertical>
             Users:
             <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
               <NFlex>
@@ -460,8 +464,8 @@ onMounted(() => {
             </template>
           </NFlex>
         </template>
-        <NDivider />
         <template v-if="bingo.gameState !== undefined">
+          <NDivider />
           <NButton @click="bingo.leaveGame()">
             Leave game
           </NButton>
@@ -507,20 +511,23 @@ onMounted(() => {
       </NFlex>
       <BingoGrid v-if="bingo.gameState === 'gameActive'" />
       <template v-else-if="bingo.gameState === 'boardUnset'">
-        <NDivider />
-        <template v-if="roomOwner">
-          <NInput
-            v-model:value="boardGenData"
-            type="textarea"
-            placeholder="game board data"
-          />
-          <NButton @click="createBoard()">
-            Create Board
-          </NButton>
-        </template>
-        <div v-else>
-          Waiting for host to set the board.
-        </div>
+        <NFlex
+          vertical
+          class="flex-1">
+          <template v-if="roomOwner">
+            <NInput
+              v-model:value="boardGenData"
+              type="textarea"
+              placeholder="game board data"
+            />
+            <NButton @click="createBoard()">
+              Create Board
+            </NButton>
+          </template>
+          <div v-else>
+            Waiting for host to set the board.
+          </div>
+        </NFlex>
       </template>
     </NFlex>
   </NFlex>
@@ -544,6 +551,7 @@ onMounted(() => {
   text-shadow: 0px 1px 4px #0008;
   border-radius: 4px;
   background-image: linear-gradient(45deg, #1b43df, #eb141d);
+  user-select: none;
 }
 
 .bingo-score-team {
