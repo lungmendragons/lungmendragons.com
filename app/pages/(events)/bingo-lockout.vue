@@ -150,9 +150,13 @@ const timerDisplay = computed(() => {
 const showCreateRoom = ref(false);
 const showJoinRoom = ref(false);
 
+const loading = useLoading(
+  computed(() => bingo.state === "connecting" || bingo.state === "gettingToken"),
+);
+
 async function createRoom() {
   showCreateRoom.value = false;
-
+  loading.start("Creating room...");
   await bingo.createRoom(nameField.value, (err) => {
     if (err.kind === "token") {
       message.error("Could not retrieve bingo token.");
@@ -164,7 +168,7 @@ async function createRoom() {
 
 async function joinRoom() {
   showJoinRoom.value = false;
-
+  loading.start("Joining room...");
   await bingo.joinRoom(nameField.value, takeRef(roomIdField, ""), (err) => {
     if (err.kind === "token") {
       message.error("Could not retrieve bingo token.");

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import type { TileId } from "bingo-logic";
 
-const { tileId: id } = defineProps<{
+const { tileId: id, sizeList, padding } = defineProps<{
   tileId: TileId;
+  sizeList: Array<[number, string] | [string]>;
+  padding: string;
 }>();
 
 // const regex = /^Clear .*?(F\d.*?);/i;
@@ -32,6 +34,15 @@ const claimed = computed(() => {
 });
 
 function dynFontSize(len: number): string {
+  for (const v of sizeList) {
+    if (v.length === 1) {
+      return v[0];
+    } else if (len < v[0]) {
+      return v[1];
+    }
+  }
+  return "1em";
+
   if (len < 50)
     return "18px";
   if (len < 70)
@@ -64,6 +75,7 @@ function dynFontSize(len: number): string {
       class="bingo-task"
       :style="{
         fontSize: dynFontSize(tile?.def.text.length ?? 0),
+        padding,
         // padding: (tile?.def.text.length ?? 0) > 80 ? '8px' : '8px',
       }"
     >
@@ -74,15 +86,12 @@ function dynFontSize(len: number): string {
 
 <style scoped>
 .bingo-tile {
-  width: 144px;
-  height: 144px;
   margin: auto;
   transition: background-color 0.3s;
 }
 
 .bingo-task {
   text-align: center;
-  padding: 8px;
   color: #ffffff;
 }
 
