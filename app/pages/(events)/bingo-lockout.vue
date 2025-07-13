@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { NFlex, NInput, NModal } from "naive-ui";
-import type { InputInst /* , DropdownOption */ } from "naive-ui";
+import type { InputInst, ScrollbarInst /* , DropdownOption */ } from "naive-ui";
 // import type { VNodeChild } from "vue";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
-import { useNow, useMediaQuery } from "@vueuse/core";
+import { useNow, useMediaQuery, promiseTimeout } from "@vueuse/core";
 import type { BoardDef } from "bingo-logic";
 import * as z from "zod";
 
@@ -222,6 +222,16 @@ const logStyles = computed(() => {
     })),
   }
 });
+
+const bingoLog = ref<ScrollbarInst>();
+
+watch(
+  tempLog.value,
+  async () => {
+    await promiseTimeout(100);
+    bingoLog.value?.scrollTo({ top: 99999, behavior: "smooth" });
+  },
+);
 
 onMounted(() => {
   if (autojoin.value) {
@@ -562,7 +572,16 @@ onMounted(() => {
             Make into online room
           </NButton>
           <NDivider :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
-          <BingoLog :items="tempLog" :highlights="logStyles" />
+          <NScrollbar
+            ref="bingoLog"
+            :style="{
+              maxHeight: '200px',
+              border: '1px solid #8888',
+              padding: '4px 6px',
+              borderRadius: '4px',
+            }">
+            <BingoLog :items="tempLog" :highlights="logStyles" />
+          </NScrollbar>
           <NButton @click="addLog">add log</NButton> <!-- temp -->
         </template>
       </NFlex>
