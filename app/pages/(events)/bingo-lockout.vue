@@ -5,7 +5,7 @@ import type { InputInst /* , DropdownOption */ } from "naive-ui";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
-import { useNow } from "@vueuse/core";
+import { useNow, useMediaQuery } from "@vueuse/core";
 import type { BoardDef } from "bingo-logic";
 import * as z from "zod";
 
@@ -17,6 +17,7 @@ const nameField = ref("");
 //   "#D03050",
 // ]);
 
+const isMD = useMediaQuery(mediaQuery.minWidth.md);
 const url = useRequestURL();
 const autojoin = ref(false);
 const joinParam = url.searchParams.get("room");
@@ -35,8 +36,6 @@ const roomId = computed(() => bingo.inRoom()?.roomId);
 const roomIdUrl = computed(() => roomId.value ? `${url.origin}/bingo-lockout?room=${roomId.value}` : undefined);
 const message = useMessage();
 const roomIdInputRef = ref<InputInst>();
-
-const roomOwner = computed(() => bingo.inRoom()?.isSync ?? true);
 
 async function copyRoomId() {
   roomIdInputRef.value?.blur();
@@ -190,10 +189,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <NFlex vertical>
+  <NFlex vertical class="mx-auto">
     <NModal v-model:show="showCreateRoom">
       <NCard
-        style="width: 400px"
+        class="w-[328px] mx-auto"
         :bordered="false"
         role="dialog"
         size="medium"
@@ -222,7 +221,7 @@ onMounted(() => {
     </NModal>
     <NModal v-model:show="showJoinRoom">
       <NCard
-        style="width: 400px"
+        class="w-[328px] mx-auto"
         :bordered="false"
         role="dialog"
         size="medium"
@@ -249,112 +248,123 @@ onMounted(() => {
         </NFlex>
       </NCard>
     </NModal>
-    <NFlex :wrap="false">
-      <NFlex vertical class="flex-none w-[250px]">
-        <template v-if="bingo.net.state.type === 'noLobby'">
-          <!-- <NInput
-            v-model:value="nameField"
+    <NFlex
+      vertical
+      size="small"
+      class="w-[328px] mx-auto">
+      <template v-if="bingo.net.state.type === 'noLobby'">
+        <NButton @click="bingo.offlineRoom()" :size="isMD ? 'medium' : 'small'">
+          Create offline room
+        </NButton>
+        <!-- Online -->
+        <NButton @click="showCreateRoom = true" :size="isMD ? 'medium' : 'small'">
+          Create online room
+        </NButton>
+        <NDivider style="margin: 12px 0" />
+        <NFlex vertical size="small">
+          <NInput
+            v-model:value="roomIdField"
             type="text"
-            placeholder="Enter display name"
+            :size="isMD ? 'medium' : 'small'"
+            placeholder="Room ID"
           />
-          <NDivider style="margin: 4px 0 !important" /> -->
-          <NButton @click="bingo.offlineRoom()">
-            Create offline room
+          <NButton
+            class="w-full"
+            :size="isMD ? 'medium' : 'small'"
+            @click="bingo.joinRoom(nameField, roomIdField)">
+            Join online room
           </NButton>
-          <!-- Online -->
-          <NButton @click="showCreateRoom = true">
-            Create online room
-          </NButton>
-          <NDivider />
-          <NFlex vertical>
-            <NInput
-              v-model:value="roomIdField"
-              type="text"
-              placeholder="Room ID"
-            />
-            <!-- <NDivider vertical /> -->
-            <NButton class="w-full" @click="bingo.joinRoom(nameField, roomIdField)">
-              Join online room
+        </NFlex>
+      </template>
+    </NFlex>
+    <NFlex
+      class="w-full"
+      :wrap="false"
+      :vertical="!isMD">
+      <NFlex
+        vertical
+        size="small"
+        class="flex-none w-[328px] mx-auto xl:mx-4">
+        <template v-if="gameStateDisplay">
+          <!-- Timer -->
+          <NFlex
+            v-if="bingo.roomOwner"
+            align="center"
+            class="mx-auto mb-2 md:my-4 h-6">
+            <NFormItem
+              v-if="!timerStarted && !timerSet"
+              label="Minutes"
+              label-placement="left"
+              :show-feedback="false"
+              size="small">
+              <NInputNumber
+                v-model:value="timerInput"
+                class="w-24"
+                size="small"
+                button-placement="both"
+                :min="0"
+                :input-props="{
+                  style: { textAlign: 'center' },
+                }"
+              />
+            </NFormItem>
+            <NButton
+              v-if="!timerStarted && !timerSet"
+              :disabled="timerInput === 0"
+              size="small"
+              secondary
+              @click="handleSet">
+              Set
+            </NButton>
+            <NButton
+              v-if="!timerStarted && timerSet"
+              type="success"
+              size="small"
+              secondary
+              @click="bingo.toggleTimer">
+              <template #icon>
+                <NIcon><MdiPlay /></NIcon>
+              </template>
+              Start
+            </NButton>
+            <NButton
+              v-if="timerStarted && timerState?.kind === 'paused'"
+              type="success"
+              size="small"
+              secondary
+              @click="bingo.toggleTimer">
+              <template #icon>
+                <NIcon><MdiPlay /></NIcon>
+              </template>
+              Resume
+            </NButton>
+            <NButton
+              v-if="timerState?.kind === 'active' && !timerEnded()"
+              type="warning"
+              size="small"
+              secondary
+              @click="bingo.toggleTimer">
+              <template #icon>
+                <NIcon><MdiPause /></NIcon>
+              </template>
+              Pause
+            </NButton>
+            <NButton
+              v-if="timerEnded() || timerState?.kind === 'paused' && timerSet"
+              type="error"
+              size="small"
+              secondary
+              @click="handleReset">
+              <template #icon>
+                <NIcon><MdiCloseThick /></NIcon>
+              </template>
+              Reset
             </NButton>
           </NFlex>
-        </template>
-        <template v-else>
-          <template v-if="gameStateDisplay">
-            <!-- Timer -->
-            <NFlex
-              v-if="roomOwner"
-              align="center"
-              class="mx-auto my-4 h-6">
-              <NFormItem
-                v-if="!timerStarted && !timerSet"
-                label="Minutes"
-                label-placement="left"
-                :show-feedback="false"
-                size="small">
-                <NInputNumber
-                  v-model:value="timerInput"
-                  class="w-24"
-                  size="small"
-                  button-placement="both"
-                  :min="0"
-                  :input-props="{
-                    style: { textAlign: 'center' },
-                  }"
-                />
-              </NFormItem>
-              <NButton
-                v-if="!timerStarted && !timerSet"
-                :disabled="timerInput === 0"
-                size="small"
-                secondary
-                @click="handleSet">
-                Set
-              </NButton>
-              <NButton
-                v-if="!timerStarted && timerSet"
-                type="success"
-                size="small"
-                secondary
-                @click="bingo.toggleTimer">
-                <template #icon>
-                  <NIcon><MdiPlay /></NIcon>
-                </template>
-                Start
-              </NButton>
-              <NButton
-                v-if="timerStarted && timerState?.kind === 'paused'"
-                type="success"
-                size="small"
-                secondary
-                @click="bingo.toggleTimer">
-                <template #icon>
-                  <NIcon><MdiPlay /></NIcon>
-                </template>
-                Resume
-              </NButton>
-              <NButton
-                v-if="timerState?.kind === 'active' && !timerEnded()"
-                type="warning"
-                size="small"
-                secondary
-                @click="bingo.toggleTimer">
-                <template #icon>
-                  <NIcon><MdiPause /></NIcon>
-                </template>
-                Pause
-              </NButton>
-              <NButton
-                v-if="timerEnded() || timerState?.kind === 'paused' && timerSet"
-                type="error"
-                size="small"
-                secondary
-                @click="handleReset">
-                <template #icon>
-                  <NIcon><MdiCloseThick /></NIcon>
-                </template>
-                Reset
-              </NButton>
-            </NFlex>
+          <NFlex
+            :vertical="isMD"
+            :size="13"
+            justify="center">
             <NSpin
               size="large"
               :show="timerState?.kind === 'paused'"
@@ -369,11 +379,8 @@ onMounted(() => {
               </div>
             </NSpin>
             <!-- Score -->
-            <NFlex
-              v-if="teamScoreList.length > 0"
-              style="width: 80%; margin: 0.25rem auto 0;"
-              justify="center">
-              <NDivider style="margin: 0">
+            <NFlex v-if="teamScoreList.length > 0" justify="center">
+              <NDivider v-show="isMD" style="margin: 0">
                 Score
               </NDivider>
               <NFlex style="width: fit-content">
@@ -409,68 +416,90 @@ onMounted(() => {
                 </template>
               </NFlex>
             </NFlex>
-          </template>
-          <NDivider v-if="roomId !== undefined" />
-          <NFormItem
-            v-if="roomId !== undefined"
-            label="Room ID"
-            label-placement="left"
-            :show-feedback="false"
-          >
-            <NInput
-              ref="roomIdInputRef"
-              :theme-overrides="{ caretColor: 'transparent' }"
-              :input-props="{
-                style: { cursor: 'pointer' },
-              }"
-              class="w-full"
-              :value="roomIdUrl"
-              type="text"
-              :autosize="true"
-              readonly
-              @click="copyRoomId"
-            />
-          </NFormItem>
-          <NFlex v-if="bingo.inRoom()?.isSync" vertical>
-            Users:
-            <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
-              <NFlex>
-                <!-- change to AuthPermission.BingoModerator when live, testing was annoying -->
-                <!-- <template v-if="user && hasPermission(user.permissions, AuthPermission.User)">
-                  <NButton text title="Promote user to room admin">
-                    <template #icon>
-                      <NIcon><EosIconsAdmin /></NIcon>
-                    </template>
-                  </NButton>
-                  <NButton text title="Kick user">
-                    <template #icon>
-                      <NIcon><IonBan /></NIcon>
-                    </template>
-                  </NButton>
-                </template> -->
-                <!-- <NDropdown
-                  size="small"
-                  trigger="click"
-                  :options="localTeamColorMap"
-                  :render-label="renderDropdownLabel"
-                  style="margin:4px"
-                  @select="bingo.joinTeam"> -->
-                <NTag
-                  style="width: fit-content; cursor: pointer"
-                  :color="{
-                    textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
-                    borderColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
-                  }">
-                  {{ bingoUser.name }}
-                </NTag>
-                <!-- </NDropdown> -->
-              </NFlex>
-            </template>
           </NFlex>
         </template>
+        <NDivider v-if="roomId !== undefined" :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
+        <NFormItem
+          v-if="roomId !== undefined"
+          size="small"
+          label="Room URL"
+          label-placement="left"
+          :label-style="{
+            fontSize: isMD ? '14px' : '10px',
+            paddingRight: '4px',
+          }"
+          :show-feedback="false">
+          <NInput
+            ref="roomIdInputRef"
+            :theme-overrides="{ caretColor: 'transparent' }"
+            :input-props="{
+              style: {
+                cursor: 'pointer',
+                fontSize: isMD ? '14px' : '10px',
+              },
+            }"
+            class="w-full"
+            :size="isMD ? 'small' : 'tiny'"
+            :value="roomIdUrl"
+            type="text"
+            :autosize="true"
+            readonly
+            @click="copyRoomId"
+          />
+        </NFormItem>
+        <NFlex
+          v-if="bingo.inRoom()?.isSync"
+          :vertical="isMD"
+          :style="{ fontSize: isMD ? '14px' : '10px' }"
+          :align="isMD ? 'start' : 'center'">
+          <span>
+            Users:
+          </span>
+          <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
+            <NFlex>
+              <!-- change to AuthPermission.BingoModerator when live, testing was annoying -->
+              <!-- <template v-if="user && hasPermission(user.permissions, AuthPermission.User)">
+                <NButton text title="Promote user to room admin">
+                  <template #icon>
+                    <NIcon><EosIconsAdmin /></NIcon>
+                  </template>
+                </NButton>
+                <NButton text title="Kick user">
+                  <template #icon>
+                    <NIcon><IonBan /></NIcon>
+                  </template>
+                </NButton>
+              </template> -->
+              <!-- <NDropdown
+                size="small"
+                trigger="click"
+                :options="localTeamColorMap"
+                :render-label="renderDropdownLabel"
+                style="margin:4px"
+                @select="bingo.joinTeam"> -->
+              <NTag
+                :size="isMD ? 'medium' : 'small'"
+                :style="{
+                  fontSize: isMD ? '14px' : '10px',
+                  width: 'fit-content',
+                  cursor: 'pointer',
+                }"
+                :color="{
+                  textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                  borderColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                }">
+                {{ bingoUser.name }}
+              </NTag>
+              <!-- </NDropdown> -->
+            </NFlex>
+          </template>
+        </NFlex>
         <template v-if="bingo.gameState !== undefined">
-          <NDivider />
-          <NButton @click="bingo.leaveGame()">
+          <NDivider :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
+          <NButton
+            :size="isMD ? 'small' : 'tiny'"
+            class="w-2/3 mx-auto"
+            @click="bingo.leaveGame()">
             Leave game
           </NButton>
           <!-- <NPopconfirm v-if="bingo.state === 'inRoom'" @positive-click="bingo.offlineRoom()">
@@ -481,44 +510,22 @@ onMounted(() => {
             </template>
             Are you sure?
           </NPopconfirm> -->
-          <NButton v-if="bingo.state === 'offline'" @click="showCreateRoom = true">
+          <NButton
+            v-if="bingo.state === 'offline'"
+            :size="isMD ? 'small' : 'tiny'"
+            class="w-2/3 mx-auto"
+            @click="showCreateRoom = true">
             Make into online room
           </NButton>
+          <NDivider :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
         </template>
-        <!-- <NDivider v-if="bingo.inRoom()?.isSync" />
-        <NForm v-if="teams" :model="model">
-          <NFormItem
-            v-for="(team, i) in teams"
-            :key="i"
-            :label="team.name"
-            :path="`teams[${i}].color`"
-            label-placement="left">
-            <NColorPicker
-              v-if="model[i]"
-              v-model:value="model[i]"
-              :modes="['hex']"
-              :show-alpha="false"
-              :swatches="[
-                '#18A058',
-                '#2080F0',
-                '#F0A020',
-                '#D03050',
-              ]"
-            />
-          </NFormItem>
-          <NFormItem>
-            <NButton @click="model.forEach((v, i) => bingo.setTeamColor(i, v))">
-              Confirm
-            </NButton>
-          </NFormItem>
-        </NForm> -->
       </NFlex>
       <BingoGrid v-if="bingo.gameState === 'gameActive'" />
       <template v-else-if="bingo.gameState === 'boardUnset'">
         <NFlex
           vertical
-          class="flex-1">
-          <template v-if="roomOwner">
+          class="flex-1 w-[328px] md:w-[250px] mx-auto">
+          <template v-if="bingo.roomOwner">
             <NInput
               v-model:value="boardGenData"
               type="textarea"
@@ -541,7 +548,6 @@ onMounted(() => {
 .bingo-timer-container {
   font-variant-numeric: tabular-nums;
   margin: 0 auto;
-  /* margin-bottom: 1rem; */
   width: fit-content;
   font-size: 48px;
   font-weight: 700;
@@ -576,5 +582,27 @@ onMounted(() => {
 
 :deep(.n-spin) {
   color: white;
+}
+
+@media (max-width: 768px) {
+  :global(#page-content-container > .n-layout-scroll-container) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .bingo-timer-container {
+    font-size: 32px;
+    margin-top: 20px;
+  }
+  .bingo-timer {
+    padding: 0px 8px;
+    line-height: 1.6;
+  }
+  .bingo-score-team {
+    font-size: 10px;
+  }
+  .bingo-score {
+    width: 3.25rem;
+    font-size: 32px;
+  }
 }
 </style>

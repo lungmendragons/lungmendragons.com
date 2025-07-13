@@ -34,7 +34,10 @@ const claimed = computed(() => {
       'bingo-tile',
       extra ? 'bingo-tile-extra' : 'bingo-tile-standard',
     ]"
-    :style="{ backgroundColor: claimed?.color ?? '#1a1a1a' }">
+    :style="{
+      backgroundColor: claimed?.color ?? '#1a1a1a',
+      cursor: bingo.roomOwner ? 'pointer' : 'auto',
+    }">
     <div class="bingo-task">
       {{ tile?.def.text ?? "" }}
     </div>
@@ -45,43 +48,11 @@ const claimed = computed(() => {
 .bingo-tile {
   width: 144px;
   height: 144px;
-  font-weight: 700;
+  font-weight: 500;
+  line-height: 1.5;
   margin: auto;
   transition: background-color 0.3s;
   color: #ffffff;
-
-  /* temporary */
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .bingo-tile {
-    width: 96px;
-    height: 96px;
-    font-size: 11px;
-    font-weight: 400;
-    line-height: 1.2;
-  }
-}
-
-@media (max-width: 576px) {
-  .bingo-tile {
-    width: 80px;
-    height: 80px;
-    font-size: 9px;
-    font-weight: 400;
-    line-height: 1.2;
-  }
-}
-
-@media (max-width: 426px) {
-  .bingo-tile {
-    width: 64px;
-    height: 64px;
-    font-size: 7px;
-    font-weight: 400;
-    line-height: 1.2;
-  }
 }
 
 .bingo-tile-standard {
@@ -98,5 +69,43 @@ const claimed = computed(() => {
 .bingo-task {
   padding: 8px;
   text-align: center;
+}
+
+@media (max-width: 1920px) {
+  .bingo-tile {
+    width: 120px;
+    height: 120px;
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .bingo-task {
+    padding: 6px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .bingo-tile {
+    width: 96px;
+    height: 96px;
+    font-size: 10px;
+    line-height: 1.3;
+  }
+}
+
+@media (max-width: 576px) {
+  .bingo-tile {
+    width: 80px;
+    height: 80px;
+    font-size: 9px;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 432px) {
+  .bingo-tile {
+    width: 64px;
+    height: 64px;
+    font-size: 7px;
+  }
 }
 </style>

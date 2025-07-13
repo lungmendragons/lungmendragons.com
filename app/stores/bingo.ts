@@ -16,6 +16,7 @@ export const useBingo = defineStore("bingosync-state", () => {
   const gameState = () => net.value.tryGet("connecting", "inRoom", "inServer", "gettingToken", "offline")?.game;
 
   const inRoom = () => net.value.tryGet("inRoom");
+  const roomOwner = computed(() => inRoom()?.isSync ?? true);
   // const gameActive = () => net.value.tryGet("inRoom", "offline");
   const board = () => gameState()?.tryGet("gameActive")?.session;
   const teams = () => gameState()?.state.data.teams;
@@ -109,6 +110,7 @@ export const useBingo = defineStore("bingosync-state", () => {
     teams,
     localUserTeams,
     inRoom,
+    roomOwner,
     gameSession: () => gameState()?.tryGet("gameActive"),
     gameStateDisplay: gameState,
     // gameActive,

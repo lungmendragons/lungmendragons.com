@@ -175,24 +175,17 @@ async function claim(team: TeamId, tile: TileId) {
 
 <style scoped>
 .board-container {
-  width: 750px;
   margin: 0 1rem 2rem;
-}
-
-@media (max-width: 768px) {
-  .board-container {
-    margin: 0;
-  }
 }
 
 .board-bonus {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 5px;
+  width: min-content;
 }
 
 .board-standard-container {
-  height: 750px;
   display: grid;
   gap: 4px;
   grid-template-areas:
@@ -241,26 +234,12 @@ async function claim(team: TeamId, tile: TileId) {
   gap: 4px;
 }
 
-@media (max-width: 768px) {
-  .board-standard {
-    height: 325px;
-    gap: 1px;
-  }
-}
-
 .board-heading {
   font-size: 1.875em;
   line-height: 1.225;
   margin: 0.125em 0;
   padding: 0 0.5em;
   font-weight: 700;
-}
-
-@media (max-width: 768px) {
-  .board-heading {
-    font-size: 1.25em;
-    margin: 0;
-  }
 }
 
 .heading-bonus {
@@ -271,5 +250,57 @@ async function claim(team: TeamId, tile: TileId) {
 .heading-standard {
   border-left: 6px solid #fff;
   margin-top: 1rem;
+}
+
+@media (max-width: 1920px) {
+  .board-standard-container, .board-standard {
+    gap: 3px;
+  }
+  .grid-row {
+    height: 120px;
+  }
+  .grid-col {
+    width: 120px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .board-container {
+    margin: 0 auto;
+  }
+  .grid-row {
+    height: 96px;
+  }
+  .grid-col {
+    width: 96px;
+  }
+}
+
+@media (max-width: 576px) {
+  .grid-row, .grid-col {
+    font-size: 9px;
+  }
+  .grid-row {
+    width: 15px;
+    height: 80px;
+  }
+  .grid-col {
+    height: 15px;
+    width: 80px;
+  }
+}
+
+@media (max-width: 432px) {
+  .grid-row, .grid-col {
+    font-size: 6px;
+  }
+  .grid-row {
+    width: 8px;
+    height: 64px;
+  }
+  .grid-col {
+    height: 8px;
+    width: 64px;
+  }
 }
 </style>
