@@ -179,6 +179,50 @@ async function joinRoom() {
 
 const gameStateDisplay = computed(bingo.gameStateDisplay);
 
+const users = computed(() => Object.values(bingo.inRoom()?.users ?? {}));
+const tempLog = ref([
+  `12:00 ${users.value[0]?.name} created the room`,
+  `12:00 ${users.value[0]?.name} joined Team 1`,
+  "12:00 user1 joined Team 1",
+  "12:00 user2 joined Team 2",
+  `12:00 ${users.value[0]?.name} crushed user1's balls`,
+  "12:01 admin set timer for 30 minutes",
+  "12:02 admin started game",
+  `12:03 ${users.value[0]?.name} crushed user2's balls`,
+  "12:07 team 1 claimed tile A4",
+  "12:09 team 2 claimed tile D2",
+  `12:10 ${users.value[0]?.name} uncrushed everyone's balls`,
+]);
+
+function addLog() {
+  tempLog.value.push("12:11 hhhhhhhhhh");
+}
+
+const logStyles = computed(() => {
+  const teams = bingo.teams() ?? [];
+  return {
+    ...Object.fromEntries(Object.values(bingo.inRoom()?.users ?? {}).map(u => {
+      const userColor = teams.length !== 0 && u.teams.length !== 0
+        ? teams[u.teams[0] as number]?.color
+        : "grey";
+      return [
+        u.name,
+        {
+          padding: "1px 3px",
+          color: userColor,
+          fontWeight: "bold",
+          border: "1px solid",
+          borderColor: userColor,
+          borderRadius: "2px",
+        },
+      ];
+    })),
+    ...Object.fromEntries(Object.values(teams ?? {}).map(t => {
+      return [ t.name, { color: t.color, fontWeight: "bold" } ];
+    })),
+  }
+});
+
 onMounted(() => {
   if (autojoin.value) {
     autojoin.value = false;
@@ -518,6 +562,8 @@ onMounted(() => {
             Make into online room
           </NButton>
           <NDivider :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
+          <BingoLog :items="tempLog" :highlights="logStyles" />
+          <NButton @click="addLog">add log</NButton> <!-- temp -->
         </template>
       </NFlex>
       <BingoGrid v-if="bingo.gameState === 'gameActive'" />
