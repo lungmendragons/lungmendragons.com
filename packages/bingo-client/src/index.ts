@@ -1,5 +1,6 @@
 import {
   GameSession,
+  type TilePlace,
   type ActiveBoard,
   type BoardDef,
   type TeamId,
@@ -30,6 +31,7 @@ interface BingoSyncData {
   teams: Team[] | undefined;
   start: number | undefined;
   timer: TimerState | undefined;
+  log: string[] | undefined;
 }
 
 export interface Team {
@@ -107,6 +109,7 @@ const BingoSyncDataSchema: s.Schema<BingoSyncData> = s.struct({
   teams: s.option(s.array(TeamSchema)),
   start: s.option(s.f64),
   timer: s.option(TimerStateSchema),
+  log: s.option(s.array(s.string)),
 });
 
 export type BingoAction = {
@@ -179,9 +182,11 @@ export const bingoStateMachine = stateMachine(() => {
     clearTile: { tile: TileId };
     setTeamData: { team: TeamId; color?: string; name?: string };
     sync: { data: BingoSyncData };
+    logAction: string;
   };
+  type H = object;
 
-  async function setTeamData(s: { teams: Team[] }, e: E["setTeamData"], ctx: EventCtx<S, E>) {
+  async function setTeamData(s: { teams: Team[] }, e: E["setTeamData"], ctx: EventCtx<S, E, H>) {
     const teamData = s.teams[e.team];
     if (!teamData)
       return;
@@ -203,7 +208,7 @@ export const bingoStateMachine = stateMachine(() => {
       session.start = sync.start;
   }
 
-  return cfg<[teams: Team[]], S, E>({
+  return cfg<[teams: Team[]], S, E, H>({
     initial: teams => ({
       type: "boardUnset",
       data: {
@@ -323,12 +328,51 @@ function bingoSession(machine: BingoStateMachine) {
   return machine.state.data.session;
 }
 
+type LogState = {
+  entries: string[];
+  sent: number;
+};
+
 // eslint-disable-next-line antfu/top-level-function
 export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMachine(() => {
+  function createBingoStateMachine(teams: Team[], ctx: EventCtx<S, E, H>) {
+    const out = bingoStateMachine(teams);
+    return out;
+  }
+
+  function renderTileName(tile: TilePlace) {
+    switch (tile.kind) {
+      case "main":
+        return `${String.fromCharCode(0x41 + tile.row)}${tile.col + 1}`;
+      case "extra":
+        return `E${tile.idx}`;
+    }
+  }
+
+  function renderTime(time: number) {
+    const timeLeft = time ?? 0;
+    const seconds = Math.floor((timeLeft / 1000) % 60).toString().padStart(2, "0");
+    const minutes = Math.floor(timeLeft / 60000).toString().padStart(2, "0");
+    return `${minutes}:${seconds}`;
+  }
+
+  function renderTimer(timer: TimerState) {
+    switch (timer.kind) {
+      case "paused":
+        return `paused timer at ${renderTime(timer.time)}`;
+      case "active":
+        return `started timer`;
+      case "set":
+        return `set timer for ${renderTime(timer.time)}`;
+      case "unset":
+        return `reset timer`;
+    }
+  }
+
   async function connectToRoom(
     token: string,
     username: string,
-    ctx: EventCtx<S, E>,
+    ctx: EventCtx<S, E, H>,
     prev: keyof S,
     game?: BingoStateMachine,
   ) {
@@ -359,6 +403,13 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
   function runSync(syncs: Syncs, state: S["inRoom"]) {
     if (!state.isSync)
       return;
+
+    let logSyncs: string[] | undefined;
+    if (syncs.to === undefined) {
+      logSyncs = state.log.entries.slice(state.log.sent);
+      state.log.sent = state.log.entries.length;
+    }
+
     const data = {
       state: state.game.state.type,
       active: syncs.active ? bingoSession(state.game)?.activeBoard : undefined,
@@ -367,6 +418,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       teams: syncs.teams ? state.game.state.data.teams : undefined,
       users: syncs.users ? Object.values(state.users) : undefined,
       timer: syncs.timer ? state.game.state.data.timer : undefined,
+      log: logSyncs,
     };
 
     state.websocket.send(BinaryWriter.using({
@@ -416,6 +468,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       roomId: string;
       users: Record<UserId, User>;
       game: BingoStateMachine;
+      log: LogState;
     };
     offline: {
       game: BingoStateMachine;
@@ -433,9 +486,11 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     setTimer: { timer: TimerState };
     leaveGame: undefined;
     error: NetworkError;
+    log: string;
   };
+  type H = object;
 
-  return cfg<[], S, E>({
+  return cfg<[], S, E, H>({
     initial: () => ({ type: "noLobby", data: undefined }),
     state: {
       noLobby: {
@@ -472,12 +527,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           return connectToRoom(token, username, ctx, "noLobby", undefined);
         },
         offlineRoom: async (s, e, ctx) => {
-          const game = bingoStateMachine([
+          const game = createBingoStateMachine([
             {
               color: "#2080F0",
-              name: "Team 1",
+              name: "Blue",
             },
-          ]);
+          ], ctx);
           ctx.next("offline", { game });
         },
       },
@@ -509,16 +564,16 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
         },
         serverMessage: handleServerMessage({
           [ServerOpcode.Init]: async (s, { client }, ctx) => {
-            const game = s.game ?? bingoStateMachine([
+            const game = s.game ?? createBingoStateMachine([
               {
                 color: "#2080F0",
-                name: "Team 1",
+                name: "Blue",
               },
               {
                 color: "#D03050",
-                name: "Team 2",
+                name: "Red",
               },
-            ]);
+            ], ctx);
             // game.hooks = ctx.hooks;
             ctx.next("inRoom", {
               websocket: s.websocket,
@@ -527,12 +582,21 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               userId: client.id,
               users: {},
               game,
+              log: { entries: [], sent: 0 },
             });
             await ctx.event("bingoAction", { action: { kind: "enter_room", name: s.username } });
           },
         }),
       },
       inRoom: {
+        log: async (s, e, ctx) => {
+          if (s.isSync) {
+            const now = new Date(Date.now());
+            const hour = now.getHours().toString().padStart(2, "0");
+            const minute = now.getMinutes().toString().padStart(2, "0");
+            s.log.entries.push(`${hour}:${minute} ${e}`);
+          }
+        },
         leaveGame: async (s, e, ctx) => {
           s.websocket.close();
           ctx.next("noLobby");
@@ -556,6 +620,10 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
                 }
                 s.users = users;
               }
+              if (syncData.log) {
+                s.log.entries.push(...syncData.log);
+                s.log.sent = s.log.entries.length;
+              }
               await s.game.event("sync", {
                 data: syncData,
               });
@@ -572,12 +640,17 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
         },
         bingoAction: async (s, { action, user: userId }, ctx) => {
           const user = userId ?? s.userId;
+          const userName = s.users[user]?.name;
           switch (action.kind) {
             case "click_tile": {
               if (!s.users[user]?.teams.includes(action.team))
                 break;
-              await s.game.event("clickTile", { team: action.team, tile: action.tile });
-              runSync({ active: true }, s);
+              if (await s.game.event("clickTile", { team: action.team, tile: action.tile })) {
+                ctx.event("log", `${userName} clicked tile ${
+                  renderTileName(bingoSession(s.game)!.tilePlace(action.tile))
+                } for ${s.game.state.data.teams[action.team]?.name}`);
+                runSync({ active: true }, s);
+              }
               break;
             }
             case "clear_tile": {
@@ -590,8 +663,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               if (!teamsMatch)
                 break;
 
-              await s.game.event("clearTile", { tile: action.tile });
-              runSync({ active: true }, s);
+              if (await s.game.event("clearTile", { tile: action.tile })) {
+                ctx.event("log", `${userName} cleared tile ${
+                  renderTileName(bingoSession(s.game)!.tilePlace(action.tile))
+                }`);
+                runSync({ active: true }, s);
+              }
               break;
             }
             case "enter_room": {
@@ -636,14 +713,18 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
         setBoard: async (s, { board }, ctx) => {
           if (!s.isSync)
             return;
-          await s.game.event("setBoard", { board });
-          runSync({ board: true }, s);
+          if (await s.game.event("setBoard", { board })) {
+            ctx.event("log", `${s.users[s.userId]?.name} set board`);
+            runSync({ board: true }, s);
+          }
         },
         setTimer: async (s, { timer }, ctx) => {
           if (!s.isSync)
             return;
-          await s.game.event("setTimer", { timer });
-          runSync({ timer: true }, s);
+          if (await s.game.event("setTimer", { timer })) {
+            ctx.event("log", `${s.users[s.userId]?.name} ${renderTimer(timer)}`);
+            runSync({ timer: true }, s);
+          }
         },
       },
       offline: {
@@ -653,11 +734,11 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           game.state.data.teams = [
             {
               color: "#2080F0",
-              name: "Team 1",
+              name: "Blue",
             },
             {
               color: "#D03050",
-              name: "Team 2",
+              name: "Red",
             },
           ];
           ctx.next("gettingToken", { game });

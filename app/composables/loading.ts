@@ -13,15 +13,14 @@ export function useLoading(loading: Ref<boolean>) {
       }
     },
   });
+  const active = ref(false);
 
-  let active = false;
-
-  watch(loading, () => {
-    if (active && !loading.value) {
+  watch([ loading, active ], () => {
+    if (active.value && !loading.value) {
       activeMessage.value?.destroy();
       queuedText.value = undefined;
       delay.stop();
-      active = false;
+      active.value = false;
     }
   });
 
@@ -30,7 +29,7 @@ export function useLoading(loading: Ref<boolean>) {
       activeMessage.value?.destroy();
       queuedText.value = text;
       delay.start();
-      active = true;
+      active.value = true;
     },
   };
 }

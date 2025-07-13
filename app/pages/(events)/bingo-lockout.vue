@@ -31,7 +31,7 @@ watchEffect(() => {
   console.log(bingo.gameState);
 });
 
-// const teams = computed(bingo.teams);
+const teams = computed(bingo.teams);
 const roomId = computed(() => bingo.inRoom()?.roomId);
 const roomIdUrl = computed(() => roomId.value ? `${url.origin}/bingo-lockout?room=${roomId.value}` : undefined);
 const message = useMessage();
@@ -179,29 +179,12 @@ async function joinRoom() {
 
 const gameStateDisplay = computed(bingo.gameStateDisplay);
 
-const users = computed(() => Object.values(bingo.inRoom()?.users ?? {}));
-const tempLog = ref([
-  `12:00 ${users.value[0]?.name} created the room`,
-  `12:00 ${users.value[0]?.name} joined Team 1`,
-  "12:00 user1 joined Team 1",
-  "12:00 user2 joined Team 2",
-  `12:00 ${users.value[0]?.name} crushed user1's balls`,
-  "12:01 admin set timer for 30 minutes",
-  "12:02 admin started game",
-  `12:03 ${users.value[0]?.name} crushed user2's balls`,
-  "12:07 team 1 claimed tile A4",
-  "12:09 team 2 claimed tile D2",
-  `12:10 ${users.value[0]?.name} uncrushed everyone's balls`,
-]);
-
-function addLog() {
-  tempLog.value.push("12:11 hhhhhhhhhh");
-}
+const log = computed(() => bingo.log() ?? []);
 
 const logStyles = computed(() => {
   const teams = bingo.teams() ?? [];
   return {
-    ...Object.fromEntries(Object.values(bingo.inRoom()?.users ?? {}).map(u => {
+    ...Object.fromEntries(Object.values(bingo.inRoom()?.users ?? {}).map((u) => {
       const userColor = teams.length !== 0 && u.teams.length !== 0
         ? teams[u.teams[0] as number]?.color
         : "grey";
@@ -217,16 +200,16 @@ const logStyles = computed(() => {
         },
       ];
     })),
-    ...Object.fromEntries(Object.values(teams ?? {}).map(t => {
+    ...Object.fromEntries(Object.values(teams ?? {}).map((t) => {
       return [ t.name, { color: t.color, fontWeight: "bold" } ];
     })),
-  }
+  };
 });
 
 const bingoLog = ref<ScrollbarInst>();
 
 watch(
-  tempLog.value,
+  log.value,
   async () => {
     await promiseTimeout(100);
     bingoLog.value?.scrollTo({ top: 99999, behavior: "smooth" });
@@ -307,11 +290,11 @@ onMounted(() => {
       size="small"
       class="w-[328px] mx-auto">
       <template v-if="bingo.net.state.type === 'noLobby'">
-        <NButton @click="bingo.offlineRoom()" :size="isMD ? 'medium' : 'small'">
+        <NButton :size="isMD ? 'medium' : 'small'" @click="bingo.offlineRoom()">
           Create offline room
         </NButton>
         <!-- Online -->
-        <NButton @click="showCreateRoom = true" :size="isMD ? 'medium' : 'small'">
+        <NButton :size="isMD ? 'medium' : 'small'" @click="showCreateRoom = true">
           Create online room
         </NButton>
         <NDivider style="margin: 12px 0" />
@@ -443,6 +426,7 @@ onMounted(() => {
                   :key="`name-${teamId}`">
                   <NFlex
                     vertical
+                    align="center"
                     justify="center"
                     size="small"
                     class="text-center">
@@ -503,12 +487,12 @@ onMounted(() => {
         </NFormItem>
         <NFlex
           v-if="bingo.inRoom()?.isSync"
-          :vertical="isMD"
+          wrap
           :style="{ fontSize: isMD ? '14px' : '10px' }"
           :align="isMD ? 'start' : 'center'">
-          <span>
-            Users:
-          </span>
+          <NDivider style="margin-bottom: 0">
+            Users
+          </NDivider>
           <template v-for="(bingoUser) in Object.values(bingo.inRoom()?.users ?? {})" :key="bingoUser.id">
             <NFlex>
               <!-- change to AuthPermission.BingoModerator when live, testing was annoying -->
@@ -536,7 +520,6 @@ onMounted(() => {
                 :style="{
                   fontSize: isMD ? '14px' : '10px',
                   width: 'fit-content',
-                  cursor: 'pointer',
                 }"
                 :color="{
                   textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
@@ -547,6 +530,37 @@ onMounted(() => {
               <!-- </NDropdown> -->
             </NFlex>
           </template>
+        </NFlex>
+        <NFlex
+          v-if="teams"
+          :wrap="!isMD"
+          :vertical="isMD"
+          :style="{ fontSize: isMD ? '14px' : '10px' }"
+          align="center"
+        >
+          <NDivider style="margin: 0">
+            Teams
+          </NDivider>
+          <BingoTeamNameSet
+            v-for="(team, teamId) in teams"
+            :key="`team-${teamId}`"
+            :set="(text) => bingo.setTeamName(teamId, text)"
+            :disabled="!bingo.roomOwner"
+          >
+            <NTag
+              :size="isMD ? 'medium' : 'small'"
+              :color="{
+                borderColor: team.color,
+                textColor: team.color,
+              }"
+              :style="{
+                cursor: bingo.roomOwner ? 'pointer' : 'default',
+                fontSize: isMD ? '14px' : '10px',
+              }"
+            >
+              {{ team.name }}
+            </NTag>
+          </BingoTeamNameSet>
         </NFlex>
         <template v-if="bingo.gameState !== undefined">
           <NDivider :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
@@ -573,6 +587,7 @@ onMounted(() => {
           </NButton>
           <NDivider :style="{ margin: isMD ? '24px 0' : '12px 0' }" />
           <NScrollbar
+            v-if="bingo.state === 'inRoom' && log.length > 0"
             ref="bingoLog"
             :style="{
               maxHeight: '200px',
@@ -580,9 +595,8 @@ onMounted(() => {
               padding: '4px 6px',
               borderRadius: '4px',
             }">
-            <BingoLog :items="tempLog" :highlights="logStyles" />
+            <BingoLog :items="log" :highlights="logStyles" />
           </NScrollbar>
-          <NButton @click="addLog">add log</NButton> <!-- temp -->
         </template>
       </NFlex>
       <BingoGrid v-if="bingo.gameState === 'gameActive'" />

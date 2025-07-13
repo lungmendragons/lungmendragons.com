@@ -50,11 +50,12 @@ function teamOptions(tile: TileId): DropdownOption[] {
 }
 
 function renderDropdownLabel(option: DropdownOption): VNodeChild {
+  const label = option.label as string;
   const slot = option.label === "_"
-    ? [ h(NIcon, null, () => h(IonClose)), option.label ]
+    ? [ h(NIcon, null, () => h(IonClose)), label ]
     : [
         h("div", { style: { backgroundColor: option.hex, borderRadius: "50%", width: "12px", height: "12px" } }),
-        h("div", { style: { fontSize: "12px" } }, (option.label as string).slice(-1)),
+        h("div", { style: { height: "28px" } }, label.length < 10 ? label : `${label.slice(0, 7).trim()}...`),
       ];
   return h(NFlex, { align: "center" }, slot);
 }
@@ -160,7 +161,7 @@ async function claim(team: TeamId, tile: TileId) {
             :overlap="true"
             :options="teamOptions(board.mainTile(i))"
             :render-label="renderDropdownLabel"
-            style="margin:4px"
+            style="margin: 4px;"
             @select="claim($event, board.mainTile(i))">
             <BingoTile
               :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"

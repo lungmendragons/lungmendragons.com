@@ -7,11 +7,11 @@ const props = defineProps<{
 }>();
 
 const escapedWords = computed(() =>
-  Object.keys(props.highlights).map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+  Object.keys(props.highlights).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
 );
 
 const wordRegex = computed(() =>
-  new RegExp(`\\b(${escapedWords.value.join("|")})\\b`, "g")
+  new RegExp(`\\b(${escapedWords.value.join("|")})\\b`, "g"),
 );
 
 function tokenize(line: string) {
@@ -21,14 +21,14 @@ function tokenize(line: string) {
     spec?: CSSProperties;
   }[] = [];
 
-  const time = line.slice(0,6);
+  const time = line.slice(0, 6);
   const msg = line.slice(6);
 
   let last = 0;
   segments.push({
     text: time,
     match: true,
-    spec: { color: "grey", fontFamily: "monospace" }
+    spec: { color: "grey", fontFamily: "monospace" },
   });
 
   for (const match of msg.matchAll(wordRegex.value)) {
@@ -43,7 +43,7 @@ function tokenize(line: string) {
     segments.push({
       text: word,
       match: true,
-      spec: props.highlights[word]
+      spec: props.highlights[word],
     });
 
     last = end;

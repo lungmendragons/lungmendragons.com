@@ -7,8 +7,9 @@ export const useBingo = defineStore("bingosync-state", () => {
   const net: Ref<NetworkStateMachine> = shallowRef(networkStateMachine(wsurl, "")());
 
   net.value.hooks.afterEvent = (triggered, s, e) => {
-    if (triggered)
+    if (triggered) {
       triggerRef(net);
+    }
   };
 
   type S = NetworkStateMachine["Infer"]["state"];
@@ -68,6 +69,14 @@ export const useBingo = defineStore("bingosync-state", () => {
         color,
       },
     }),
+    setTeamName: async (team: TeamId, name: string) => await net.value.event("bingoAction", {
+      action: {
+        kind: "set_team_data",
+        team,
+        name,
+        color: undefined,
+      },
+    }),
     clickTile: async (team: TeamId, tile: TileId) => await net.value.event("bingoAction", {
       action: {
         kind: "click_tile",
@@ -111,6 +120,7 @@ export const useBingo = defineStore("bingosync-state", () => {
     localUserTeams,
     inRoom,
     roomOwner,
+    log: () => inRoom()?.log.entries,
     gameSession: () => gameState()?.tryGet("gameActive"),
     gameStateDisplay: gameState,
     // gameActive,

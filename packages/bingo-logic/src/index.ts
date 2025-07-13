@@ -31,6 +31,15 @@ export interface LineCount {
   d: number;
 }
 
+export type TilePlace = {
+  kind: "main";
+  row: number;
+  col: number;
+} | {
+  kind: "extra";
+  idx: number;
+};
+
 export class GameSession {
   /** The definition for the board in the bingo game. */
   boardDef: BoardDef;
@@ -59,6 +68,21 @@ export class GameSession {
 
   mainTileRowCol(row: number, col: number): TileId {
     return row * this.boardDef.width + col;
+  }
+
+  tilePlace(id: TileId): TilePlace {
+    if (id < this.boardDef.width * this.boardDef.height) {
+      return {
+        kind: "main",
+        row: Math.floor(id / this.boardDef.width),
+        col: id % this.boardDef.width,
+      };
+    } else {
+      return {
+        kind: "extra",
+        idx: id - (this.boardDef.width * this.boardDef.height),
+      };
+    }
   }
 
   extraTile(idx: number): TileId {

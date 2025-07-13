@@ -1,5 +1,6 @@
 type StateSet = Record<string, any>;
 type EventSet = Record<string, any>;
+type HookSet = Record<string, any>;
 
 type Opt<A> = A extends [ type: infer K, data: infer D ] ?
   D extends undefined ? [ type: K, data?: D ] : [ type: K, data: D ] : never;
@@ -7,10 +8,10 @@ type Opt<A> = A extends [ type: infer K, data: infer D ] ?
 type TriOpt<A> = A extends [ type: infer K, data: infer D, hooks: infer H ] ?
   D extends undefined ? [ type: K, data?: D, hooks?: H ] : [ type: K, data: D, hooks?: H ] : never;
 
-export interface EventCtx<S extends StateSet, E extends EventSet> {
+export interface EventCtx<S extends StateSet, E extends EventSet, H extends HookSet> {
   next: <K extends Key<S>>(...params: Opt<[type: K, data: S[K]]>) => void;
   event: EventCall<E>;
-  hooks: MachineInstance<S, E>["hooks"];
+  hooks: Hooks<S, E, H>;
 }
 
 type Combine<S extends Record<string, any>> =
@@ -24,11 +25,11 @@ function combine<
   return { type, data } as unknown as Combine<V>;
 }
 
-type MachineCfg<C extends any[], S extends StateSet, E extends EventSet> = {
+type MachineCfg<C extends any[], S extends StateSet, E extends EventSet, H extends HookSet> = {
   initial: (...args: C) => Combine<S>;
   state: {
     [SK in keyof S]?: {
-      [EK in keyof E]?: (state: S[SK], event: E[EK], ctx: EventCtx<S, E>) => Promise<void>;
+      [EK in keyof E]?: (state: S[SK], event: E[EK], ctx: EventCtx<S, E, H>) => Promise<void>;
     } /* & {
       enter?: (state: S[SK], prev: Combine<S>, ctx: EventCtx<S, E>) => Promise<void>;
       exit?: (state: S[SK], next: Combine<S>, ctx: EventCtx<S, E>) => Promise<void>;
@@ -37,17 +38,23 @@ type MachineCfg<C extends any[], S extends StateSet, E extends EventSet> = {
   };
 };
 
-type EventCall<E extends EventSet> = <K extends Key<E>>(...params: Opt<[type: K, data: E[K]]>) => Promise<void>;
+type EventCall<E extends EventSet> = <K extends Key<E>>(...params: Opt<[type: K, data: E[K]]>) => Promise<boolean>;
 
-export interface MachineInstance<S extends StateSet, E extends EventSet> {
+type Hooks<S extends StateSet, E extends EventSet, H extends HookSet> = {
+  afterEvent?: (eventProcessed: boolean, state: Combine<S>, event: Combine<E>) => void;
+} & Partial<H>;
+
+export interface MachineInstance<
+  S extends StateSet,
+  E extends EventSet,
+  H extends HookSet,
+> {
   state: Combine<S>;
   event: <K extends Key<E>>(...params: [
-    ...TriOpt<[type: K, data: E[K], hooks: MachineInstance<S, E>["hooks"]]>,
-  ]) => Promise<void>;
+    ...TriOpt<[type: K, data: E[K], hooks: Hooks<S, E, H>]>,
+  ]) => Promise<boolean>;
   tryGet: <K extends Key<S>>(...types: K[]) => S[K] | undefined;
-  hooks: {
-    afterEvent?: (eventProcessed: boolean, state: Combine<S>, event: Combine<E>) => void;
-  };
+  hooks: Hooks<S, E, H>;
   Infer: { state: S; event: E };
 }
 
@@ -57,9 +64,10 @@ export function stateMachine<
   C extends any[],
   S extends StateSet,
   E extends EventSet,
+  H extends HookSet,
 >(
-  f: () => MachineCfg<C, S, E>,
-): (...args: C) => MachineInstance<S, E> {
+  f: () => MachineCfg<C, S, E, H>,
+): (...args: C) => MachineInstance<S, E, H> {
   const cfg = f();
 
   class StateMachine {
@@ -69,35 +77,56 @@ export function stateMachine<
 
     state: Combine<S>;
 
-    hooks: MachineInstance<S, E>["hooks"] = {};
+    hooks: Hooks<S, E, H> = {};
 
     next<K extends Key<S>>(type: K, data?: S[K]) {
       this.state = combine(type, data);
     }
 
-    async event<K extends Key<E>>(type: K, data?: E[K], hooks?: MachineInstance<S, E>["hooks"]) {
-      const ctx: EventCtx<S, E> = {
+    async event<K extends Key<E>>(type: K, data?: E[K], hooks?: Hooks<S, E, H>) {
+      let mergedHooks: Record<string, any>;
+      if (hooks) {
+        mergedHooks = hooks;
+        for (const [ name, hook ] of Object.entries(this.hooks)) {
+          const mergeHook = mergedHooks[name];
+          if (mergeHook) {
+            mergedHooks[name] = (...args: any[]) => {
+              mergeHook(...args);
+              (hook as any)(...args);
+            };
+          } else {
+            mergeHook[name] = hook;
+          }
+        }
+      } else {
+        mergedHooks = this.hooks;
+      }
+
+      const ctx: EventCtx<S, E, H> = {
         next: (t, d?) => this.next(t, d),
         event: async (t, d?) => {
           const handler = cfg.state[this.state.type as string]?.[t];
           if (handler) {
             await handler(this.state.data as any, d as any, ctx);
             ctx.hooks.afterEvent?.(true, this.state, combine(t, d));
+            return true;
           } else {
             ctx.hooks.afterEvent?.(false, this.state, combine(t, d));
+            return false;
           }
         },
-        hooks: {
-          afterEvent: hooks?.afterEvent
-            ? (p, s, e) => {
-                hooks.afterEvent!(p, s, e);
-                this.hooks.afterEvent?.(p, s, e);
-              }
-            : this.hooks.afterEvent,
-        },
+        hooks: mergedHooks as Hooks<S, E, H>,
+        // hooks: Object.entries(hooks)  {
+        //   afterEvent: hooks?.afterEvent
+        //     ? (p, s, e) => {
+        //         hooks.afterEvent!(p, s, e);
+        //         this.hooks.afterEvent?.(p, s, e);
+        //       }
+        //     : this.hooks.afterEvent,
+        // },
       };
 
-      await (ctx.event as any)(type, data);
+      return await (ctx.event as any)(type, data);
     };
 
     tryGet<K extends Key<S>>(...types: K[]) {
@@ -108,15 +137,16 @@ export function stateMachine<
   };
 
   return (...args: C) => {
-    const out: Omit<MachineInstance<S, E>, "Infer"> = new StateMachine(...args);
-    return out as MachineInstance<S, E>;
+    const out: Omit<MachineInstance<S, E, H>, "Infer"> = new StateMachine(...args);
+    return out as MachineInstance<S, E, H>;
   };
 }
 
 export function states<
   S extends StateSet,
   E extends EventSet,
->(state: MachineCfg<any, S, E>["state"]): MachineCfg<any, S, E>["state"] {
+  H extends HookSet,
+>(state: MachineCfg<any, S, E, H>["state"]): MachineCfg<any, S, E, H>["state"] {
   return state;
 }
 
@@ -124,6 +154,7 @@ export function cfg<
   C extends any[],
   S extends StateSet,
   E extends EventSet,
->(data: MachineCfg<C, S, E>): MachineCfg<C, S, E> {
+  H extends HookSet,
+>(data: MachineCfg<C, S, E, H>): MachineCfg<C, S, E, H> {
   return data;
 }
