@@ -235,11 +235,20 @@ watch(
 );
 
 onMounted(() => {
+  window.onbeforeunload = (event) => {
+    if (bingo.gameState === "gameActive" && bingo.roomOwner)
+      event.preventDefault();
+  };
+
   if (autojoin.value) {
     autojoin.value = false;
     if (bingo.state === "noLobby")
       showJoinRoom.value = true;
   }
+});
+
+onUnmounted(() => {
+  window.onbeforeunload = null;
 });
 </script>
 
