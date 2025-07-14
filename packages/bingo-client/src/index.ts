@@ -251,7 +251,7 @@ export const bingoStateMachine = stateMachine(() => {
                 ctx.next("gameActive", {
                   session,
                   teams: data.teams ?? s.teams,
-                  timer: data.timer ?? { kind: "unset" },
+                  timer: data.timer ?? s.timer,
                 });
               }
               break;
