@@ -65,8 +65,9 @@ useFavicon(favicon);
 
 const isLG = useMediaQuery(mediaQuery.minWidth.lg as string);
 const layout = computed(() => {
-  if (subdomain.value) {
-    return "empty";
+  const layout = useRoute().meta.layout;
+  if (layout) {
+    return layout;
   } else  {
     return isLG.value ? "desktop" : "mobile";
   }
@@ -111,7 +112,7 @@ onMounted(() => {
 
     <!-- Loading screen during hydration, shouldn't exceed ~500ms or so -->
     <NFlex
-      v-if="!isLoaded"
+      v-if="!isLoaded && layout !== 'empty'"
       vertical
       justify="center"
       :style="{ width: '100vw', height: '100svh' }">

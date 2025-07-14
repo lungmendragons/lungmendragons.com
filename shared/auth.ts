@@ -5,6 +5,7 @@ export enum AuthPermission {
   User = 1 << 0,
   Writer = 1 << 1,
   Member = 1 << 2,
+  BingoModerator = 1 << 3,
   Admin = 1 << 7,
 }
 

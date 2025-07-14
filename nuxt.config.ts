@@ -28,7 +28,7 @@ export default defineNuxtConfig({
   ],
   devtools: {
     enabled: true,
-    componentInspector: false,
+    componentInspector: true,
   },
   build: {
     transpile: [ "vueuc", "naive-ui" ],
@@ -77,6 +77,7 @@ export default defineNuxtConfig({
         "font-src": [
           "'self'",
           "data:",
+          "fonts.gstatic.com",
         ],
         "img-src": [
           "'self'",
@@ -92,6 +93,7 @@ export default defineNuxtConfig({
         "style-src": [
           "'self'",
           "'unsafe-inline'",
+          "fonts.googleapis.com",
         ],
       },
       crossOriginEmbedderPolicy:
@@ -188,10 +190,16 @@ export default defineNuxtConfig({
   },
   alias: {
     "rs-app": fileURLToPath(new URL("./rs-app/src/lib.ts", import.meta.url)),
+    "$api/*": fileURLToPath(new URL("./server/api/*", import.meta.url)),
   },
   eslint: {
     config: {
       standalone: false,
+      // can be uncommented to provide slow type-aware lints. mainly useful
+      // for floating promises.
+      // typescript: {
+      //   tsconfigPath: "./tsconfig.json",
+      // },
     },
   },
   css: [
@@ -214,8 +222,8 @@ export default defineNuxtConfig({
   },
   image: {
     screens: {
-      "xs": 432,
-      "sm": 576,
+      xs: 432,
+      sm: 576,
     },
   },
 });

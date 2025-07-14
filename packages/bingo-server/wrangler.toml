@@ -1,0 +1,16 @@
+name = "bingo-server"
+main = "src/index.ts"
+compatibility_date = "2025-04-01"
+compatibility_flags = [ "nodejs_compat" ]
+
+[route]
+custom_domain = true
+pattern = "bingosync-server.lungmendragons.com"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["WSDurableObject"]
+
+[[durable_objects.bindings]]
+class_name = "WSDurableObject"
+name = "WSDurableObject"

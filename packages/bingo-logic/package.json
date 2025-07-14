@@ -1,0 +1,14 @@
+{
+  "name": "bingo-logic",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts",
+    "./gen": "./src/gen/index.ts"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}
