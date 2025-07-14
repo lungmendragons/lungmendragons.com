@@ -5,7 +5,7 @@ import type { InputInst, ScrollbarInst /* , DropdownOption */ } from "naive-ui";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
-import { useNow, useMediaQuery, promiseTimeout } from "@vueuse/core";
+import { useNow, useMediaQuery, promiseTimeout, useDark } from "@vueuse/core";
 import type { BoardDef } from "bingo-logic";
 import * as z from "zod";
 
@@ -18,6 +18,9 @@ const nameField = ref("");
 // ]);
 
 const isMD = useMediaQuery(mediaQuery.minWidth.md);
+const isDark = useDark();
+const defaultTagColor = computed(() => isDark.value ? "#fff" : "#000");
+
 const url = useRequestURL();
 const autojoin = ref(false);
 const joinParam = url.searchParams.get("room");
@@ -168,7 +171,22 @@ async function createRoom() {
 async function joinRoom() {
   showJoinRoom.value = false;
   loading.start("Joining room...");
-  await bingo.joinRoom(nameField.value, takeRef(roomIdField, ""), (err) => {
+  let roomId = takeRef(roomIdField, "").trim();
+  if (roomId.length > 16) {
+    const enteredUrl = new URL(roomId);
+    if (enteredUrl.pathname !== "/bingo-lockout")
+      return;
+    if (enteredUrl.origin !== url.origin)
+      return;
+    const roomParam = enteredUrl.searchParams.get("room");
+    if (roomParam)
+      roomId = roomParam;
+  }
+
+  if (!roomId || roomId.length > 16)
+    return;
+
+  await bingo.joinRoom(nameField.value, roomId, (err) => {
     if (err.kind === "token") {
       message.error("Could not retrieve bingo token.");
     } else if (err.kind === "ws") {
@@ -187,7 +205,7 @@ const logStyles = computed(() => {
     ...Object.fromEntries(Object.values(bingo.inRoom()?.users ?? {}).map((u) => {
       const userColor = teams.length !== 0 && u.teams.length !== 0
         ? teams[u.teams[0] as number]?.color
-        : "grey";
+        : isDark.value ? "grey" : "black";
       return [
         u.name,
         {
@@ -303,12 +321,12 @@ onMounted(() => {
             v-model:value="roomIdField"
             type="text"
             :size="isMD ? 'medium' : 'small'"
-            placeholder="Room ID"
+            placeholder="Room ID / URL"
           />
           <NButton
             class="w-full"
             :size="isMD ? 'medium' : 'small'"
-            @click="bingo.joinRoom(nameField, roomIdField)">
+            @click="showJoinRoom = true">
             Join online room
           </NButton>
         </NFlex>
@@ -522,8 +540,8 @@ onMounted(() => {
                   width: 'fit-content',
                 }"
                 :color="{
-                  textColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
-                  borderColor: (bingo.teams() ?? [])[bingoUser.teams[0]!]?.color ?? '#fff',
+                  textColor: bingo.teams()?.[bingoUser.teams[0]!]?.color ?? defaultTagColor,
+                  borderColor: bingo.teams()?.[bingoUser.teams[0]!]?.color ?? defaultTagColor,
                 }">
                 {{ bingoUser.name }}
               </NTag>
