@@ -6,6 +6,7 @@ import Socials from "./Socials.vue";
 import { getSidebarMenu } from "~/utils/menu";
 import Fa6BrandsYoutube from "~icons/fa6-brands/youtube";
 import MdiHeart from "~icons/mdi/heart";
+import LineMdDownloadLoop from "~icons/line-md/download-loop";
 
 const { drawer = false } = defineProps<{ drawer?: boolean }>();
 
@@ -50,6 +51,24 @@ onBeforeMount(() => {
       />
     </NScrollbar>
     <NFlex vertical style="margin: 0.5rem">
+      <NButton
+        :size="isMD && showSocials ? 'medium' : 'small'"
+        strong
+        round
+        tag="a"
+        href="https://www.ldplayer.net/games/arknights-on-pc.html"
+        target="_blank"
+        rel="noopener noreferrer"
+        color="#fdd23e"
+        class="w-full text-[0.7rem] md:text-sm mb-1"
+        icon-placement="right">
+        <template #icon>
+          <NIcon :size="25">
+            <LineMdDownloadLoop />
+          </NIcon>
+        </template>
+        <img src="/ldplayer/logo-black.png" style="height: 18px;">
+      </NButton>
       <Socials v-if="showSocials" class="p-2" />
       <NFlex justify="space-around" :vertical="isLG">
         <NButton
