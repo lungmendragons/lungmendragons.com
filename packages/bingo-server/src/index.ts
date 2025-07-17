@@ -112,6 +112,7 @@ function setClientData(client: WebSocket, data: ClientData) {
 export class WSDurableObject extends DurableObject {
   constructor(ctx: DurableObjectState, env: Env) {
     super(ctx, env);
+    ctx.setWebSocketAutoResponse(new WebSocketRequestResponsePair("keepalive:heartbeat", "keepalive:ack"));
   }
 
   async fetch(request: Request) {
@@ -195,7 +196,7 @@ export class WSDurableObject extends DurableObject {
       if (isArrayBuffer(data)) {
         message = BinaryReader.using(data, ClientMessageSchema.decode);
       } else {
-        const buffer = base64Url.decode(data).buffer;
+        const buffer = base64Url.decode(data);
         message = BinaryReader.using(buffer, ClientMessageSchema.decode);
       }
     } catch (e) {

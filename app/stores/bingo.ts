@@ -1,3 +1,4 @@
+import { useTimeout } from "@vueuse/core";
 import { type NetworkError, type NetworkStateMachine, networkStateMachine } from "bingo-client";
 import type { TeamId, TileId, BoardDef } from "bingo-logic";
 
@@ -6,10 +7,23 @@ const wsurl = import.meta.dev ? "ws://localhost:2930" : "wss://bingosync-server.
 export const useBingo = defineStore("bingosync-state", () => {
   const net: Ref<NetworkStateMachine> = shallowRef(networkStateMachine(wsurl, "")());
 
+  const heartbeatTimeout = useTimeout(60000, { controls: true, callback: async () => {
+    net.value.event("sendKeepalive");
+    heartbeatTimeout.start();
+  } });
+
   net.value.hooks.afterEvent = (triggered, s, e) => {
     if (triggered) {
       triggerRef(net);
     }
+  };
+  net.value.hooks.serverMessage = (message) => {
+    heartbeatTimeout.start();
+    console.log("server message", message);
+  };
+  net.value.hooks.clientMessage = (message) => {
+    heartbeatTimeout.start();
+    console.log("client message: ", message);
   };
 
   type S = NetworkStateMachine["Infer"]["state"];

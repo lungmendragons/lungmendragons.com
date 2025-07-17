@@ -87,15 +87,15 @@ export function stateMachine<
       let mergedHooks: Record<string, any>;
       if (hooks) {
         mergedHooks = hooks;
-        for (const [ name, hook ] of Object.entries(this.hooks)) {
-          const mergeHook = mergedHooks[name];
-          if (mergeHook) {
+        for (const [ name, newHook ] of Object.entries(this.hooks)) {
+          const currentHook = mergedHooks[name];
+          if (currentHook) {
             mergedHooks[name] = (...args: any[]) => {
-              mergeHook(...args);
-              (hook as any)(...args);
+              currentHook(...args);
+              (newHook as any)(...args);
             };
           } else {
-            mergeHook[name] = hook;
+            mergedHooks[name] = newHook;
           }
         }
       } else {
