@@ -11,6 +11,7 @@ import {
   ClientOpcode,
   ServerMessageSchema,
   ServerOpcode,
+  type ClientMessage,
   type ServerMessage,
 } from "bingo-server/protocol";
 import {
@@ -386,12 +387,15 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       opened.value = true;
       await ctx.event("serverConnected");
     };
-    websocket.onmessage = async ev => ev.data instanceof ArrayBuffer
-      ? await ctx.event(
-        "serverMessage",
-        { message: BinaryReader.using(ev.data, ServerMessageSchema.decode) },
-      )
-      : undefined;
+    websocket.onmessage = async (ev) => {
+      if (ev.data instanceof ArrayBuffer) {
+        const message = BinaryReader.using(ev.data, ServerMessageSchema.decode);
+        await ctx.event("serverMessage", { message });
+        ctx.hooks.serverMessage?.(message);
+      } else if (typeof ev.data === "string") {
+        console.log(ev.data);
+      }
+    };
     websocket.onclose = async () => {
       if (!opened.value) {
         await ctx.event("error", { kind: "ws" });
@@ -400,8 +404,11 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     };
   }
 
-  function runSync(syncs: Syncs, state: S["inRoom"]) {
+  function runSync(syncs: Syncs, state: S["inRoom"], ctx: EventCtx<S, E, H>) {
     if (!state.isSync)
+      return;
+
+    if (syncs.to === state.userId)
       return;
 
     let logSyncs: string[] | undefined;
@@ -421,21 +428,21 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       log: logSyncs,
     };
 
-    state.websocket.send(BinaryWriter.using({
+    sendClientMessage({
       opcode: ClientOpcode.SendSync,
       data: BinaryWriter.using(data, BingoSyncDataSchema.encode),
       to: syncs.to,
-    }, ClientMessageSchema.encode));
+    }, state.websocket, ctx);
   }
 
-  function sendAction(action: BingoAction, state: S["inRoom"]) {
+  function sendAction(action: BingoAction, state: S["inRoom"], ctx: EventCtx<S, E, H>) {
     if (state.isSync)
       return;
 
-    state.websocket.send(BinaryWriter.using({
+    sendClientMessage({
       opcode: ClientOpcode.SendAction,
       data: BinaryWriter.using(action, BingoActionSchema.encode),
-    }, ClientMessageSchema.encode));
+    }, state.websocket, ctx);
   }
 
   type ServerMessageHooks<S, C> = {
@@ -446,6 +453,11 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
   ) => async (s: S, { message }: E["serverMessage"], c: C) =>
     // yeah this sucks.
     hooks[message.opcode]?.(s, message as any as never, c);
+
+  function sendClientMessage(message: ClientMessage, ws: WebSocket, ctx: EventCtx<S, E, H>) {
+    ws.send(BinaryWriter.using(message, ClientMessageSchema.encode));
+    ctx.hooks.clientMessage?.(message);
+  };
 
   type S = {
     noLobby: undefined;
@@ -487,8 +499,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     leaveGame: undefined;
     error: NetworkError;
     log: string;
+    sendKeepalive: undefined;
   };
-  type H = object;
+  type H = {
+    clientMessage: (message: ClientMessage) => void;
+    serverMessage: (message: ServerMessage) => void;
+  };
 
   return cfg<[], S, E, H>({
     initial: () => ({ type: "noLobby", data: undefined }),
@@ -542,9 +558,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           ctx.next("noLobby");
         },
         serverConnected: async (s, e, ctx) => {
-          s.websocket.send(BinaryWriter.using({
-            opcode: ClientOpcode.Init,
-          }, ClientMessageSchema.encode));
+          sendClientMessage({ opcode: ClientOpcode.Init }, s.websocket, ctx);
           ctx.next("inServer", s);
         },
         serverDisconnected: async (s, e, ctx) => {
@@ -587,6 +601,9 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
             await ctx.event("bingoAction", { action: { kind: "enter_room", name: s.username } });
           },
         }),
+        sendKeepalive: async (s, e, ctx) => {
+          s.websocket.send("keepalive:heartbeat");
+        },
       },
       inRoom: {
         log: async (s, e, ctx) => {
@@ -649,7 +666,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
                 ctx.event("log", `${userName} clicked tile ${
                   renderTileName(bingoSession(s.game)!.tilePlace(action.tile))
                 } for ${s.game.state.data.teams[action.team]?.name}`);
-                runSync({ active: true }, s);
+                runSync({ active: true }, s, ctx);
               }
               break;
             }
@@ -667,7 +684,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
                 ctx.event("log", `${userName} cleared tile ${
                   renderTileName(bingoSession(s.game)!.tilePlace(action.tile))
                 }`);
-                runSync({ active: true }, s);
+                runSync({ active: true }, s, ctx);
               }
               break;
             }
@@ -677,8 +694,8 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
                 name: action.name,
                 teams: s.userId === user ? s.game.state.data.teams.map((_, i) => i) : [],
               };
-              runSync({ board: true, teams: true, users: true, active: true, timer: true, to: user }, s);
-              runSync({ users: true }, s);
+              runSync({ board: true, teams: true, users: true, active: true, timer: true, to: user }, s, ctx);
+              runSync({ users: true }, s, ctx);
               break;
             }
             case "join_team": {
@@ -693,7 +710,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               } else {
                 userData.teams = [ action.team ];
               }
-              runSync({ users: true }, s);
+              runSync({ users: true }, s, ctx);
               break;
             }
             case "set_team_data": {
@@ -704,18 +721,18 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
                 color: action.color,
                 name: action.name,
               });
-              runSync({ teams: true }, s);
+              runSync({ teams: true }, s, ctx);
               break;
             }
           }
-          sendAction(action, s);
+          sendAction(action, s, ctx);
         },
         setBoard: async (s, { board }, ctx) => {
           if (!s.isSync)
             return;
           if (await s.game.event("setBoard", { board })) {
             ctx.event("log", `${s.users[s.userId]?.name} set board`);
-            runSync({ board: true }, s);
+            runSync({ board: true }, s, ctx);
           }
         },
         setTimer: async (s, { timer }, ctx) => {
@@ -723,8 +740,11 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
             return;
           if (await s.game.event("setTimer", { timer })) {
             ctx.event("log", `${s.users[s.userId]?.name} ${renderTimer(timer)}`);
-            runSync({ timer: true }, s);
+            runSync({ timer: true }, s, ctx);
           }
+        },
+        sendKeepalive: async (s, e, ctx) => {
+          s.websocket.send("keepalive:heartbeat");
         },
       },
       offline: {
