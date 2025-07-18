@@ -231,14 +231,18 @@ const bingoLog = ref<ScrollbarInst>();
 const is5bgm = ref<HTMLAudioElement>();
 const isMuted = ref(false);
 const disableSlider = ref(false);
-const volume = ref(0.05);
+const volume = ref(20);
+const trueVolume = computed(() => volume.value / 400);
+
+const endsfx = ref<HTMLAudioElement>();
+const isEndedWatchRef = computed(() => timerEnded());
 
 function toggleMute() {
   if (is5bgm.value) {
     disableSlider.value = !disableSlider.value;
     is5bgm.value.volume = disableSlider.value
       ? 0
-      : volume.value;
+      : trueVolume.value;
     isMuted.value = disableSlider.value;
   }
 }
@@ -252,9 +256,13 @@ function startPlayback() {
       const steps = 50;
       let currentStep = 0;
       const fadeInterval = setInterval(() => {
+        if (!is5bgm.value) {
+          clearInterval(fadeInterval);
+          return;
+        }
         currentStep++;
         const progress = currentStep / steps;
-        is5bgm.value!.volume = Math.min(progress * volume.value, volume.value);
+        is5bgm.value.volume = Math.min(progress * trueVolume.value, trueVolume.value);
         if (currentStep >= steps)
           clearInterval(fadeInterval);
       }, 20);
@@ -280,8 +288,18 @@ watch(
   volume,
   () => {
     if (is5bgm.value)
-      is5bgm.value.volume = volume.value;
+      is5bgm.value.volume = trueVolume.value;
     isMuted.value = volume.value === 0;
+  }
+);
+
+watch(
+  isEndedWatchRef,
+  () => {
+    if (timerEnded() && endsfx.value) {
+      endsfx.value.volume = trueVolume.value + 0.3;
+      endsfx.value.play();
+    }
   }
 );
 
@@ -419,8 +437,6 @@ onUnmounted(() => {
               v-model:value="volume"
               style="width: 200px; margin-right: 0.75rem;"
               :disabled="disableSlider"
-              :max="1"
-              :step="0.01"
               :theme-overrides="{
                 fillColor: '#2080f0',
                 fillColorHover: '#2080f0',
@@ -428,6 +444,9 @@ onUnmounted(() => {
             />
             <audio ref="is5bgm" loop>
               <source src="/mp3/m_sys_rouge4_theme2_loop.mp3" type="audio/mpeg">
+            </audio>
+            <audio ref="endsfx">
+              <source src="/mp3/g_ui_transition.mp3" type="audio/mpeg">
             </audio>
           </NFlex>
           <!-- Timer -->
