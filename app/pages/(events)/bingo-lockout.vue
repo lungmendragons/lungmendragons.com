@@ -421,7 +421,7 @@ onUnmounted(() => {
             />
             <Teleport to="#teleports">
               <audio ref="is5bgm" loop>
-                <source src="~/assets/mp3/m_sys_rouge4_theme2_loop.mp3" type="audio/mpeg">
+                <source src="/mp3/m_sys_rouge4_theme2_loop.mp3" type="audio/mpeg">
               </audio>
             </Teleport>
           </NFlex>
