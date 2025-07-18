@@ -5,6 +5,8 @@ import type { InputInst, ScrollbarInst /* , DropdownOption */ } from "naive-ui";
 import MdiPlay from "~icons/mdi/play";
 import MdiPause from "~icons/mdi/pause";
 import MdiCloseThick from "~icons/mdi/close-thick";
+import HumbleiconsVolume2 from "~icons/humbleicons/volume-2";
+import HumbleiconsVolumeOff from "~icons/humbleicons/volume-off";
 import { useNow, useMediaQuery, promiseTimeout, useDark } from "@vueuse/core";
 import type { BoardDef } from "bingo-logic";
 import * as z from "zod";
@@ -226,12 +228,36 @@ const logStyles = computed(() => {
 
 const bingoLog = ref<ScrollbarInst>();
 
+const is5bgm = ref<HTMLAudioElement>();
+const isMuted = ref(false);
+const disableSlider = ref(false);
+const volume = ref(0.05);
+
+function toggleMute() {
+  if (is5bgm.value) {
+    disableSlider.value = !disableSlider.value;
+    is5bgm.value.volume = disableSlider.value
+      ? 0
+      : volume.value;
+    isMuted.value = disableSlider.value;
+  }
+}
+
 watch(
   log.value,
   async () => {
     await promiseTimeout(100);
     bingoLog.value?.scrollTo({ top: 99999, behavior: "smooth" });
   },
+);
+
+watch(
+  volume,
+  () => {
+    if (is5bgm.value)
+      is5bgm.value.volume = volume.value;
+    isMuted.value = volume.value === 0;
+  }
 );
 
 onMounted(() => {
@@ -244,6 +270,24 @@ onMounted(() => {
     autojoin.value = false;
     if (bingo.state === "noLobby")
       showJoinRoom.value = true;
+  }
+
+  if (is5bgm.value) {
+    is5bgm.value.volume = 0;
+    is5bgm.value
+      .play()
+      .then(() => {
+        const steps = 50;
+        let currentStep = 0;
+        const fadeInterval = setInterval(() => {
+          currentStep++;
+          const progress = currentStep / steps;
+          is5bgm.value!.volume = Math.min(progress * volume.value, volume.value);
+          if (currentStep >= steps)
+            clearInterval(fadeInterval);
+        }, 20);
+      })
+      .catch((e) => console.error("audio error", e));
   }
 });
 
@@ -350,6 +394,37 @@ onUnmounted(() => {
         size="small"
         class="flex-none w-[328px] mx-auto xl:mx-4">
         <template v-if="gameStateDisplay">
+          <NFlex
+            justify="center"
+            align="center"
+            class="mx-auto w-full">
+            <NButton
+              circle
+              secondary
+              @click="toggleMute">
+              <template #icon>
+                <NIcon>
+                  <component :is="isMuted ? HumbleiconsVolumeOff : HumbleiconsVolume2" />
+                </NIcon>
+              </template>
+            </NButton>
+            <NSlider
+              v-model:value="volume"
+              style="width: 200px; margin-right: 0.75rem;"
+              :disabled="disableSlider"
+              :max="1"
+              :step="0.01"
+              :theme-overrides="{
+                fillColor: '#2080f0',
+                fillColorHover: '#2080f0',
+              }"
+            />
+            <Teleport to="#teleports">
+              <audio ref="is5bgm" loop>
+                <source src="~/assets/mp3/m_sys_rouge4_theme2_loop.mp3" type="audio/mpeg">
+              </audio>
+            </Teleport>
+          </NFlex>
           <!-- Timer -->
           <NFlex
             v-if="bingo.roomOwner"
