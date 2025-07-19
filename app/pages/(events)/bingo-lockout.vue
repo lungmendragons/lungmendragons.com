@@ -248,7 +248,8 @@ function toggleMute() {
 }
 
 function startPlayback() {
-  if (!is5bgm.value) return;
+  if (!is5bgm.value)
+    return;
   is5bgm.value.volume = 0;
   is5bgm.value
     .play()
@@ -267,7 +268,7 @@ function startPlayback() {
           clearInterval(fadeInterval);
       }, 20);
     })
-    .catch((e) => console.error("audio error", e));
+    .catch(e => console.error("audio error", e));
 }
 
 watch(
@@ -290,7 +291,7 @@ watch(
     if (is5bgm.value)
       is5bgm.value.volume = trueVolume.value;
     isMuted.value = volume.value === 0;
-  }
+  },
 );
 
 watch(
@@ -300,7 +301,7 @@ watch(
       endsfx.value.volume = trueVolume.value + 0.3;
       endsfx.value.play();
     }
-  }
+  },
 );
 
 onMounted(() => {

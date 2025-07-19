@@ -179,7 +179,7 @@ export class GameSession {
       } else {
         // the current team has claimed the tile, so toggling the click
         // will remove their claim.
-        active.claimed.splice(idx);
+        active.claimed.splice(idx, 1);
       }
     }
   }

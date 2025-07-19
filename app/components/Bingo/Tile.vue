@@ -18,10 +18,11 @@ const tile = computed(() => {
 });
 
 const claimed = computed(() => {
-  const team = tile.value?.active.claimed[0];
-  if (team === undefined)
-    return undefined;
-  return bingo.teams()![team];
+  const claim = tile.value?.active.claimed;
+  if (!claim || claim.length === 0)
+    return [];
+  const teams = bingo.teams()!;
+  return claim.map(v => ({ team: teams[v]!, teamId: v }));
 });
 </script>
 
@@ -35,12 +36,39 @@ const claimed = computed(() => {
       extra ? 'bingo-tile-extra' : 'bingo-tile-standard',
     ]"
     :style="{
-      backgroundColor: claimed?.color ?? '#1a1a1a',
-      cursor: bingo.roomOwner ? 'pointer' : 'auto',
+      position: 'relative',
+      backgroundColor: '#1a1a1a',
+      overflow: 'hidden',
     }">
-    <div class="bingo-task">
+    <div
+      class="bingo-task"
+      :style="{
+        textShadow: claimed.length > 0 ? `#000 0 0 4px` : undefined,
+      }">
       {{ tile?.def.text ?? "" }}
     </div>
+    <div
+      v-if="claimed.length === 1"
+      :style="{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        backgroundColor: claimed[0]!.team.color,
+      }" />
+    <div
+      v-for="({ team, teamId }, index) in claimed"
+      v-else-if="claimed.length > 1"
+      :key="`${teamId}`"
+      :style="{
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+        transform: `skew(-45deg) translateX(${100 - (200 / claimed.length) * index}%)`,
+        borderRight: claimed?.length !== 1 ? `1px solid #1a1a1a` : undefined,
+        borderLeft: claimed?.length !== 1 ? `1px solid #1a1a1a` : undefined,
+        transformOrigin: 'top',
+        backgroundColor: team.color,
+      }" />
   </NFlex>
 </template>
 
@@ -69,6 +97,7 @@ const claimed = computed(() => {
 .bingo-task {
   padding: 8px;
   text-align: center;
+  z-index: 20;
 }
 
 @media (max-width: 1920px) {

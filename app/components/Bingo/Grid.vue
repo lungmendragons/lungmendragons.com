@@ -40,6 +40,9 @@ function teamOptions(tile: TileId): DropdownOption[] {
   if (active.claimed.length === 0) {
     return teamDropdownOptions.value;
   }
+  if (!def.exclusive) {
+    return teamDropdownOptions.value;
+  }
   if (def.stealable) {
     return [
       ...teamDropdownOptions.value.filter(v => !active.claimed.includes(v.teamId)),
@@ -92,7 +95,10 @@ async function claim(team: TeamId, tile: TileId) {
           <BingoTile
             v-else-if="localUserTeams?.length === 1"
             :key="`tile-${board.extraTile(i)}-1`"
-            :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+            :style="{
+              gridArea: gridArea(i, board.boardDef.width, board.boardDef.height),
+              cursor: 'pointer',
+            }"
             :tile-id="board.extraTile(i)"
             :extra="true"
             @click="claim(localUserTeams[0]!, board.extraTile(i))"
@@ -110,7 +116,10 @@ async function claim(team: TeamId, tile: TileId) {
             style="margin:4px"
             @select="claim($event, board.extraTile(i))">
             <BingoTile
-              :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+              :style="{
+                gridArea: gridArea(i, board.boardDef.width, board.boardDef.height),
+                cursor: 'pointer',
+              }"
               :tile-id="board.extraTile(i)"
               :extra="true"
             />
@@ -147,7 +156,10 @@ async function claim(team: TeamId, tile: TileId) {
           <BingoTile
             v-else-if="localUserTeams?.length === 1"
             :key="`tile-${board.mainTile(i)}-1`"
-            :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+            :style="{
+              gridArea: gridArea(i, board.boardDef.width, board.boardDef.height),
+              cursor: 'pointer',
+            }"
             :tile-id="board.mainTile(i)"
             @click="claim(localUserTeams[0]!, board.mainTile(i))"
           />
@@ -164,7 +176,10 @@ async function claim(team: TeamId, tile: TileId) {
             style="margin: 4px;"
             @select="claim($event, board.mainTile(i))">
             <BingoTile
-              :style="{ gridArea: gridArea(i, board.boardDef.width, board.boardDef.height) }"
+              :style="{
+                gridArea: gridArea(i, board.boardDef.width, board.boardDef.height),
+                cursor: 'pointer',
+              }"
               :tile-id="board.mainTile(i)"
             />
           </NDropdown>
