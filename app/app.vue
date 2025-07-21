@@ -36,13 +36,7 @@ const route = useRoute();
 
 if(route.meta.getEmbedData && import.meta.server) {
   try {
-    const {
-      title,
-      description,
-      url,
-      image,
-      imageAlt,
-    } = await route.meta.getEmbedData();
+    const { title, description, url, image } = await route.meta.getEmbedData();
     useSeoMeta({
       title,
       ogTitle: title,
@@ -52,8 +46,13 @@ if(route.meta.getEmbedData && import.meta.server) {
       twitterDescription: description,
       ogUrl: url,
       twitterCard: "summary",
-      ogImage: { url: image, alt: imageAlt },
-      twitterImage: image,
+      ogImage: {
+        url: image?.url,
+        alt: image?.alt,
+        width: image?.width,
+        height: image?.height,
+      },
+      twitterImage: image?.url,
     })
   } catch {
     
