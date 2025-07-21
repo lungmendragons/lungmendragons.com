@@ -7,9 +7,31 @@ const wsurl = import.meta.dev ? "ws://localhost:2930" : "wss://bingosync-server.
 export const useBingo = defineStore("bingosync-state", () => {
   const net: Ref<NetworkStateMachine> = shallowRef(networkStateMachine(wsurl, "")());
 
+  let rejoinStarted = false;
+  let rejoinBackoff = 0;
+  let rejoinCount = 0;
+
   const heartbeatTimeout = useTimeout(60000, { controls: true, callback: async () => {
     net.value.event("sendKeepalive");
     heartbeatTimeout.start();
+  } });
+
+  const rejoinTimeout = useTimeout(1000, { controls: true, immediate: false, callback: async () => {
+    rejoinCount += 1;
+    if (rejoinCount > rejoinBackoff) {
+      rejoinBackoff += 1;
+      rejoinCount = 0;
+      console.log(`attempting rejoin with ${rejoinBackoff}s `);
+      await net.value.event("startRejoin");
+    }
+    if (rejoinBackoff > 8) {
+      rejoinBackoff = 0;
+      rejoinCount = 0;
+      rejoinStarted = false;
+      await net.value.event("leaveGame");
+    } else {
+      rejoinTimeout.start();
+    }
   } });
 
   net.value.hooks.afterEvent = (triggered, s, e) => {
@@ -25,10 +47,26 @@ export const useBingo = defineStore("bingosync-state", () => {
     heartbeatTimeout.start();
     console.log("client message: ", message);
   };
+  net.value.hooks.needsRejoin = () => {
+    console.log("needs rejoin");
+    if (!rejoinStarted) {
+      rejoinStarted = true;
+      rejoinCount = 0;
+      rejoinBackoff = 0;
+      rejoinTimeout.start();
+    }
+  };
+  net.value.hooks.rejoinSuccess = () => {
+    console.log("rejoin success");
+    rejoinStarted = false;
+    rejoinCount = 0;
+    rejoinBackoff = 0;
+    rejoinTimeout.stop();
+  };
 
   type S = NetworkStateMachine["Infer"]["state"];
 
-  const gameState = () => net.value.tryGet("connecting", "inRoom", "inServer", "gettingToken", "offline")?.game;
+  const gameState = () => net.value.tryGet("connecting", "inRoom", "gettingToken", "offline", "rejoining")?.game;
 
   const inRoom = () => net.value.tryGet("inRoom");
   const roomOwner = computed(() => inRoom()?.isSync ?? true);
@@ -140,7 +178,7 @@ export const useBingo = defineStore("bingosync-state", () => {
     // gameActive,
     netState: computed(() => net.value.state.type),
     gameState: computed(() => {
-      return net.value.tryGet("inRoom", "offline", "gettingToken", "connecting", "inServer")?.game?.state.type;
+      return net.value.tryGet("inRoom", "offline", "gettingToken", "connecting", "rejoining")?.game?.state.type;
     }),
   };
 });

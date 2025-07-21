@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import { nanoid } from "nanoid";
 import { base64Url } from "@better-auth/utils/base64";
 import {
+  createToken,
   decodeTokenData,
   RoomActionKind,
   verifyToken,
@@ -123,6 +124,8 @@ export class WSDurableObject extends DurableObject {
         return this.createRoom(tokenData);
       case RoomActionKind.Join:
         return this.joinRoom(tokenData, tokenData.room.room);
+      case RoomActionKind.Rejoin:
+        return this.rejoinRoom(tokenData, tokenData.room.room, tokenData.room.sync);
     }
   }
 
@@ -141,7 +144,6 @@ export class WSDurableObject extends DurableObject {
     const clientData: ClientData = {
       sync: true,
       id: nanoid(8),
-      token: nanoid(),
       room,
     };
     setClientData(server, clientData);
@@ -173,7 +175,6 @@ export class WSDurableObject extends DurableObject {
     const clientData: ClientData = {
       sync: false,
       id: nanoid(8),
-      token: nanoid(),
       room,
     };
     setClientData(server, clientData);
@@ -189,7 +190,33 @@ export class WSDurableObject extends DurableObject {
     });
   }
 
-  webSocketMessage(client: WebSocket, data: string | ArrayBuffer) {
+  rejoinRoom(_token: TokenData, room: string, sync: boolean) {
+    if (room.length > 16) {
+      return new Response(null, { status: 400, statusText: "invalid room id" });
+    }
+
+    const { 0: client, 1: server } = new WebSocketPair();
+    this.ctx.acceptWebSocket(server, [ room ]);
+
+    const clientData: ClientData = {
+      sync,
+      id: nanoid(8),
+      room,
+    };
+    setClientData(server, clientData);
+
+    console.log(`rejoining ${clientData.id} in ${clientData.room}`);
+
+    return new Response(null, {
+      headers: {
+        "Sec-Websocket-Protocol": "bingo",
+      },
+      status: 101,
+      webSocket: client,
+    });
+  }
+
+  async webSocketMessage(client: WebSocket, data: string | ArrayBuffer) {
     let message: ClientMessage;
 
     try {
@@ -208,7 +235,7 @@ export class WSDurableObject extends DurableObject {
 
     switch (message.opcode) {
       case ClientOpcode.SendAction:
-        let hasSync = false;
+        // let hasSync = false;
         for (const peer of this.ctx.getWebSockets(clientData.room)) {
           const peerClientData = getClientData(peer);
           if (peerClientData.sync) {
@@ -217,13 +244,13 @@ export class WSDurableObject extends DurableObject {
               client: clientData,
               data: message.data,
             });
-            hasSync = true;
+            // hasSync = true;
             break;
           }
         }
-        if (!hasSync) {
-          this.deleteRoom(clientData.room);
-        }
+        // if (!hasSync) {
+        //   this.deleteRoom(clientData.room);
+        // }
         break;
       case ClientOpcode.SendSync:
         if (clientData.sync) {
@@ -253,10 +280,28 @@ export class WSDurableObject extends DurableObject {
         }
         break;
       case ClientOpcode.Init:
-        this.sendSingle(client, {
-          opcode: ServerOpcode.Init,
-          client: clientData,
-        });
+        if (clientData.sync) {
+          const rejoin = await createToken({
+            expires: Date.now() + 1000 * 60 * 60 * 4,
+            room: { action: RoomActionKind.Rejoin, room: clientData.room, sync: clientData.sync },
+          });
+          this.sendAll(client, clientData.room, { opcode: ServerOpcode.ReqIdent });
+          this.sendSingle(client, {
+            opcode: ServerOpcode.Init,
+            client: clientData,
+            rejoin,
+          });
+        } else {
+          this.sendSingle(client, {
+            opcode: ServerOpcode.Init,
+            client: clientData,
+            rejoin: await createToken({
+              expires: Date.now() + 1000 * 60 * 60 * 4,
+              room: { action: RoomActionKind.Rejoin, room: clientData.room, sync: clientData.sync },
+            }),
+          });
+        }
+
         break;
     }
   }
@@ -273,10 +318,10 @@ export class WSDurableObject extends DurableObject {
     console.log(`closing ${clientData.id} in ${clientData.room}`);
 
     // shut the whole room down.
-    if (clientData.sync) {
-      this.deleteRoom(clientData.room);
-      return;
-    }
+    // if (clientData.sync) {
+    //   this.deleteRoom(clientData.room);
+    //   return;
+    // }
 
     this.sendAll(client, clientData.room, {
       opcode: ServerOpcode.Close,

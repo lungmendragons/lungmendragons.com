@@ -8,14 +8,26 @@ const hmac = createHMAC("SHA-256", "base64urlnopad");
 export const enum RoomActionKind {
   Create,
   Join,
+  Rejoin,
 }
 
-export type RoomAction = { action: RoomActionKind.Create } | { action: RoomActionKind.Join; room: string };
+export type RoomAction =
+  { action: RoomActionKind.Create } |
+  { action: RoomActionKind.Join; room: string } |
+  {
+    action: RoomActionKind.Rejoin;
+    room: string;
+    sync: boolean;
+  };
 
 export const RoomActionSchema: s.Schema<RoomAction> = s.union("action", {
   [RoomActionKind.Create]: {},
   [RoomActionKind.Join]: {
     room: s.string,
+  },
+  [RoomActionKind.Rejoin]: {
+    room: s.string,
+    sync: s.boolean,
   },
 });
 
@@ -52,7 +64,7 @@ export async function createToken(
 
   const signature = await hmac.sign(await signKey(), buffer);
 
-  const token = `${base64Url.encode(buffer)}.${signature}`;
+  const token = `${base64Url.encode(buffer, { padding: false })}.${signature}`;
 
   return token;
 }

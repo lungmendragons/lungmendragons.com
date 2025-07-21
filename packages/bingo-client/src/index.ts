@@ -378,7 +378,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     game?: BingoStateMachine,
   ) {
     const websocket = new WebSocket(wsurl, [ `token.${token}`, `bingo` ]);
-    ctx.next("connecting", { username, websocket, game, prev });
+    ctx.next("connecting", { username, websocket, game, prev, inServer: false });
     websocket.binaryType = "arraybuffer";
 
     const opened = { value: false };
@@ -397,6 +397,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
       }
     };
     websocket.onclose = async () => {
+      if (!opened.value) {
+        await ctx.event("error", { kind: "ws" });
+      }
+      await ctx.event("serverDisconnected");
+    };
+    websocket.onerror = async () => {
       if (!opened.value) {
         await ctx.event("error", { kind: "ws" });
       }
@@ -463,23 +469,29 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     noLobby: undefined;
     gettingToken: { game?: BingoStateMachine };
     connecting: {
+      inServer: boolean;
       username: string;
       websocket: WebSocket;
       game?: BingoStateMachine;
       prev: keyof S;
     };
-    inServer: {
-      username: string;
-      websocket: WebSocket;
-      game?: BingoStateMachine;
-    };
     inRoom: {
       websocket: WebSocket;
       isSync: boolean;
       userId: UserId;
+      username: string;
       roomId: string;
       users: Record<UserId, User>;
       game: BingoStateMachine;
+      rejoin: string;
+      log: LogState;
+    };
+    rejoining: {
+      inServer: boolean;
+      websocket?: WebSocket;
+      username: string;
+      game: BingoStateMachine;
+      rejoin: string;
       log: LogState;
     };
     offline: {
@@ -496,6 +508,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
     bingoAction: { user?: UserId; action: BingoAction };
     setBoard: { board: BoardDef };
     setTimer: { timer: TimerState };
+    startRejoin: undefined;
     leaveGame: undefined;
     error: NetworkError;
     log: string;
@@ -504,6 +517,8 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
   type H = {
     clientMessage: (message: ClientMessage) => void;
     serverMessage: (message: ServerMessage) => void;
+    needsRejoin: () => void;
+    rejoinSuccess: () => void;
   };
 
   return cfg<[], S, E, H>({
@@ -559,7 +574,7 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
         },
         serverConnected: async (s, e, ctx) => {
           sendClientMessage({ opcode: ClientOpcode.Init }, s.websocket, ctx);
-          ctx.next("inServer", s);
+          s.inServer = true;
         },
         serverDisconnected: async (s, e, ctx) => {
           switch (s.prev) {
@@ -570,14 +585,12 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               ctx.next("offline", { game: s.game! });
           }
         },
-      },
-      inServer: {
-        leaveGame: async (s, e, ctx) => {
-          s.websocket.close();
-          ctx.next("noLobby");
-        },
         serverMessage: handleServerMessage({
-          [ServerOpcode.Init]: async (s, { client }, ctx) => {
+          [ServerOpcode.Init]: async (s, { client, rejoin }, ctx) => {
+            if (!s.inServer) {
+              console.error("received Opcode.Init but not in server?");
+              return;
+            }
             const game = s.game ?? createBingoStateMachine([
               {
                 color: "#2080F0",
@@ -594,7 +607,9 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               isSync: client.sync,
               roomId: client.room,
               userId: client.id,
+              username: s.username,
               users: {},
+              rejoin,
               game,
               log: { entries: [], sent: 0 },
             });
@@ -602,7 +617,8 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           },
         }),
         sendKeepalive: async (s, e, ctx) => {
-          s.websocket.send("keepalive:heartbeat");
+          if (s.inServer)
+            s.websocket.send("keepalive:heartbeat");
         },
       },
       inRoom: {
@@ -646,6 +662,9 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
               });
             }
           },
+          [ServerOpcode.ReqIdent]: async (s, e, ctx) => {
+            await ctx.event("bingoAction", { action: { kind: "enter_room", name: s.username } });
+          },
           [ServerOpcode.Close]: async (s, { client }, ctx) => {
             if (s.isSync) {
               delete s.users[client.id];
@@ -653,7 +672,15 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
           },
         }),
         serverDisconnected: async (s, e, ctx) => {
-          ctx.next("offline", { game: s.game });
+          ctx.next("rejoining", {
+            inServer: false,
+            game: s.game,
+            log: s.log,
+            rejoin: s.rejoin,
+            username: s.username,
+            websocket: undefined,
+          });
+          ctx.hooks.needsRejoin?.();
         },
         bingoAction: async (s, { action, user: userId }, ctx) => {
           const user = userId ?? s.userId;
@@ -745,6 +772,91 @@ export const networkStateMachine = (wsurl: string, fetchurl: string) => stateMac
         },
         sendKeepalive: async (s, e, ctx) => {
           s.websocket.send("keepalive:heartbeat");
+        },
+      },
+      rejoining: {
+        startRejoin: async (s, e, ctx) => {
+          if (s.websocket !== undefined)
+            return;
+          const websocket = new WebSocket(wsurl, [ `token.${s.rejoin}`, `bingo` ]);
+          websocket.binaryType = "arraybuffer";
+
+          const opened = { value: false };
+
+          websocket.onopen = async () => {
+            opened.value = true;
+            ctx.hooks.rejoinSuccess?.();
+            await ctx.event("serverConnected");
+          };
+          websocket.onmessage = async (ev) => {
+            if (ev.data instanceof ArrayBuffer) {
+              const message = BinaryReader.using(ev.data, ServerMessageSchema.decode);
+              await ctx.event("serverMessage", { message });
+              ctx.hooks.serverMessage?.(message);
+            } else if (typeof ev.data === "string") {
+              console.log(ev.data);
+            }
+          };
+          websocket.onclose = async () => {
+            if (!opened.value) {
+              await ctx.event("error", { kind: "ws" });
+            }
+            await ctx.event("serverDisconnected");
+          };
+          websocket.onerror = async () => {
+            if (!opened.value) {
+              await ctx.event("error", { kind: "ws" });
+            }
+            await ctx.event("serverDisconnected");
+          };
+          s.websocket = websocket;
+        },
+        leaveGame: async (s, e, ctx) => {
+          s.websocket?.close();
+          ctx.next("noLobby");
+        },
+        serverConnected: async (s, e, ctx) => {
+          sendClientMessage({ opcode: ClientOpcode.Init }, s.websocket!, ctx);
+          s.inServer = true;
+        },
+        serverDisconnected: async (s, e, ctx) => {
+          s.websocket = undefined;
+          ctx.hooks.needsRejoin?.();
+        },
+        serverMessage: handleServerMessage({
+          [ServerOpcode.Init]: async (s, { client, rejoin }, ctx) => {
+            if (!s.inServer) {
+              console.error("received Opcode.Init but not in server?");
+              return;
+            }
+            const game = s.game ?? createBingoStateMachine([
+              {
+                color: "#2080F0",
+                name: "Blue",
+              },
+              {
+                color: "#D03050",
+                name: "Red",
+              },
+            ], ctx);
+            // game.hooks = ctx.hooks;
+            ctx.next("inRoom", {
+              websocket: s.websocket!,
+              isSync: client.sync,
+              roomId: client.room,
+              userId: client.id,
+              username: s.username,
+              users: {},
+              rejoin,
+              game,
+              log: { entries: [], sent: 0 },
+            });
+            await ctx.event("bingoAction", { action: { kind: "enter_room", name: s.username } });
+          },
+        }),
+        sendKeepalive: async (s, e, ctx) => {
+          if (s.inServer)
+            s.websocket!.send("keepalive:heartbeat");
         },
       },
       offline: {

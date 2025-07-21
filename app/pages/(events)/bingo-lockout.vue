@@ -158,6 +158,15 @@ const loading = useLoading(
   computed(() => bingo.state === "connecting" || bingo.state === "gettingToken"),
 );
 
+const rejoinMessage = useMessage();
+watch(() => bingo.state, () => {
+  if (bingo.state === "rejoining") {
+    rejoinMessage.warning("Rejoining room...", { duration: 2147483647 });
+  } else {
+    rejoinMessage.destroyAll();
+  }
+});
+
 async function createRoom() {
   showCreateRoom.value = false;
   loading.start("Creating room...");
