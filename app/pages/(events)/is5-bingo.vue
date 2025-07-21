@@ -56,10 +56,8 @@ definePageMeta({
       description: "Bingo Lockout returns for Sarkaz's Furnaceside Fables. Sponsored by Arknights EN.",
       url: "https://lungmendragons.com/is5-bingo",
       image: {
-        url: "https://lungmendragons.com/images/ld/bl4-kv.png",
-        alt: "IS5 Bingo Lockout logo, captioned with 'Coming Soon' and 'Sponsored by Arknights'.",
-        width: 1200,
-        height: 675,
+        url: "https://lungmendragons.com/images/ld/bingo_logo.png",
+        alt: "IS5 Bingo Lockout logo",
       }
     };
   },

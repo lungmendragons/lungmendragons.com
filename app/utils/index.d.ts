@@ -5,10 +5,8 @@ declare module "#app" {
       description: string;
       url: string;
       image?: {
-        url?: string;
-        alt?: string;
-        width?: number;
-        height?: number;
+        url: string;
+        alt: string;
       }
     }>;
   }

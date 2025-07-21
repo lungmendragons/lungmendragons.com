@@ -49,8 +49,6 @@ if(route.meta.getEmbedData && import.meta.server) {
       ogImage: {
         url: image?.url,
         alt: image?.alt,
-        width: image?.width,
-        height: image?.height,
       },
       twitterImage: image?.url,
     })
