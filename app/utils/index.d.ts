@@ -4,6 +4,8 @@ declare module "#app" {
       title: string;
       description: string;
       url: string;
+      image?: string;
+      imageAlt?: string;
     }>;
   }
 }

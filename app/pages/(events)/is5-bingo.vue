@@ -48,6 +48,18 @@ onUnmounted(() => {
     el.style.backgroundBlendMode = "unset";
   }
 })
+
+definePageMeta({
+  getEmbedData: async () => {
+    return {
+      title: "Bingo Lockout #4 | Lungmen Dragons",
+      description: "Bingo Lockout returns for Sarkaz's Furnaceside Fables. Sponsored by Arknights EN.",
+      url: "https://lungmendragons.com/is5-bingo",
+      image: "https://lungmendragons.com/ld/bl4-kv.png",
+      imageAlt: "IS5 Bingo Lockout logo, captioned with 'Coming Soon' and 'Sponsored by Arknights'."
+    };
+  },
+});
 </script>
 
 <template>
