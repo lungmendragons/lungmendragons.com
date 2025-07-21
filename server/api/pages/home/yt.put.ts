@@ -1,7 +1,8 @@
 export default eventHandler({
   onRequest: [requirePermission(AuthPermission.Admin)],
   handler: async (event) => {
-    const id = readBody(event);
+    const body = await readBody(event);
+    const id = body.id;
 
     try {
       const recent = await $fetch(
