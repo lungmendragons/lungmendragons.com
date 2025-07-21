@@ -60,7 +60,7 @@ export default withNuxt(
       "vue/first-attribute-linebreak": [ "off" ],
       "vue/html-closing-bracket-newline": [ "off" ],
       "vue/max-attributes-per-line": [ "warn", {
-        singleline: { max: 2 },
+        singleline: { max: 3 },
         multiline: { max: 1 },
       } ],
       "vue/prefer-separate-static-class": "off",

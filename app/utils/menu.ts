@@ -13,14 +13,12 @@ import HeroiconsPencilSquareSolid from "~icons/heroicons/pencil-square-solid";
 import HeroiconsCloudArrowUp from "~icons/heroicons/cloud-arrow-up";
 import MaterialSymbolsNotificationAddOutlineRounded from "~icons/material-symbols/notification-add-outline-rounded?width=24px&height=24px";
 
-import { type MenuOption, NIcon } from "naive-ui";
+import { type MenuOption, NIcon, NMarquee } from "naive-ui";
 import { type Component, h } from "vue";
 import NavMenuLink from "~/components/Nav/MenuLink.vue";
 import NavMenuLinkMobile from "~/components/Nav/MenuLinkMobile.vue";
 import LogoIconSwitcher from "~/components/Logo/IconSwitcher.vue";
-
-// temp for SGL2
-import { NMarquee } from "naive-ui";
+import SVGSineWave from "~/components/SVG/SineWave.vue";
 
 function renderIcon(icon: Component) {
   return () => h(
@@ -39,6 +37,69 @@ function sidebarMenuDivider(index: number): MenuOption {
 
 function sidebarMenuMain(linkComponent: Component): MenuOption[] {
   return [
+    {
+      label: () => h(
+        linkComponent,
+        { to: "/is5-bingo" },
+        () => h(
+          "div",
+          {
+            style: {
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }
+          },
+          [
+            h(
+              "img",
+              {
+                src: "/ld-events/bingo4/bingo_logo_moons.png",
+                style: {
+                  height: "0.625rem",
+                  marginTop: "0.25rem",
+                  objectFit: "contain",
+                  filter: `
+                    drop-shadow(0 -1px 1px #8a120a)
+                    drop-shadow(1px 1px 1px #4e76c2)
+                    drop-shadow(0 1px 1px #4e76c2)
+                    drop-shadow(-1px -1px 1px #8a120a)
+                  `,
+                },
+              },
+            ),
+            h(
+              "div",
+              {
+                style: {
+                  textAlign: "center",
+                  color: "#eee",
+                  lineHeight: 1.5,
+                  filter: `
+                    drop-shadow(0 -1px 1px #8a120a)
+                    drop-shadow(1px 1px 1px #4e76c2)
+                    drop-shadow(0 1px 1px #4e76c2)
+                    drop-shadow(-1px -1px 1px #8a120a)
+                  `,
+                }
+              },
+              "Bingo Lockout #4",
+            ),
+            h(SVGSineWave),
+          ]
+        ),
+      ),
+      key: "is5-bingo",
+      props: {
+        style: {
+          height: "5rem",
+        }
+      }
+    },
+    {
+      key: "divider-0",
+      type: "divider",
+    },
     {
       label: () => h(
         linkComponent,
