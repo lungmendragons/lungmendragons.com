@@ -14,7 +14,7 @@ function updateYT() {
   loading.value = true;
   $fetch("/api/pages/home/yt", {
     method: "PUT",
-    body: id.value,
+    body: { id: id.value },
   })
     .then((res) => {
       if (res === "success") {

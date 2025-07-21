@@ -1,44 +1,60 @@
 <script setup lang="ts">
-/* 2024-04-10 - Disabled temporarily due to broken API call
-
 import { NMarquee } from "naive-ui";
 
 const ytEmbed = ref("");
 const ytTitle = ref("...");
 const ytDesc = ref("...");
 const ytDate = ref("");
+const loading = ref(true);
+const error = ref(false);
 
 async function getLatestVideo() {
-  const recent = await $fetch("/api/pages/home/yt", { method: "GET" }) as any;
-  if (recent.items && recent.items.length > 0) {
-    const v = recent.items[0];
-    ytEmbed.value = `https://www.youtube.com/embed/${v.id}`;
-    ytTitle.value = v.snippet.title;
-    ytDesc.value = v.snippet.description;
-    ytDate.value = v.snippet.publishedAt;
+  loading.value = true;
+  error.value = false;
+  
+  try {
+    const recent = await $fetch("/api/pages/home/yt", { method: "GET" }) as any;
+    if (recent && recent.items && recent.items.length > 0) {
+      const v = recent.items[0];
+      ytEmbed.value = `https://www.youtube.com/embed/${v.id}`;
+      ytTitle.value = v.snippet.title;
+      ytDesc.value = v.snippet.description;
+      ytDate.value = v.snippet.publishedAt;
+    } else {
+      // Fallback to hardcoded video if data is empty
+      ytEmbed.value = "https://www.youtube.com/embed/yGi_2t9sTX0";
+      error.value = true;
+    }
+  } catch (e) {
+    console.error("Failed to fetch latest video:", e);
+    // Fallback to hardcoded video if API call fails
+    ytEmbed.value = "https://www.youtube.com/embed/yGi_2t9sTX0";
+    error.value = true;
+  } finally {
+    loading.value = false;
   }
 }
 
-onMounted(() => getLatestVideo()); */
+onMounted(() => getLatestVideo());
 </script>
 
 <template>
   <NCard size="small" class="mx-auto w-min">
-    <!-- <div class="text-lg leading-6 text-center font-black">
+    <div v-if="!error" class="text-lg leading-6 text-center font-black">
       {{ ytTitle }}
     </div>
-    <template #header>
+    <template #header v-if="!error">
       <div class="text-xs text-center">
-        LATEST VIDEO | {{ new Date(Date.parse(ytDate)).toLocaleDateString() }}
+        LATEST VIDEO | {{ ytDate ? new Date(Date.parse(ytDate)).toLocaleDateString() : "" }}
       </div>
-    </template> -->
+    </template>
     <template #cover>
       <iframe
         credentialless
         class="mx-auto"
         width="800"
         height="450"
-        src="https://www.youtube.com/embed/836tVij_7jo"
+        :src="ytEmbed"
         title="YouTube video player"
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -46,13 +62,13 @@ onMounted(() => getLatestVideo()); */
         allowfullscreen
       />
     </template>
-    <!-- <template #footer>
+    <template #footer v-if="!error">
       <NMarquee>
         <div class="text-xs mr-12">
           {{ ytDesc }}
         </div>
       </NMarquee>
-    </template> -->
+    </template>
   </NCard>
 </template>
 
