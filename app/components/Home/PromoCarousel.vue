@@ -23,11 +23,14 @@ import Link from "~/components/Link.global.vue";
         </Link>
       </NCarouselItem>
     </NCarousel> -->
-    <Link to="https://forms.gle/SfZmwk1ogpLp1UdHA">
+    <!-- <Link to="https://forms.gle/SfZmwk1ogpLp1UdHA">
       <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-96" src="/carousel/video-submit.png">
-    </Link>
-    <Link to="https://www.youtube.com/@LungmenDragons/join">
+    </Link> -->
+    <!-- <Link to="https://www.youtube.com/@LungmenDragons/join">
       <img class="object-cover my-0 mx-auto px-2 w-80 sm:w-96" src="/carousel/membership.png">
+    </Link> -->
+    <Link to="https://res.ldrescdn.com/download/CustomEdition/LDPlayer9_ens_35075_ld.exe">
+      <img class="object-cover my-0 mx-auto sm:w-96" src="/ldplayer/banner.png">
     </Link>
   </NFlex>
 </template>

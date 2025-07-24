@@ -56,7 +56,7 @@ onBeforeMount(() => {
         strong
         round
         tag="a"
-        href="https://www.ldplayer.net/games/arknights-on-pc.html"
+        href="https://res.ldrescdn.com/download/CustomEdition/LDPlayer9_ens_35075_ld.exe"
         target="_blank"
         rel="noopener noreferrer"
         color="#fdd23e"
@@ -67,7 +67,7 @@ onBeforeMount(() => {
             <LineMdDownloadLoop />
           </NIcon>
         </template>
-        <img src="/ldplayer/logo-black.png" style="height: 18px;">
+        <img src="/ldplayer/button.png">
       </NButton>
       <Socials v-if="showSocials" class="p-2" />
       <NFlex justify="space-around" :vertical="isLG">
