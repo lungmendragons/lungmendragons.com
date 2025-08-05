@@ -36,6 +36,16 @@
           0_CONCEPTART_LUNGBAO_ORIGINAL.png<br>5355x2665px, 4.84 MB
         </div>
       </NCard>
+      <NCard class="max-w-[300px] h-[250px]" content-style="padding:8px">
+        <template #cover>
+          <a download href="/images/ld/a/LD_4th_ANNI.png">
+            <NuxtImg src="https://lungmendragons.com/images/ld/a/LD_4th_ANNI.png" :height="200" />
+          </a>
+        </template>
+        <div class="text-xs text-center">
+          LD_4th_ANNI.png<br>8820x4961px, 90.5 MB
+        </div>
+      </NCard>
     </NFlex>
   </NFlex>
 </template>
