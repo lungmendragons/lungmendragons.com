@@ -53,7 +53,7 @@ export default eventHandler({
         const oldAvatar = event.context.auth!.user.image;
         
         await serverAuth().api.updateUser({
-          body: { image: `images/${object.key}` },
+          body: { image: `/images/${object.key}` },
           headers: event.headers,
         });
 
