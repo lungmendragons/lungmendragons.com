@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' cdn.ko-fi.tools; script-src 'self' 'unsafe-inline' cdn.ko-fi.tools; img-src 'self' data: cdn.ko-fi.tools s3.ko-fi.com storage.ko-fi.com https:; font-src 'self' data:; connect-src 'self' ko-fi.com api.ko-fi.tools; frame-src 'self';">
+  <title>Ko-fi Shop Embed</title>
+  <script defer src="https://cdn.ko-fi.tools/v2/js/shop.js"></script>
+  <style>
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-y: hidden; /* Hide vertical scrollbar */
+    width: 100%;
+  }
+  
+  #kofi-shop-embed {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  /* Make Ko-fi elements responsive */
+  .kofi-shop-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    width: 100%;
+  }
+</style>
+</head>
+<body>
+  
+  <!-- Ko-fi Shop Embed Widget -->
+  <div id="kofi-shop-embed"
+       data-shop-id="G2G511DGSY"
+       data-shop-currency="$"
+       data-shop-theme="default"
+       data-shop-soldout="show">
+  </div>
+
+  <script>
+    // Function to send height to parent
+    function updateParentHeight() {
+      const height = document.body.scrollHeight;
+      window.parent.postMessage({ type: 'resize-iframe', height: height }, '*');
+    }
+
+    // Create MutationObserver to watch for content changes
+    const observer = new MutationObserver(function() {
+      updateParentHeight();
+    });
+
+    // Observe the entire document for changes
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true,
+      attributes: true,
+      characterData: true 
+    });
+
+    // Update height on load and periodically
+    window.addEventListener('load', updateParentHeight);
+    window.addEventListener('DOMContentLoaded', updateParentHeight);
+    
+    // Periodically check height for dynamic content loading
+    setInterval(updateParentHeight, 1000);
+  </script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import CarbonEarthFilled from "~icons/carbon/earth-filled";
 import HeroiconsBookOpen from "~icons/heroicons/book-open";
 import HeroiconsBookmark from "~icons/heroicons/bookmark";
 import HeroiconsPuzzlePiece from "~icons/heroicons/puzzle-piece";
+import HeroiconsShoppingBag from "~icons/heroicons/shopping-bag";
 import HeroiconsStar from "~icons/heroicons/star";
 import HeroiconsTrophy from "~icons/heroicons/trophy";
 import HeroiconsWrenchScrewdriver from "~icons/heroicons/wrench-screwdriver";
@@ -125,6 +126,15 @@ function sidebarMenuMain(linkComponent: Component): MenuOption[] {
           icon: renderIcon(CarbonEarthFilled),
           disabled: true,
           // extra: "[WIP]",
+        },
+        {
+          label: () => h(
+            linkComponent,
+            { to: "/shop" },
+            () => "Shop",
+          ),
+          key: "shop",
+          icon: renderIcon(HeroiconsShoppingBag),
         },
         {
           label: () => h(
